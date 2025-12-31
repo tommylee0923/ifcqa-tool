@@ -1,0 +1,7 @@
+node_modules/
+venv/
+.venv/
+bin/
+obj/
+.vs/
+.DS_Store
