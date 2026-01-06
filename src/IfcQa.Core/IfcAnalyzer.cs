@@ -96,6 +96,10 @@ public sealed class IfcAnalyzer
                 new RuleRequireQto("W102", Severity.Warning, "IfcWall", "Qto_WallBaseQuantities"),
                 new RuleRequirePset("W101", Severity.Error, "IfcWallStandardCase", "Pset_WallCommon"),
                 new RuleRequireQto("W102", Severity.Warning, "IfcWallStandardCase", "Qto_WallBaseQuantities"),
+                new RuleRequirePsetPropertyKeys("W201", Severity.Error,   "IfcWall", "Pset_WallCommon", "IsExternal"),
+                new RuleRequirePsetPropertyKeys("W202", Severity.Warning, "IfcWall", "Pset_WallCommon", "LoadBearing"),
+
+                // Spaces: Pset_SpaceCommon keys exist: GrossPlannedArea, NetPlannedArea, etc.
 
                 //Slabs
                 new RuleRequirePset("S101", Severity.Error, "IfcSlab", "Pset_SlabCommon"),
@@ -107,6 +111,7 @@ public sealed class IfcAnalyzer
 
                 //Spaces
                 new RuleRequirePset("SP101", Severity.Warning, "IfcSpace", "Pset_SpaceCommon"),
+                new RuleRequirePsetPropertyKeys("SP201", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "NetPlannedArea"),
 
                 //Building
                 new RuleRequirePset("B101", Severity.Info, "IfcBuilding", "Pset_BuildingCommon"),

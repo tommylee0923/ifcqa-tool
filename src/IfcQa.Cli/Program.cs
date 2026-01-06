@@ -5,15 +5,17 @@ using IfcQa.Core.Catalog;
 
 //var ifcPath = args.Length > 0 ? args[0] : @"C:\Users\Tommy Lee\Documents\Project\IfcQaTool\samples\Building-Architecture.ifc";
 
+var cmd = (args.Length > 0? args[0].ToLowerInvariant() : "");
+
 if (args.Length == 0)
 {
+    if (cmd != "check" && cmd != "catalog") Console.WriteLine($"Unknown command: {cmd}");
     Console.WriteLine("Usage:");
     Console.WriteLine(" IfcQa.Cli   catalog   <path-to-ifc>");
     Console.WriteLine(" IfcQa.Cli   check     <path-to-ifc>");
     return;
 }
 
-var cmd = args[0].ToLowerInvariant();
 var ifcPath = args.Length > 1 ? args[1] : throw new ArgumentException("Missing IFC File.");
 
 
@@ -54,7 +56,6 @@ if (cmd == "check")
     Console.WriteLine("Wrote issues.csv");
 }
 
-Console.WriteLine($"Unknown command: {cmd}");
 static string BuildIssuesCsv(List<Issue> issues)
 {
     static string Esc(string? s)
