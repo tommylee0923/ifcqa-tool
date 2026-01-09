@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IfcQa.Core", "src\IfcQa.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IfcQa.Cli", "src\IfcQa.Cli\IfcQa.Cli.csproj", "{74AA4942-26D6-4B14-8954-B3B04CDC4038}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0C381E64-CF76-4794-8E62-C0833926AD26}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		global.json = global.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,5 +56,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F0C243DE-2863-471E-9708-947091E2FD1B} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{74AA4942-26D6-4B14-8954-B3B04CDC4038} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {518E22AF-2396-4016-A82C-9A919126AD47}
 	EndGlobalSection
 EndGlobal
