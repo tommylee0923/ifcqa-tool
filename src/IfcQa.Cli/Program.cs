@@ -40,7 +40,6 @@ if (cmd == "check")
     var report = analyzer.Analyze(ifcPath);
 
     var json = JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true });
-    Console.WriteLine(json);
 
     File.WriteAllText("report.json", json);
     Console.WriteLine("\nWrote report.json.");

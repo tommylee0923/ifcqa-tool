@@ -9,19 +9,19 @@ using Xbim.Ifc4.Interfaces;
 
 namespace IfcQa.Core.Rules;
 
-public sealed class RuleRequireQtoQuantityVavlueNumber : IRule
+public sealed class RuleRequireQtoQuantityValueNumber : IRule
 {
-    public string Id {get;}
-    public XmlSeverityType Severity {get;}
+    public string Id { get; }
+    public Severity Severity { get; }
 
     private readonly string _ifcClass;
     private readonly string _qtoName;
     private readonly string _quantityName;
     private readonly double _minExclusive;
 
-    public RuleRequireQtoQuantityVavlueNumber(
+    public RuleRequireQtoQuantityValueNumber(
         string id,
-        XmlSeverityType severity,
+        Severity severity,
         string ifcClass,
         string qtoName,
         string quantityName,
@@ -29,45 +29,57 @@ public sealed class RuleRequireQtoQuantityVavlueNumber : IRule
     {
         Id = id;
         Severity = severity;
+        _ifcClass = ifcClass;
         _qtoName = qtoName;
         _quantityName = quantityName;
         _minExclusive = minExclusive;
     }
 
+    static bool Eq(string? a, string b) => string.Equals(a?.Trim(), b?.Trim(), StringComparison.OrdinalIgnoreCase);
     public IEnumerable<Issue> Evaluate(IfcStore model)
     {
         var products = model.Instances.OfType<IIfcProduct>()
             .Where(p => p.ExpressType.Name.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase));
-        
-        if (_qtoName == null) continue;
 
-        var qty = _qtoName.Quantities
-            .FirstOrDefault(qty => qty.Name?.ToString() == _qtoName);
-        
-        if (qty == null) continue;
+        foreach (var p in products)
+        {
+            var qto = IfcPropertyUtils.GetAllQuantitySets(p)
+                .FirstOrDefault(q => Eq(q.Name.ToString(), _qtoName));
+            if (qto == null)
+            {
+                continue;
+            }
 
-        var v = IfcQuantityUtils.GetAllQuantitySets(qty);
-        if (v is null)
-        {
-            yield return new Issue(
-                Id,
-                Severity,
-                p.ExpressType.Name,
-                p.GlobalId?.ToString() ?? "",
-                p.Name?.ToString(),
-                $"Quantity '{_quantityName}' in '{_qtoName}' is missing or not numeric."
-            );
-        }
-        else if (v <= _minExclusive)
-        {
-            yield return new Issue(
-                Id,
-                Severity,
-                p.ExpressType.Name,
-                p.GlobalId?.ToString() ?? "",
-                p.Name?.ToString(),
-                $"Quantity '{_quantityName}' in '{_qtoName}' must be > {_minExclusive} (found {v})."
-            );
+            var qty = qto.Quantities
+                .FirstOrDefault(qty => Eq(qty.Name.ToString(), _quantityName));
+            if (qty == null)
+            {
+                continue;
+            }
+
+            var v = IfcQuantityUtils.GetQuantityValue(qty);
+            if (v is null || double.IsNaN(v.Value) || double.IsInfinity(v.Value))
+            {
+                yield return new Issue(
+                    Id,
+                    Severity,
+                    p.ExpressType.Name,
+                    p.GlobalId.ToString() ?? "",
+                    p.Name?.ToString(),
+                    $"Quantity '{_quantityName}' in '{_qtoName}' is missing or not numeric."
+                );
+            }
+            else if (v <= _minExclusive)
+            {
+                yield return new Issue(
+                    Id,
+                    Severity,
+                    p.ExpressType.Name,
+                    p.GlobalId.ToString() ?? "",
+                    p.Name?.ToString(),
+                    $"Quantity '{_quantityName}' in '{_qtoName}' must be > {_minExclusive} (found {v})."
+                );
+            }
         }
     }
 }

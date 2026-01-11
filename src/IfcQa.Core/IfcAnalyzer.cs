@@ -7,6 +7,7 @@ using Xbim.Common;
 using Xbim.Ifc4.Interfaces;
 using IfcQa.Core.Rules;
 using Ifc.Qa.Rules;
+using System.Xml.Schema;
 
 namespace IfcQa.Core;
 
@@ -91,12 +92,15 @@ public sealed class IfcAnalyzer
                 new RuleRequirePsetPropertyValueBool("W301", Severity.Error, "IfcWallStandcardCase", "Pset_WallCommon", "IsExternal"),
                 new RuleRequirePsetPropertyValueBool("W302", Severity.Warning, "IfcWallStandcardCase", "Pset_WallCommon", "LoadBearing"),
                 new RuleRequireQtoQuantityNames("W401", Severity.Warning, "IfcWall", "Qto_WallBaseQuantities", "Length", "NetSideArea"),
+                new RuleRequireQtoQuantityValueNumber("W501", Severity.Warning, "IfcWall", "Qto_WallBaseQuantities", "Length", 0),
+                new RuleRequireQtoQuantityValueNumber("W502", Severity.Warning, "IfcWall", "Qto_WallBaseQuantities", "NetSideArea", 0),
 
                 //Slabs
                 new RuleRequirePset("S101", Severity.Error, "IfcSlab", "Pset_SlabCommon"),
                 new RuleRequireQto("S102", Severity.Warning, "IfcSlab", "Qto_SlabBaseQuantities"),
                 new RuleRequirePsetPropertyValueBool("S301", Severity.Warning, "IfcSlab", "Pset_SlabCommon", "IsExternal"),
                 new RuleRequireQtoQuantityNames("S401", Severity.Warning, "IfcSlab", "Qto_SlabBaseQuantities", "NetArea"),
+                new RuleRequireQtoQuantityValueNumber("S501", Severity.Warning, "IfcSlab", "Qto_SlabBaseQuantities", "NetArea", 0),
 
                 //Roof
                 new RuleRequirePset("R101", Severity.Warning, "IfcRoof", "Pset_RoofCommon"),
@@ -114,6 +118,7 @@ public sealed class IfcAnalyzer
             ];
 
         var issues = rules.SelectMany(r => r.Evaluate(model)).ToList();
+
         return new IfcQaRunResult(ifcPath, issues);
     }
     public sealed class IfcSummaryReport
