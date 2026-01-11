@@ -1,0 +1,126 @@
+{
+  "IfcPath": "../../samples/Building-Architecture.ifc",
+  "ProductCount": 22,
+  "ByClass": [
+    {
+      "IfcClass": "IfcBuildingElementProxy",
+      "Count": 5,
+      "WithAnyPsetCount": 0,
+      "WithAnyQtoCount": 0,
+      "WithAnyPsetPct": 0,
+      "WithAnyQtoPct": 0
+    },
+    {
+      "IfcClass": "IfcWall",
+      "Count": 4,
+      "WithAnyPsetCount": 4,
+      "WithAnyQtoCount": 4,
+      "WithAnyPsetPct": 1,
+      "WithAnyQtoPct": 1
+    },
+    {
+      "IfcClass": "IfcSlab",
+      "Count": 3,
+      "WithAnyPsetCount": 3,
+      "WithAnyQtoCount": 3,
+      "WithAnyPsetPct": 1,
+      "WithAnyQtoPct": 1
+    },
+    {
+      "IfcClass": "IfcSite",
+      "Count": 2,
+      "WithAnyPsetCount": 0,
+      "WithAnyQtoCount": 0,
+      "WithAnyPsetPct": 0,
+      "WithAnyQtoPct": 0
+    },
+    {
+      "IfcClass": "IfcSpace",
+      "Count": 2,
+      "WithAnyPsetCount": 2,
+      "WithAnyQtoCount": 0,
+      "WithAnyPsetPct": 1,
+      "WithAnyQtoPct": 0
+    },
+    {
+      "IfcClass": "IfcFurniture",
+      "Count": 1,
+      "WithAnyPsetCount": 0,
+      "WithAnyQtoCount": 0,
+      "WithAnyPsetPct": 0,
+      "WithAnyQtoPct": 0
+    },
+    {
+      "IfcClass": "IfcChimney",
+      "Count": 1,
+      "WithAnyPsetCount": 0,
+      "WithAnyQtoCount": 0,
+      "WithAnyPsetPct": 0,
+      "WithAnyQtoPct": 0
+    },
+    {
+      "IfcClass": "IfcRoof",
+      "Count": 1,
+      "WithAnyPsetCount": 1,
+      "WithAnyQtoCount": 0,
+      "WithAnyPsetPct": 1,
+      "WithAnyQtoPct": 0
+    },
+    {
+      "IfcClass": "IfcBuilding",
+      "Count": 1,
+      "WithAnyPsetCount": 1,
+      "WithAnyQtoCount": 0,
+      "WithAnyPsetPct": 1,
+      "WithAnyQtoPct": 0
+    },
+    {
+      "IfcClass": "IfcBuildingStorey",
+      "Count": 1,
+      "WithAnyPsetCount": 0,
+      "WithAnyQtoCount": 0,
+      "WithAnyPsetPct": 0,
+      "WithAnyQtoPct": 0
+    },
+    {
+      "IfcClass": "IfcSpatialZone",
+      "Count": 1,
+      "WithAnyPsetCount": 0,
+      "WithAnyQtoCount": 0,
+      "WithAnyPsetPct": 0,
+      "WithAnyQtoPct": 0
+    }
+  ],
+  "TopPsets": [
+    {
+      "Name": "Pset_WallCommon",
+      "Count": 4
+    },
+    {
+      "Name": "Pset_SlabCommon",
+      "Count": 3
+    },
+    {
+      "Name": "Pset_SpaceCommon",
+      "Count": 2
+    },
+    {
+      "Name": "Pset_RoofCommon",
+      "Count": 1
+    },
+    {
+      "Name": "Pset_BuildingCommon",
+      "Count": 1
+    }
+  ],
+  "TopQtos": [
+    {
+      "Name": "Qto_WallBaseQuantities",
+      "Count": 4
+    },
+    {
+      "Name": "Qto_SlabBaseQuantities",
+      "Count": 3
+    }
+  ]
+}

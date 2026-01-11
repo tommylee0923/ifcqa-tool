@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../IfcQa.Core/IfcQa.Core.csproj" />
+  <Project Path="IfcQa.Cli.csproj" />
+</Solution>
