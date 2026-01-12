@@ -7,12 +7,12 @@ using System.Net;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 
-namespace Ifc.Qa.Rules;
+namespace IfcQa.Core.Rules;
 
 public sealed class RuleRequireQtoQuantityNames : IRule
 {
-    public string Id {get;}
-    public Severity Severity {get;}
+    public string Id { get; }
+    public Severity Severity { get; }
 
     private readonly string _ifcClass;
     private readonly string _qtoName;
@@ -36,7 +36,7 @@ public sealed class RuleRequireQtoQuantityNames : IRule
     {
         var products = model.Instances.OfType<IIfcProduct>()
             .Where(p => p.ExpressType.Name.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase));
-        
+
         foreach (var p in products)
         {
             var qto = IfcPropertyUtils.GetAllQuantitySets(p)
@@ -45,7 +45,7 @@ public sealed class RuleRequireQtoQuantityNames : IRule
             if (_qtoName == null) continue;
 
             var available = new HashSet<string>(
-                qto.Quantities
+                qto!.Quantities
                     .Select(q => q.Name.ToString())
                     .Where(n => !string.IsNullOrWhiteSpace(n))
                     .Select(n => n!),

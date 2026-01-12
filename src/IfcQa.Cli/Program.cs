@@ -2,6 +2,7 @@
 using System.Text.Json;
 using IfcQa.Core;
 using IfcQa.Core.Catalog;
+using IfcQa.Core.Rules;
 
 var cmd = (args.Length > 0 ? args[0].ToLowerInvariant() : "");
 
@@ -15,6 +16,9 @@ if (args.Length == 0)
 }
 
 var ifcPath = args.Length > 1 ? args[1] : throw new ArgumentException("Missing IFC File.");
+var rulesetPath = "rulesets/basic-ifcqa.json";
+// TODO: parse --rules <path>
+var (_, rules) = RulesetLoader.Load(rulesetPath);
 
 
 if (cmd == "catalog")
@@ -35,7 +39,7 @@ if (cmd == "catalog")
 if (cmd == "check")
 {
     var analyzer = new IfcAnalyzer();
-    var run = analyzer.AnalyzeWithRules(ifcPath);
+    var run = analyzer.AnalyzeWithRules(ifcPath, rules);
 
     var report = analyzer.Analyze(ifcPath);
 

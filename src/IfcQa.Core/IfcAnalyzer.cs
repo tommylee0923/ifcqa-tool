@@ -6,9 +6,7 @@ using Xbim.Ifc;
 using Xbim.Common;
 using Xbim.Ifc4.Interfaces;
 using IfcQa.Core.Rules;
-using Ifc.Qa.Rules;
 using System.Xml.Schema;
-using IfcQa.Core.Rule;
 
 namespace IfcQa.Core;
 
@@ -17,13 +15,10 @@ public sealed class IfcAnalyzer
     public IfcSummaryReport Analyze(string ifcPath)
     {
         if (string.IsNullOrWhiteSpace(ifcPath))
-        {
             throw new ArgumentNullException("IFC path is empty", nameof(ifcPath));
-        }
+
         if (!File.Exists(ifcPath))
-        {
             throw new FileNotFoundException("IFC file not found.", ifcPath);
-        }
 
         using var model = IfcStore.Open(ifcPath);
 
@@ -71,57 +66,19 @@ public sealed class IfcAnalyzer
         };
     }
 
-    public IfcQaRunResult AnalyzeWithRules(string ifcPath)
+    public IfcQaRunResult AnalyzeWithRules(string ifcPath, IEnumerable<IRule> rules)
     {
         using var model = IfcStore.Open(ifcPath);
 
-        IRule[] rules =
-            [
-                new RuleMissingName(),
-                new RuleMissingContainment(),
-                new RuleDuplicateGlobalId(),
+        var allIssues = new List<Issue>();
 
-                //Walls
-                new RuleRequirePset("W101", Severity.Error, "IfcWall", "Pset_WallCommon"),
-                new RuleRequireQto("W102", Severity.Warning, "IfcWall", "Qto_WallBaseQuantities"),
-                new RuleRequirePset("W101", Severity.Error, "IfcWallStandardCase", "Pset_WallCommon"),
-                new RuleRequireQto("W102", Severity.Warning, "IfcWallStandardCase", "Qto_WallBaseQuantities"),
-                new RuleRequirePsetPropertyKeys("W201", Severity.Error,   "IfcWall", "Pset_WallCommon", "IsExternal"),
-                new RuleRequirePsetPropertyKeys("W202", Severity.Warning, "IfcWall", "Pset_WallCommon", "LoadBearing"),
-                new RuleRequirePsetPropertyValueBool("W301", Severity.Error, "IfcWall", "Pset_WallCommon", "IsExternal"),
-                new RuleRequirePsetPropertyValueBool("W302", Severity.Warning, "IfcWall", "Pset_WallCommon", "LoadBearing"),
-                new RuleRequirePsetPropertyValueBool("W301", Severity.Error, "IfcWallStandcardCase", "Pset_WallCommon", "IsExternal"),
-                new RuleRequirePsetPropertyValueBool("W302", Severity.Warning, "IfcWallStandcardCase", "Pset_WallCommon", "LoadBearing"),
-                new RuleRequireQtoQuantityNames("W401", Severity.Warning, "IfcWall", "Qto_WallBaseQuantities", "Length", "NetSideArea"),
-                new RuleRequireQtoQuantityValueNumber("W501", Severity.Warning, "IfcWall", "Qto_WallBaseQuantities", "Length", 0),
-                new RuleRequireQtoQuantityValueNumber("W502", Severity.Warning, "IfcWall", "Qto_WallBaseQuantities", "NetSideArea", 0),
-
-                //Slabs
-                new RuleRequirePset("S101", Severity.Error, "IfcSlab", "Pset_SlabCommon"),
-                new RuleRequireQto("S102", Severity.Warning, "IfcSlab", "Qto_SlabBaseQuantities"),
-                new RuleRequirePsetPropertyValueBool("S301", Severity.Warning, "IfcSlab", "Pset_SlabCommon", "IsExternal"),
-                new RuleRequireQtoQuantityNames("S401", Severity.Warning, "IfcSlab", "Qto_SlabBaseQuantities", "NetArea"),
-                new RuleRequireQtoQuantityValueNumber("S501", Severity.Warning, "IfcSlab", "Qto_SlabBaseQuantities", "NetArea", 0),
-
-                //Roof
-                new RuleRequirePset("R101", Severity.Warning, "IfcRoof", "Pset_RoofCommon"),
-                //new RuleRequireQto("R102", Severity.Warning, "IfcRoof", "Qto_RoofBaseQuantities"),
-
-                //Spaces
-                new RuleRequirePset("SP101", Severity.Warning, "IfcSpace", "Pset_SpaceCommon"),
-                new RuleRequirePsetPropertyKeys("SP201", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "NetPlannedArea"),
-                new RuleRequiredPsetPropertyValueNumber("SP301", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "NetPlannedArea", 0),
-                new RuleRequiredPsetPropertyValueNumber("SP302", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "GrossPlannedArea", 0),
-                new RuleComparePsetNumbers("SP303", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "GrossPlannedArea", "NetPlannedArea"),
-                new RuleSpaceExternalHasExternalBoundary(),
-
-                //Building
-                new RuleRequirePset("B101", Severity.Info, "IfcBuilding", "Pset_BuildingCommon"),
-            ];
-
-        var issues = rules.SelectMany(r => r.Evaluate(model)).ToList();
-
-        return new IfcQaRunResult(ifcPath, issues);
+        foreach (var rule in rules)
+        {
+            var issues = rule.Evaluate(model);
+            allIssues.AddRange(issues);
+        }
+        
+        return new IfcQaRunResult(ifcPath, allIssues);
     }
     public sealed class IfcSummaryReport
     {

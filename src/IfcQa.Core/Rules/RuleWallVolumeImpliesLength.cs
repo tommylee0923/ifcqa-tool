@@ -9,8 +9,17 @@ namespace IfcQa.Core.Rules;
 
 public sealed class RuleWallVolumeImpliesLength : IRule
 {
-    public string Id => "W601";
-    public Severity Severity => Severity.Warning;
+    public string Id {get;}
+    public Severity Severity {get;}
+
+    public RuleWallVolumeImpliesLength(
+        string id,
+        Severity severity
+    )
+    {
+        Id = id;
+        Severity = severity;
+    }
 
     public IEnumerable<Issue> Evaluate(IfcStore model)
     {
@@ -34,7 +43,7 @@ public sealed class RuleWallVolumeImpliesLength : IRule
                     w.ExpressType.Name,
                     w.GlobalId.ToString() ?? "",
                     w.Name?.ToString(),
-                    "Wall has NetVOlume > 0 but Length is missing or <= 0"
+                    "Wall has NetVolume > 0 but Length is missing or <= 0"
                 );
             }
         }

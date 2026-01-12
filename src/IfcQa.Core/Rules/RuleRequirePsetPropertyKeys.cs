@@ -6,7 +6,7 @@ using Xbim.Ifc4.Interfaces;
 
 namespace IfcQa.Core.Rules
 {
-    public sealed class RuleRequirePsetPropertyKeys : IRule
+    public sealed class RuleRequirePsetPropertyKey : IRule
     {
         public string Id { get; }
         public Severity Severity { get; }
@@ -15,7 +15,7 @@ namespace IfcQa.Core.Rules
         private readonly string _psetName;
         private readonly string _propertyKey;
 
-        public RuleRequirePsetPropertyKeys(string id, Severity severity, string ifcClass, string psetName, string propertyKey)
+        public RuleRequirePsetPropertyKey(string id, Severity severity, string ifcClass, string psetName, string propertyKey)
         {
             Id = id;
             Severity = severity;

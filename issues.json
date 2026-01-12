@@ -1,5 +1,5 @@
 {
-  "IfcPath": "samples/Building-Architecture.ifc",
+  "IfcPath": ".\\samples\\Building-Architecture.ifc",
   "Issues": [
     {
       "RuleId": "R002",

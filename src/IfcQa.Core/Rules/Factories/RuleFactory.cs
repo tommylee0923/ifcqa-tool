@@ -1,5 +1,5 @@
+using IfcQa.Core.Rules;
 using IfcQa.Core.Rules.Specs;
-using System.Runtime.Serialization;
 
 namespace IfcQa.Core.Rules.Factories;
 
@@ -7,16 +7,115 @@ public static class RuleFactory
 {
     public static IRule Create(RuleSpec s)
     {
-        var sev = Enum.Parse<Severity>(s.Severity, ignoreCase: true);
+        var sev = Enum.TryParse<Severity>(s.Severity?.Trim(), true, out var parsed)
+            ? parsed
+            : Severity.Warning;
+
+        if (string.IsNullOrWhiteSpace(s.Type))
+            throw new NotSupportedException("Rule missing 'type'.");
+
+        if (string.IsNullOrWhiteSpace(s.Id))
+            throw new NotSupportedException($"Rule of type '{s.Type}' missing 'id'.");
+
         return s.Type switch
         {
-            "MissingName" => new RuleMissingName(s.Id, sev),
-            "MissingContanment" => new RuleMissingContainment(s.Id, sev),
-            "DuplicateGlobalId" => new RuleDuplicateGlobalId(s.Id, sev),
-            "RequirePset" => new RuleRequirePset(s.Id, sev, s.IfcClass!, s.Pset!),
-            // Need to populate with more rules
+            "MissingName" =>
+                new RuleMissingName(
+                    s.Id,
+                    sev),
+
+            "MissingContainment" =>
+                new RuleMissingContainment(
+                    s.Id,
+                    sev),
+
+            "DuplicateGlobalId" =>
+                new RuleDuplicateGlobalId(
+                    s.Id,
+                    sev),
+
+            "RequirePset" =>
+                new RuleRequirePset(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s), Req(s.Pset, "pset", s)),
+
+            "RequireQto" =>
+                new RuleRequireQto(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Qto, "qto", s)),
+
+            "RequirePsetPropertyKey" =>
+                new RuleRequirePsetPropertyKey(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Pset, "pset", s),
+                    Req(s.Key, "key", s)),
+
+            "RequirePsetBool" =>
+                new RuleRequirePsetPropertyValueBool(
+                    s.Id, sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Pset, "pset", s),
+                    Req(s.Key, "key", s)),
+            
+            "RequirePsetNumber" =>
+                new RuleRequirePsetPropertyValueNumber(
+                    s.Id, sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Pset, "pset", s),
+                    Req(s.Key, "key", s),
+                    s.MinExclusive ?? 0.0),
+
+            "RequireQtoQuantityNames" =>
+                new RuleRequireQtoQuantityNames(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Qto, "qto", s),
+                    s.QtyNames ?? Array.Empty<string>()),
+
+            "RequireQtoQtyValue" =>
+                new RuleRequireQtoQuantityValueNumber(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Qto, "qto", s),
+                    Req(s.Qty, "qty", s),
+                    s.MinExclusive ?? 0.0),
+
+            "ComparePsetNumbers" =>
+                new RuleComparePsetNumbers(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Pset, "pset", s),
+                    Req(s.KeyA, "keyA", s),
+                    Req(s.KeyB, "keyB", s)),
+
+            "SpaceExternalHasExternalBoundary" =>
+                new RuleSpaceExternalHasExternalBoundary(
+                    s.Id,
+                    sev),
+
+            "WallVolumeImpliesLength" =>
+                new RuleWallVolumeImpliesLength(
+                    s.Id,
+                    sev),
 
             _ => throw new NotSupportedException($"Unknown rule type: {s.Type}")
         };
+    }
+
+    static string Req(string? v, string name, RuleSpec s)
+    {
+        if (string.IsNullOrWhiteSpace(v))
+        {
+            throw new NotSupportedException($"Rule {s.Id} ({s.Type}) missing required field '{name}'.");
+        }
+        return v;
     }
 }

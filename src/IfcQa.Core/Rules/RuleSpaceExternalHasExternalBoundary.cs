@@ -5,12 +5,21 @@ using System.Linq;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 
-namespace IfcQa.Core.Rule;
+namespace IfcQa.Core.Rules;
 
 public sealed class RuleSpaceExternalHasExternalBoundary : IRule
 {
-    public string Id => "SP501";
-    public Severity Severity => Severity.Warning;
+    public string Id {get; set;}
+    public Severity Severity {get; set;}
+
+    public RuleSpaceExternalHasExternalBoundary(
+        string id,
+        Severity severity
+    )
+    {
+        Id = id;
+        Severity = severity;
+    }
 
     public IEnumerable<Issue> Evaluate(IfcStore model)
     {

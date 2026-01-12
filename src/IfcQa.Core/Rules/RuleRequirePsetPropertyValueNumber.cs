@@ -8,7 +8,7 @@ using Xbim.Ifc4.Interfaces;
 
 namespace IfcQa.Core.Rules;
 
-public sealed class RuleRequiredPsetPropertyValueNumber : IRule
+public sealed class RuleRequirePsetPropertyValueNumber : IRule
 {
     public string Id {get;}
     public Severity Severity {get;}
@@ -18,7 +18,7 @@ public sealed class RuleRequiredPsetPropertyValueNumber : IRule
     private readonly string _propertyKey;
     private readonly double _minExclusive;
 
-    public RuleRequiredPsetPropertyValueNumber(
+    public RuleRequirePsetPropertyValueNumber(
         string id,
         Severity severity,
         string ifcClass,

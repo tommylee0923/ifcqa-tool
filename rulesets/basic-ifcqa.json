@@ -6,12 +6,58 @@
     { "type": "MissingContainment", "id": "R002", "severity": "Warning" },
     { "type": "DuplicateGlobalId", "id": "R003", "severity": "Error" },
 
-    { "type": "RequirePset", "id": "W101", "severity": "Error", "ifcClass": "IfcWall", "pset": "Pset_WallCommon" },
-    { "type": "RequireQto",  "id": "W102", "severity": "Warning", "ifcClass": "IfcWall", "qto": "Qto_WallBaseQuantities" },
 
-    { "type": "RequirePsetBool", "id": "W301", "severity": "Error", "ifcClass": "IfcWall", "pset": "Pset_WallCommon", "key": "IsExternal" },
-    { "type": "RequirePsetBool", "id": "W302", "severity": "Error", "ifcClass": "IfcWall", "pset": "Pset_WallCommon", "key": "LoadBearing" },
+    { "type": "RequirePset", "id": "W101A", "severity": "Error", "ifcClass": "IfcWall", "pset": "Pset_WallCommon" },
+    { "type": "RequireQto",  "id": "W102A", "severity": "Warning", "ifcClass": "IfcWall", "qto": "Qto_WallBaseQuantities" },
 
-    { "type": "RequireQtoQtyValue", "id": "W501", "severity": "Warning", "ifcClass": "IfcWall", "qto": "Qto_WallBaseQuantities", "qty": "Length", "minExclusive": 0.0 }
+    { "type": "RequirePset", "id": "W101B", "severity": "Error", "ifcClass": "IfcWallStandardCase", "pset": "Pset_WallCommon" },
+    { "type": "RequireQto",  "id": "W102B", "severity": "Warning", "ifcClass": "IfcWallStandardCase", "qto": "Qto_WallBaseQuantities" },
+
+    { "type": "RequirePsetPropertyKey", "id": "W201A", "severity": "Error",   "ifcClass": "IfcWall", "pset": "Pset_WallCommon", "key": "IsExternal" },
+    { "type": "RequirePsetPropertyKey", "id": "W202A", "severity": "Warning", "ifcClass": "IfcWall", "pset": "Pset_WallCommon", "key": "LoadBearing" },
+
+    { "type": "RequirePsetBool", "id": "W301A", "severity": "Error",   "ifcClass": "IfcWall", "pset": "Pset_WallCommon", "key": "IsExternal" },
+    { "type": "RequirePsetBool", "id": "W302A", "severity": "Warning", "ifcClass": "IfcWall", "pset": "Pset_WallCommon", "key": "LoadBearing" },
+
+    { "type": "RequirePsetBool", "id": "W301B", "severity": "Error",   "ifcClass": "IfcWallStandardCase", "pset": "Pset_WallCommon", "key": "IsExternal" },
+    { "type": "RequirePsetBool", "id": "W302B", "severity": "Warning", "ifcClass": "IfcWallStandardCase", "pset": "Pset_WallCommon", "key": "LoadBearing" },
+
+    { "type": "RequireQtoQuantityNames", "id": "W401A", "severity": "Warning", "ifcClass": "IfcWall", "qto": "Qto_WallBaseQuantities",
+      "qtyNames": ["Length", "NetSideArea"] },
+
+    { "type": "RequireQtoQtyValue", "id": "W501A", "severity": "Warning", "ifcClass": "IfcWall", "qto": "Qto_WallBaseQuantities",
+      "qty": "Length", "minExclusive": 0.0 },
+
+    { "type": "RequireQtoQtyValue", "id": "W502A", "severity": "Warning", "ifcClass": "IfcWall", "qto": "Qto_WallBaseQuantities",
+      "qty": "NetSideArea", "minExclusive": 0.0 },
+
+
+    { "type": "RequirePset", "id": "S101", "severity": "Error", "ifcClass": "IfcSlab", "pset": "Pset_SlabCommon" },
+    { "type": "RequireQto",  "id": "S102", "severity": "Warning", "ifcClass": "IfcSlab", "qto": "Qto_SlabBaseQuantities" },
+
+    { "type": "RequirePsetBool", "id": "S301", "severity": "Warning", "ifcClass": "IfcSlab", "pset": "Pset_SlabCommon", "key": "IsExternal" },
+
+    { "type": "RequireQtoQuantityNames", "id": "S401", "severity": "Warning", "ifcClass": "IfcSlab", "qto": "Qto_SlabBaseQuantities",
+      "qtyNames": ["NetArea"] },
+
+    { "type": "RequireQtoQtyValue", "id": "S501", "severity": "Warning", "ifcClass": "IfcSlab", "qto": "Qto_SlabBaseQuantities",
+      "qty": "NetArea", "minExclusive": 0.0 },
+
+
+    { "type": "RequirePset", "id": "R101", "severity": "Warning", "ifcClass": "IfcRoof", "pset": "Pset_RoofCommon" },
+
+
+    { "type": "RequirePset", "id": "SP101", "severity": "Warning", "ifcClass": "IfcSpace", "pset": "Pset_SpaceCommon" },
+    { "type": "RequirePsetPropertyKey", "id": "SP201", "severity": "Warning", "ifcClass": "IfcSpace", "pset": "Pset_SpaceCommon", "key": "NetPlannedArea" },
+    { "type": "RequirePsetNumber", "id": "SP301", "severity": "Warning", "ifcClass": "IfcSpace", "pset": "Pset_SpaceCommon",
+      "key": "NetPlannedArea", "minExclusive": 0.0 },
+    { "type": "RequirePsetNumber", "id": "SP302", "severity": "Warning", "ifcClass": "IfcSpace", "pset": "Pset_SpaceCommon",
+      "key": "GrossPlannedArea", "minExclusive": 0.0 },
+    { "type": "ComparePsetNumbers", "id": "SP303", "severity": "Warning", "ifcClass": "IfcSpace", "pset": "Pset_SpaceCommon",
+      "keyA": "GrossPlannedArea", "keyB": "NetPlannedArea" },
+    { "type": "SpaceExternalHasExternalBoundary", "id": "SP501", "severity": "Warning" },
+
+
+    { "type": "RequirePset", "id": "B101", "severity": "Info", "ifcClass": "IfcBuilding", "pset": "Pset_BuildingCommon" }
   ]
 }
