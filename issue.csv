@@ -1,3 +1,0 @@
-RuleId,Severity,IfcClass,GlobalId,Name,Message
-"R002","Warning","IfcSlab","0ZTBBPo6f6bxqV2K7Oelrq","house - roof - slab left","Element is not contained in a spatial structure (storey/building)."
-"R002","Warning","IfcSlab","12UVOn4wvAJPMUExKdZLb8","house - roof - slab right","Element is not contained in a spatial structure (storey/building)."

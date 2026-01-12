@@ -5,3 +5,7 @@ bin/
 obj/
 .vs/
 .DS_Store
+issue.csv
+issue.jsongit 
+report.json
+catalog.json
