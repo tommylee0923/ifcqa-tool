@@ -6,6 +6,6 @@ obj/
 .vs/
 .DS_Store
 issue.csv
-issue.jsongit 
+issues.json
 report.json
 catalog.json
