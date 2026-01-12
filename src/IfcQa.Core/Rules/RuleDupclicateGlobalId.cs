@@ -10,8 +10,14 @@ namespace IfcQa.Core.Rules
 {
     public sealed class RuleDuplicateGlobalId : IRule
     {
-        public string Id => "R003";
-        public Severity Severity => Severity.Error;
+        public string Id {get;}
+        public Severity Severity {get;}
+
+        public RuleDuplicateGlobalId(string id, Severity severity)
+        {
+            Id = id;
+            Severity = severity; 
+        }
 
         public IEnumerable<Issue> Evaluate(IfcStore model)
         {

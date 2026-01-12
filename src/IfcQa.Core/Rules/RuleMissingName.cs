@@ -10,8 +10,14 @@ namespace IfcQa.Core.Rules
 {
     public sealed class RuleMissingName : IRule
     {
-        public string Id => "R001";
-        public Severity Severity => Severity.Warning;
+        public string Id {get;}
+        public Severity Severity {get; }
+
+        public RuleMissingName(string id, Severity severity)
+        {
+            Id = id;
+            Severity = severity;
+        }
 
         public IEnumerable<Issue> Evaluate(IfcStore model)
         {

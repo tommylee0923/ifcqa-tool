@@ -1,0 +1,17 @@
+{
+  "name": "Basic IFC QA",
+  "version": "0.2.0",
+  "rules": [
+    { "type": "MissingName", "id": "R001", "severity": "Warning" },
+    { "type": "MissingContainment", "id": "R002", "severity": "Warning" },
+    { "type": "DuplicateGlobalId", "id": "R003", "severity": "Error" },
+
+    { "type": "RequirePset", "id": "W101", "severity": "Error", "ifcClass": "IfcWall", "pset": "Pset_WallCommon" },
+    { "type": "RequireQto",  "id": "W102", "severity": "Warning", "ifcClass": "IfcWall", "qto": "Qto_WallBaseQuantities" },
+
+    { "type": "RequirePsetBool", "id": "W301", "severity": "Error", "ifcClass": "IfcWall", "pset": "Pset_WallCommon", "key": "IsExternal" },
+    { "type": "RequirePsetBool", "id": "W302", "severity": "Error", "ifcClass": "IfcWall", "pset": "Pset_WallCommon", "key": "LoadBearing" },
+
+    { "type": "RequireQtoQtyValue", "id": "W501", "severity": "Warning", "ifcClass": "IfcWall", "qto": "Qto_WallBaseQuantities", "qty": "Length", "minExclusive": 0.0 }
+  ]
+}
