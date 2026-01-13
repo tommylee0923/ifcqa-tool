@@ -12,10 +12,10 @@ public static class RuleFactory
             : Severity.Warning;
 
         if (string.IsNullOrWhiteSpace(s.Type))
-            throw new NotSupportedException("Rule missing 'type'.");
+            throw new RulesetValidationException("Rule missing 'type'.");
 
         if (string.IsNullOrWhiteSpace(s.Id))
-            throw new NotSupportedException($"Rule of type '{s.Type}' missing 'id'.");
+            throw new RulesetValidationException($"Rule of type '{s.Type}' missing 'id'.");
 
         return s.Type switch
         {
@@ -106,16 +106,20 @@ public static class RuleFactory
                     s.Id,
                     sev),
 
-            _ => throw new NotSupportedException($"Unknown rule type: {s.Type}")
+            _ => throw new RulesetValidationException($"Unknown rule type: {s.Type}")
         };
     }
 
-    static string Req(string? v, string name, RuleSpec s)
+    static string Req(string? v, string field, RuleSpec s)
     {
         if (string.IsNullOrWhiteSpace(v))
-        {
-            throw new NotSupportedException($"Rule {s.Id} ({s.Type}) missing required field '{name}'.");
-        }
+            throw new RulesetValidationException($"Rule '{s.Id}' (type '{s.Type}') missing required field ' {field}'.");
         return v;
+    }
+    static double ReqDouble(double? v, string field, RuleSpec s)
+    {
+        if (!v.HasValue)
+            throw new RulesetValidationException($"Rule '{s.Id}' (type '{s.Type}') missing required field ' {field}'.");
+        return v.Value;
     }
 }
