@@ -3,6 +3,7 @@ venv/
 .venv/
 bin/
 obj/
+out/
 .vs/
 .DS_Store
 issue.csv
