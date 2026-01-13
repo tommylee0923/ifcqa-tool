@@ -63,6 +63,24 @@ if (cmd == "check")
 
     var analyzer = new IfcAnalyzer();
     var run = analyzer.AnalyzeWithRules(ifcPath, rules);
+    var byRule = run.Issues
+        .GroupBy(i => i.RuleId)
+        .Select(g => new
+        {
+            RuleId = g.Key,
+            Total = g.Count(),
+            Errors = g.Count(x => x.Severity == Severity.Error),
+            Warnings = g.Count(x => x.Severity == Severity.Warning),
+            Info = g.Count(x => x.Severity == Severity.Info),
+        })
+        .OrderByDescending(x => x.Total)
+        .ToList();
+
+    var uniqueElementsAffected = run.Issues
+        .Select(i => i.GlobalId)
+        .Where(gid => !string.IsNullOrWhiteSpace(gid))
+        .Distinct()
+        .Count();
 
     var report = new
     {
@@ -75,7 +93,9 @@ if (cmd == "check")
             Errors = run.Issues.Count(i => i.Severity == Severity.Error),
             Warnings = run.Issues.Count(i => i.Severity == Severity.Warning),
             Info = run.Issues.Count(i => i.Severity == Severity.Info),
-        }
+        },
+        UniqueElementsAffected = uniqueElementsAffected,
+        ByRule = byRule
     };
 
     var json = JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true });
@@ -90,6 +110,20 @@ if (cmd == "check")
 
     File.WriteAllText(issuesCsvPath, BuildIssuesCsv(run.Issues));
     Console.WriteLine("Wrote issues.csv");
+
+    Console.WriteLine();
+    Console.WriteLine("Summary:");
+    Console.WriteLine($" Total: {report.Counts.Total}   ErrorsL {report.Counts.Errors}  Warnings: {report.Counts.Warnings}  Info: {report.Counts.Info}");
+    Console.WriteLine($" Unique elements affected: {uniqueElementsAffected}");
+
+    if (byRule.Count > 0)
+    {
+        Console.WriteLine(" By rule:");
+        foreach (var r in byRule)
+        {
+            Console.WriteLine($"    {r.RuleId}: {r.Total}: (E:{r.Errors} W:{r.Warnings} I:{r.Info})");
+        }
+    }
 }
 
 static void PrintUsage()
