@@ -6,8 +6,3 @@ obj/
 out/
 .vs/
 .DS_Store
-issue.csv
-issues.json
-report.json
-catalog.json
-.html

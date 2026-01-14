@@ -38,7 +38,16 @@ public static class RuleFactory
                 new RuleRequirePset(
                     s.Id,
                     sev,
-                    Req(s.IfcClass, "ifcClass", s), Req(s.Pset, "pset", s)),
+                    Req(s.IfcClass, "ifcClass", s), 
+                    Req(s.Pset, "pset", s)),
+            
+            "RequireAnyPset" =>
+                new RuleRequireAnyPset(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    ReqPsets(s.Psets, "psets",s)
+                ),
 
             "RequireQto" =>
                 new RuleRequireQto(
@@ -116,6 +125,13 @@ public static class RuleFactory
             throw new RulesetValidationException($"Rule '{s.Id}' (type '{s.Type}') missing required field ' {field}'.");
         return v;
     }
+    static string[] ReqPsets(string[]? v, string field, RuleSpec s)
+{
+    if (v == null || v.Length == 0)
+        throw new RulesetValidationException($"Rule '{s.Id}' (type '{s.Type}') missing required field '{field}'.");
+    return v;
+}
+
     static double ReqDouble(double? v, string field, RuleSpec s)
     {
         if (!v.HasValue)

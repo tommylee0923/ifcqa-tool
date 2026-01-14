@@ -1,0 +1,115 @@
+{
+  "name": "Tool-agnostic IFC QA (Common Psets)",
+  "version": "0.3.0",
+  "rules": [
+    {
+      "type": "RequireAnyPset",
+      "id": "TA-WALL-001",
+      "severity": "Info",
+      "ifcClass": "IfcWall",
+      "psets": ["Pset_WallCommon"]
+    },
+    {
+      "type": "RequireAnyPset",
+      "id": "TA-WALLSC-001",
+      "severity": "Info",
+      "ifcClass": "IfcWallStandardCase",
+      "psets": ["Pset_WallCommon"]
+    },
+    {
+      "type": "RequireAnyPset",
+      "id": "TA-SLAB-001",
+      "severity": "Info",
+      "ifcClass": "IfcSlab",
+      "psets": ["Pset_SlabCommon"]
+    },
+    {
+      "type": "RequireAnyPset",
+      "id": "TA-DOOR-001",
+      "severity": "Info",
+      "ifcClass": "IfcDoor",
+      "psets": ["Pset_DoorCommon"]
+    },
+    {
+      "type": "RequireAnyPset",
+      "id": "TA-WINDOW-001",
+      "severity": "Info",
+      "ifcClass": "IfcWindow",
+      "psets": ["Pset_WindowCommon"]
+    },
+
+    {
+      "type": "RequirePsetPropertyKey",
+      "id": "TA-WALL-REF-001",
+      "severity": "Info",
+      "ifcClass": "IfcWall",
+      "pset": "Pset_WallCommon",
+      "key": "Reference"
+    },
+    {
+      "type": "RequirePsetPropertyKey",
+      "id": "TA-WALLSC-REF-001",
+      "severity": "Info",
+      "ifcClass": "IfcWallStandardCase",
+      "pset": "Pset_WallCommon",
+      "key": "Reference"
+    },
+    {
+      "type": "RequirePsetPropertyKey",
+      "id": "TA-SLAB-REF-001",
+      "severity": "Info",
+      "ifcClass": "IfcSlab",
+      "pset": "Pset_SlabCommon",
+      "key": "Reference"
+    },
+    {
+      "type": "RequirePsetPropertyKey",
+      "id": "TA-DOOR-REF-001",
+      "severity": "Info",
+      "ifcClass": "IfcDoor",
+      "pset": "Pset_DoorCommon",
+      "key": "Reference"
+    },
+    {
+      "type": "RequirePsetPropertyKey",
+      "id": "TA-WINDOW-REF-001",
+      "severity": "Info",
+      "ifcClass": "IfcWindow",
+      "pset": "Pset_WindowCommon",
+      "key": "Reference"
+    },
+
+    {
+      "type": "RequirePsetPropertyKey",
+      "id": "TA-WALL-BOOL-001",
+      "severity": "Info",
+      "ifcClass": "IfcWallStandardCase",
+      "pset": "Pset_WallCommon",
+      "key": "IsExternal"
+    },
+    {
+      "type": "RequirePsetPropertyKey",
+      "id": "TA-WALL-BOOL-002",
+      "severity": "Info",
+      "ifcClass": "IfcWallStandardCase",
+      "pset": "Pset_WallCommon",
+      "key": "LoadBearing"
+    },
+
+    {
+      "type": "RequireAnyPset",
+      "id": "TA-BLDG-001",
+      "severity": "Info",
+      "ifcClass": "IfcBuilding",
+      "psets": ["Pset_BuildingCommon"]
+    },
+    {
+      "type": "RequirePsetPropertyKey",
+      "id": "TA-BLDG-STOREYS-001",
+      "severity": "Info",
+      "ifcClass": "IfcBuilding",
+      "pset": "Pset_BuildingCommon",
+      "key": "NumberOfStoreys"
+    }
+  ]
+}
