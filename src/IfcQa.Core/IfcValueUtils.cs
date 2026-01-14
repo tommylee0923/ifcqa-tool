@@ -12,7 +12,7 @@ namespace IfcQa.Core
         {
             if (prop is not IIfcPropertySingleValue sv) return null;
             var nv = sv.NominalValue;
-            return nv?.ToString();
+            return nv?.Value?.ToString() ?? nv?.ToString();
         }
 
         public static bool? GetSingleValueAsBool(IIfcProperty prop)
@@ -66,7 +66,7 @@ namespace IfcQa.Core
                 s = s.Replace("m2", "", StringComparison.OrdinalIgnoreCase).Trim();
 
                 if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var d))
-                return d;
+                    return d;
             }
 
             var valueProp = nv.GetType().GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
@@ -78,10 +78,9 @@ namespace IfcQa.Core
                 if (val is int i) return i;
 
                 var vs = val?.ToString()?.Trim();
-                if (!string.IsNullOrWhiteSpace(vs) && 
+                if (!string.IsNullOrWhiteSpace(vs) &&
                     double.TryParse(vs, NumberStyles.Any, CultureInfo.InvariantCulture, out var dv)) return dv;
             }
-            
             return null;
         }
     }

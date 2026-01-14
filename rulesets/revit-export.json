@@ -1,0 +1,98 @@
+{
+    "name": "Revit Export QA Pack",
+    "version": "0.2.0",
+    "rules": [
+        {
+            "type": "RequireNonEmpty",
+            "id": "RV-DOOR-MARK-001",
+            "severity": "Warning",
+            "ifcClass": "IfcDoor",
+            "pset": "PSet_Revit_Identity Data",
+            "key": "Mark"
+        },
+        {
+            "type": "RequireNonEmpty",
+            "id": "RV-WINDOW-MARK-001",
+            "severity": "Warning",
+            "ifcClass": "IfcWindow",
+            "pset": "PSet_Revit_Identity Data",
+            "key": "Mark"
+        },
+        {
+            "type": "RequireNonEmpty",
+            "id": "RV-SPACE-NUMBER-001",
+            "severity": "Warning",
+            "ifcClass": "IfcSpace",
+            "pset": "PSet_Revit_Identity Data",
+            "key": "Number"
+        },
+        {
+            "type": "RequireNonEmpty",
+            "id": "RV-SPACE-NAME-001",
+            "severity": "Warning",
+            "ifcClass": "IfcSpace",
+            "pset": "PSet_Revit_Identity Data",
+            "key": "Name"
+        },
+        {
+            "type": "RequirePsetPropertyKey",
+            "id": "RV-PHASE-CREATED-001",
+            "severity": "Info",
+            "ifcClass": "IfcWall",
+            "pset": "PSet_Revit_Phasing",
+            "key": "Phase Created"
+        },
+        {
+            "type": "RequirePsetPropertyKey",
+            "id": "RV-PHASE-CREATED-002",
+            "severity": "Info",
+            "ifcClass": "IfcDoor",
+            "pset": "PSet_Revit_Phasing",
+            "key": "Phase Created"
+        },
+        {
+            "type": "RequirePsetPropertyKey",
+            "id": "RV-PHASE-CREATED-003",
+            "severity": "Info",
+            "ifcClass": "IfcWindow",
+            "pset": "PSet_Revit_Phasing",
+            "key": "Phase Created"
+        },
+        {
+            "type": "AllowedValues",
+            "id": "RV-PHASECREATED-ENUM-001",
+            "severity": "Info",
+            "ifcClass": "IfcWall",
+            "pset": "PSet_Revit_Phasing",
+            "key": "Phase Created",
+            "allowedValues": [
+                "New Construction",
+                "Existing"
+            ]
+        },
+        {
+            "type": "AllowedValues",
+            "id": "RV-PHASECREATED-ENUM-002",
+            "severity": "Info",
+            "ifcClass": "IfcDoor",
+            "pset": "PSet_Revit_Phasing",
+            "key": "Phase Created",
+            "allowedValues": [
+                "New Construction",
+                "Existing"
+            ]
+        },
+        {
+            "type": "AllowedValues",
+            "id": "RV-PHASECREATED-ENUM-003",
+            "severity": "Info",
+            "ifcClass": "IfcWindow",
+            "pset": "PSet_Revit_Phasing",
+            "key": "Phase Created",
+            "allowedValues": [
+                "New Construction",
+                "Existing"
+            ]
+        }
+    ]
+}

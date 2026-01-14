@@ -16,4 +16,6 @@ public sealed class RuleSpec
     public string? Qty {get; set;}
     public string[]? QtyNames {get; set;}
     public double? MinExclusive {get; set;}
+    public string[]? AllowedValues {get; set;}
+    public string? Regex {get; set;}
 }

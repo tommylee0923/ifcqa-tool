@@ -34,6 +34,25 @@ public static class RuleFactory
                     s.Id,
                     sev),
 
+            "RequireNonEmpty" =>
+                new RuleRequireNonEmpty(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Pset, "pset", s),
+                    Req(s.Key, "key", s)
+                ),
+            
+            "AllowedValues" =>
+                new RuleAllowedValues(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Pset, "pset", s),
+                    Req(s.Key, "key", s),
+                    ReqArr(s.AllowedValues, "allowedValues", s)
+                ),
+
             "RequirePset" =>
                 new RuleRequirePset(
                     s.Id,
@@ -46,15 +65,8 @@ public static class RuleFactory
                     s.Id,
                     sev,
                     Req(s.IfcClass, "ifcClass", s),
-                    ReqPsets(s.Psets, "psets",s)
+                    ReqArr(s.Psets, "psets",s)
                 ),
-
-            "RequireQto" =>
-                new RuleRequireQto(
-                    s.Id,
-                    sev,
-                    Req(s.IfcClass, "ifcClass", s),
-                    Req(s.Qto, "qto", s)),
 
             "RequirePsetPropertyKey" =>
                 new RuleRequirePsetPropertyKey(
@@ -78,6 +90,13 @@ public static class RuleFactory
                     Req(s.Pset, "pset", s),
                     Req(s.Key, "key", s),
                     s.MinExclusive ?? 0.0),
+
+            "RequireQto" =>
+                new RuleRequireQto(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Qto, "qto", s)),
 
             "RequireQtoQuantityNames" =>
                 new RuleRequireQtoQuantityNames(
@@ -125,7 +144,7 @@ public static class RuleFactory
             throw new RulesetValidationException($"Rule '{s.Id}' (type '{s.Type}') missing required field ' {field}'.");
         return v;
     }
-    static string[] ReqPsets(string[]? v, string field, RuleSpec s)
+    static string[] ReqArr(string[]? v, string field, RuleSpec s)
 {
     if (v == null || v.Length == 0)
         throw new RulesetValidationException($"Rule '{s.Id}' (type '{s.Type}') missing required field '{field}'.");

@@ -1,0 +1,83 @@
+using IfcQa.Core.Rules.Specs;
+using Xbim.Ifc;
+using Xbim.Ifc4.Interfaces;
+
+namespace IfcQa.Core.Rules;
+
+public sealed class RuleRequireNonEmpty : IRule
+{
+    public string Id { get; }
+    public Severity Severity { get; }
+
+    private readonly string _ifcClass;
+    private readonly string _pset;
+    private readonly string _key;
+
+    public RuleRequireNonEmpty(
+        string id,
+        Severity severity,
+        string ifcClass,
+        string pset,
+        string key
+    )
+    {
+        Id = id;
+        Severity = severity;
+        _ifcClass = ifcClass;
+        _pset = pset;
+        _key = key;
+    }
+
+    public IEnumerable<Issue> Evaluate(IfcStore model)
+    {
+        var products = model.Instances
+            .OfType<IIfcProduct>()
+            .Where(p => p.ExpressType.Name == _ifcClass);
+
+        foreach (var p in products)
+        {
+            var psets = IfcPropertyUtils.GetAllPropertySets(p);
+            var ps = psets.FirstOrDefault(x => x.Name?.ToString() == _pset);
+
+            if (ps == null)
+            {
+                yield return new Issue(
+                    Id,
+                    Severity,
+                    _ifcClass,
+                    p.GlobalId,
+                    p.Name,
+                    $"Missing property '{_key}' in '{_pset}'."
+                );
+                continue;
+            }
+
+            var prop = ps.HasProperties?.FirstOrDefault(hp => hp.Name.ToString() == _key);
+            if (prop == null)
+            {
+                yield return new Issue(
+                    Id,
+                    Severity,
+                    _ifcClass,
+                    p.GlobalId,
+                    p.Name,
+                    $"Missing property '{_key}' in '{_pset}'."
+                );
+                continue;
+            }
+
+            var raw = IfcValueUtils.GetSingleValueAsString(prop);
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                yield return new Issue(
+                    Id,
+                    Severity,
+                    _ifcClass,
+                    p.GlobalId,
+                    p.Name,
+                    $"Property '{_pset}.{_key}' must not be empty."
+                );
+            }
+        }
+    }
+}
