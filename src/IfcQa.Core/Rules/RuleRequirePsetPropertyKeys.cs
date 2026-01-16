@@ -26,7 +26,8 @@ namespace IfcQa.Core.Rules
 
         public IEnumerable<Issue> Evaluate(IfcStore model)
         {
-            var products = model.Instances.OfType<IIfcProduct>()
+            var products = model.Instances
+                .OfType<IIfcProduct>()
                 .Where(p => p.ExpressType.Name.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase));
 
             foreach (var p in products)

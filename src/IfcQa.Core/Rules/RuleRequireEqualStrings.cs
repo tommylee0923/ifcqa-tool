@@ -37,7 +37,7 @@ public sealed class RuleRequireEqualStrings : IRule
     {
         var products = model.Instances
             .OfType<IIfcProduct>()
-            .Where(p => p.ExpressType?.Name == _ifcClass);
+            .Where(p => p.ExpressType?.Name?.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
         
         foreach (var p in products)
         {
@@ -55,7 +55,7 @@ public sealed class RuleRequireEqualStrings : IRule
                     _ifcClass,
                     p.GlobalId,
                     p.Name,
-                    $"Mismatch: '{_psetA}.{_keyA}' = '{a}' but'{_psetB}.{_keyB}' = '{b}'."
+                    $"Mismatch: '{_psetA}.{_keyA}' = '{a}' but '{_psetB}.{_keyB}' = '{b}'."
                 );
             }
         }

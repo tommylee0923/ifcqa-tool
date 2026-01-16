@@ -13,6 +13,7 @@ public sealed class RuleAllowedValues : IRule
     private readonly string _pset;
     private readonly string _key;
     private readonly HashSet<string> _allowed;
+    private readonly bool _skipIfMissing;
 
     public RuleAllowedValues(
         string id,
@@ -20,7 +21,8 @@ public sealed class RuleAllowedValues : IRule
         string ifcClass,
         string pset,
         string key,
-        IEnumerable<string> allowedValues
+        IEnumerable<string> allowedValues,
+        bool skipIfMissing
     )
     {
         Id = id;
@@ -29,13 +31,14 @@ public sealed class RuleAllowedValues : IRule
         _pset = pset;
         _key = key;
         _allowed = new HashSet<String>(allowedValues.Select(Norm));
+        _skipIfMissing = skipIfMissing;
     }
 
     public IEnumerable<Issue> Evaluate(IfcStore model)
     {
         var products = model.Instances
             .OfType<IIfcProduct>()
-            .Where(p => p.ExpressType?.Name == _ifcClass);
+            .Where(p => p.ExpressType?.Name.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
         
         foreach (var p in products)
         {
@@ -44,6 +47,7 @@ public sealed class RuleAllowedValues : IRule
             var ps = psets.FirstOrDefault(x => x.Name?.ToString() == _pset);
             if (ps == null)
             {
+                if (_skipIfMissing) continue;
                 yield return new Issue(
                     Id,
                     Severity,
@@ -58,6 +62,7 @@ public sealed class RuleAllowedValues : IRule
             var prop = ps.HasProperties?.FirstOrDefault(hp => hp.Name.ToString() == _key);
             if (prop == null)
             {
+                if (_skipIfMissing) continue;
                 yield return new Issue(
                     Id,
                     Severity,
@@ -72,6 +77,7 @@ public sealed class RuleAllowedValues : IRule
             var val = Norm(IfcValueUtils.GetSingleValueAsString(prop));
             if (string.IsNullOrWhiteSpace(val))
             {
+                if (_skipIfMissing) continue;
                 yield return new Issue(
                     Id,
                     Severity,

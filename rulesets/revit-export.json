@@ -68,7 +68,8 @@
             "allowedValues": [
                 "New Construction",
                 "Existing"
-            ]
+            ],
+            "skipIfMissing": true
         },
         {
             "type": "AllowedValues",
@@ -80,7 +81,8 @@
             "allowedValues": [
                 "New Construction",
                 "Existing"
-            ]
+            ],
+            "skipIfMissing": true
         },
         {
             "type": "AllowedValues",
@@ -92,7 +94,8 @@
             "allowedValues": [
                 "New Construction",
                 "Existing"
-            ]
+            ],
+            "skipIfMissing": true
         },
         {
             "type": "RequireEqualStrings",
@@ -113,6 +116,15 @@
             "keyA": "Scheduled",
             "psetB": "PSet_Revit_Phasing",
             "keyB": "Phase Created"
+        },
+        {
+            "type": "RequireNonEmptyAny",
+            "id": "RV-SPACE-NAME-ANY-001",
+            "severity": "Warning",
+            "ifcClass": "IfcSpace",
+            "attribute": "Name",
+            "pset": "PSet_Revit_Identity Data",
+            "key": "Name"
         }
     ]
 }

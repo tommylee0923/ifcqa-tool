@@ -40,7 +40,8 @@ public static class RuleFactory
                     sev,
                     Req(s.IfcClass, "ifcClass", s),
                     Req(s.Pset, "pset", s),
-                    Req(s.Key, "key", s)
+                    Req(s.Key, "key", s),
+                    s.SkipIfMissing
                 ),
 
             "AllowedValues" =>
@@ -50,7 +51,8 @@ public static class RuleFactory
                     Req(s.IfcClass, "ifcClass", s),
                     Req(s.Pset, "pset", s),
                     Req(s.Key, "key", s),
-                    ReqArr(s.AllowedValues, "allowedValues", s)
+                    ReqArr(s.AllowedValues, "allowedValues", s),
+                    s.SkipIfMissing
                 ),
 
             "RequirePset" =>
@@ -142,7 +144,7 @@ public static class RuleFactory
                     Req(s.Pset, "pset", s),
                     Req(s.Key, "key", s)
                 ),
-            
+
             "RequireEqualStrings" =>
                 new RuleRequireEqualStrings(
                     s.Id,
@@ -153,6 +155,17 @@ public static class RuleFactory
                     Req(s.PsetB, "psetB", s),
                     Req(s.KeyB, "keyB", s)
                 ),
+
+            "RequireNonEmptyAny" =>
+                new RuleRequireNonEmptyAny(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    s.Attribute,            
+                    s.Pset,                 
+                    s.Key                   
+                ),
+
 
             _ => throw new RulesetValidationException($"Unknown rule type: {s.Type}")
         };

@@ -22,4 +22,6 @@ public sealed class RuleSpec
     public double? MinExclusive {get; set;}
     public string[]? AllowedValues {get; set;}
     public string? Regex {get; set;}
+    public string? Attribute {get; set;}
+    public bool SkipIfMissing {get; set;} = false;
 }
