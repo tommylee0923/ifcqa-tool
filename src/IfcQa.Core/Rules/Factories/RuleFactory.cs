@@ -165,6 +165,18 @@ public static class RuleFactory
                     s.Pset,                 
                     s.Key                   
                 ),
+            
+            "RequireNonEmptyEither" =>
+                new RuleRequireNonEmptyEither(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.PsetA, "psetA", s),
+                    Req(s.KeyA, "keyA", s),
+                    Req(s.PsetB, "psetB", s),
+                    Req(s.KeyB, "keyB", s),
+                    s.SkipIfMissing
+                ),
 
 
             _ => throw new RulesetValidationException($"Unknown rule type: {s.Type}")

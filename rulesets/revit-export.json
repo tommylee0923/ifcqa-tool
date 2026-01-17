@@ -4,22 +4,6 @@
     "rules": [
         {
             "type": "RequireNonEmpty",
-            "id": "RV-DOOR-MARK-001",
-            "severity": "Warning",
-            "ifcClass": "IfcDoor",
-            "pset": "PSet_Revit_Identity Data",
-            "key": "Mark"
-        },
-        {
-            "type": "RequireNonEmpty",
-            "id": "RV-WINDOW-MARK-001",
-            "severity": "Warning",
-            "ifcClass": "IfcWindow",
-            "pset": "PSet_Revit_Identity Data",
-            "key": "Mark"
-        },
-        {
-            "type": "RequireNonEmpty",
             "id": "RV-SPACE-NUMBER-001",
             "severity": "Warning",
             "ifcClass": "IfcSpace",
@@ -125,6 +109,26 @@
             "attribute": "Name",
             "pset": "PSet_Revit_Identity Data",
             "key": "Name"
+        },
+        {
+            "type": "RequireNonEmptyEither",
+            "id": "RV-DOOR-MARK-ANY-001",
+            "severity": "Warning",
+            "ifcClass": "IfcDoor",
+            "psetA": "PSet_Revit_Identity Data",
+            "keyA": "Mark",
+            "psetB": "PSet_Revit_Type_Identity Data",
+            "keyB": "Type Mark"
+        },
+        {
+            "type": "RequireNonEmptyEither",
+            "id": "RV-WINDOW-MARK-ANY-001",
+            "severity": "Warning",
+            "ifcClass": "IfcWindow",
+            "psetA": "PSet_Revit_Identity Data",
+            "keyA": "Mark",
+            "psetB": "PSet_Revit_Type_Identity Data",
+            "keyB": "Type Mark"
         }
     ]
 }
