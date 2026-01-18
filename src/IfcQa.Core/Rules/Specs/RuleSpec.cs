@@ -24,4 +24,5 @@ public sealed class RuleSpec
     public string? Regex {get; set;}
     public string? Attribute {get; set;}
     public bool SkipIfMissing {get; set;} = false;
+    public bool RequireBothPresent {get; set;} = false;
 }

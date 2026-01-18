@@ -1,6 +1,6 @@
 {
     "name": "Revit Export QA Pack",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "rules": [
         {
             "type": "RequireNonEmpty",
@@ -11,36 +11,13 @@
             "key": "Number"
         },
         {
-            "type": "RequireNonEmpty",
-            "id": "RV-SPACE-NAME-001",
+            "type": "RequireNonEmptyAny",
+            "id": "RV-SPACE-NAME-ANY-001",
             "severity": "Warning",
             "ifcClass": "IfcSpace",
+            "attribute": "Name",
             "pset": "PSet_Revit_Identity Data",
             "key": "Name"
-        },
-        {
-            "type": "RequirePsetPropertyKey",
-            "id": "RV-PHASE-CREATED-001",
-            "severity": "Info",
-            "ifcClass": "IfcWall",
-            "pset": "PSet_Revit_Phasing",
-            "key": "Phase Created"
-        },
-        {
-            "type": "RequirePsetPropertyKey",
-            "id": "RV-PHASE-CREATED-002",
-            "severity": "Info",
-            "ifcClass": "IfcDoor",
-            "pset": "PSet_Revit_Phasing",
-            "key": "Phase Created"
-        },
-        {
-            "type": "RequirePsetPropertyKey",
-            "id": "RV-PHASE-CREATED-003",
-            "severity": "Info",
-            "ifcClass": "IfcWindow",
-            "pset": "PSet_Revit_Phasing",
-            "key": "Phase Created"
         },
         {
             "type": "AllowedValues",
@@ -102,17 +79,8 @@
             "keyB": "Phase Created"
         },
         {
-            "type": "RequireNonEmptyAny",
-            "id": "RV-SPACE-NAME-ANY-001",
-            "severity": "Warning",
-            "ifcClass": "IfcSpace",
-            "attribute": "Name",
-            "pset": "PSet_Revit_Identity Data",
-            "key": "Name"
-        },
-        {
             "type": "RequireNonEmptyEither",
-            "id": "RV-DOOR-MARK-ANY-001",
+            "id": "RV-DOOR-ID-001",
             "severity": "Warning",
             "ifcClass": "IfcDoor",
             "psetA": "PSet_Revit_Identity Data",
@@ -122,13 +90,14 @@
         },
         {
             "type": "RequireNonEmptyEither",
-            "id": "RV-WINDOW-MARK-ANY-001",
+            "id": "RV-WINDOW-ID-001",
             "severity": "Warning",
             "ifcClass": "IfcWindow",
             "psetA": "PSet_Revit_Identity Data",
             "keyA": "Mark",
             "psetB": "PSet_Revit_Type_Identity Data",
-            "keyB": "Type Mark"
+            "keyB": "Type Mark",
+            "skipIfMissing": true
         },
         {
             "type": "RegexMatch",
@@ -136,16 +105,37 @@
             "severity": "Info",
             "ifcClass": "IfcSpace",
             "attribute": "Name",
-            "regex": "^[A-Za-z0-9 _-]{2,}$",
-            "skipIfMissing": false
+            "regex": "^[A-Za-z0-9 _-]{2,}$"
         },
         {
-            "type": "RequireInstanceEqualsType",
-            "id": "RV-DOOR-COMMENTS-TYPECONSIST-001",
+            "type": "RegexMatch",
+            "id": "RV-DOOR-MARK-REGEX-001",
             "severity": "Info",
             "ifcClass": "IfcDoor",
             "pset": "PSet_Revit_Identity Data",
-            "key": "Comments",
+            "key": "Mark",
+            "regex": "^[A-Za-z]*\\d+[A-Za-z0-9_-]*$",
+            "skipIfMissing": true
+        },
+        {
+            "type": "RegexMatch",
+            "id": "RV-DOOR-TYPEMARK-REGEX-001",
+            "severity": "Info",
+            "ifcClass": "IfcDoor",
+            "pset": "PSet_Revit_Type_Identity Data",
+            "key": "Type Mark",
+            "regex": "^[A-Za-z]*\\d+[A-Za-z0-9_-]*$",
+            "skipIfMissing": true
+        },
+        {
+            "type": "RequireEqualStrings",
+            "id": "RV-DOOR-COMMENTS-CONSIST-001",
+            "severity": "Info",
+            "ifcClass": "IfcDoor",
+            "psetA": "PSet_Revit_Identity Data",
+            "keyA": "Comments",
+            "psetB": "PSet_Revit_Type_Identity Data",
+            "keyB": "Type Comments",
             "skipIfMissing": true
         }
     ]
