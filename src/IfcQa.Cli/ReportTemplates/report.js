@@ -39,6 +39,57 @@ const dRuleInfo = document.getElementById("dRuleInfo");
 let rulesetMetaByRuleId = {}; // { [ruleId]: { title, why, description } }
 let currentIssue = null;
 
+function getStateFromUI() {
+    return {
+        sev: fSeverity?.value || "",
+        rule: fRule?.value || "",
+        cls: fClass?.value || "",
+        q: fText?.value || "",
+        group: (fGroup && fGroup.checked) ? "1" : "0",
+    };
+}
+
+function applyStateToUI(state) {
+    if (state.sev != null) fSeverity.value = state.sev;
+    if (state.rule != null) fRule.value = state.rule;
+    if (state.cls != null) fClass.value = state.cls;
+    if (state.q != null) fText.value = state.q;
+    if (fGroup) fGroup.checked = state.group === "1";
+
+    // keep chips synced (if you added them)
+    const sevChips = document.getElementById("sevChips");
+    if (sevChips) {
+        const v = fSeverity.value || "";
+        sevChips.querySelectorAll(".chip").forEach((c) => {
+            c.classList.toggle("active", (c.dataset.sev ?? "") === v);
+        });
+    }
+}
+
+function writeStateToHash(state) {
+    const p = new URLSearchParams();
+    if (state.sev) p.set("sev", state.sev);
+    if (state.rule) p.set("rule", state.rule);
+    if (state.cls) p.set("cls", state.cls);
+    if (state.q) p.set("q", state.q);
+    if (state.group === "1") p.set("group", "1");
+    const hash = p.toString();
+    // use replaceState so it doesn't spam history while typing
+    history.replaceState(null, "", hash ? `#${hash}` : "#");
+}
+
+function readStateFromHash() {
+    const hash = (location.hash || "").replace(/^#/, "");
+    const p = new URLSearchParams(hash);
+    return {
+        sev: p.get("sev") || "",
+        rule: p.get("rule") || "",
+        cls: p.get("cls") || "",
+        q: p.get("q") || "",
+        group: p.get("group") || "0",
+    };
+}
+
 function uniq(arr) {
     return Array.from(new Set(arr)).sort();
 }
@@ -59,6 +110,8 @@ function addOptions(select, label, values) {
 addOptions(fSeverity, "Severity (All)", ["Error", "Warning", "Info"]);
 addOptions(fRule, "RuleId (All)", uniq(issues.map((i) => i.ruleId)));
 addOptions(fClass, "IfcClass (All)", uniq(issues.map((i) => i.ifcClass)));
+applyStateToUI(readStateFromHash());
+rerenderAndPersist();
 
 function severityRank(sev) {
     if (sev === "Error") return 0;
@@ -123,7 +176,11 @@ function closeDrawer() {
     drawer.setAttribute("aria-hidden", "true");
     currentIssue = null;
     clearSelectedRow();
+}
 
+function rerenderAndPersist() {
+    writeStateToHash(getStateFromUI());
+    render();
 }
 
 dClose.addEventListener("click", closeDrawer);
@@ -164,9 +221,11 @@ rows.addEventListener("click", async (e) => {
     if (tr) {
         const idx = Number(tr.dataset.idx);
         const issue = window.__viewIssues?.[idx];
-        selectRowByIdx(idx);
-        openDrawer(issue);
-        if (issue) openDrawer(issue);
+        if (issue) {
+            selectRowByIdx(idx);
+            openDrawer(issue);
+        }
+
     }
 });
 
@@ -367,11 +426,11 @@ if (sevChips) {
         sevChips.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
         btn.classList.add("active");
 
-        render();
+        rerenderAndPersist();
     });
 }
 // Rule & class dropdowns can stay simple
-[fRule, fClass].forEach((s) => s.addEventListener("change", render));
+[fRule, fClass].forEach((s) => s.addEventListener("change", rerenderAndPersist));
 
 // Severity dropdown needs to sync chips
 fSeverity.addEventListener("change", () => {
@@ -381,11 +440,11 @@ fSeverity.addEventListener("change", () => {
             c.classList.toggle("active", (c.dataset.sev ?? "") === v);
         });
     }
-    render();
+    rerenderAndPersist();
 });
 
-fText.addEventListener("input", render);
-if (fGroup) fGroup.addEventListener("change", render);
+fText.addEventListener("input", rerenderAndPersist);
+if (fGroup) fGroup.addEventListener("change", rerenderAndPersist);
 
 // ruleset decoration (optional)
 if (rulesetFile) {
@@ -409,7 +468,7 @@ if (rulesetFile) {
             });
 
             rulesetMetaByRuleId = map;
-            render();
+            rerenderAndPersist();
         } catch (err) {
             alert("Failed to load ruleset JSON.");
             console.error(err);
@@ -426,5 +485,3 @@ function selectRowByIdx(idx) {
     const tr = rows.querySelector(`tr[data-idx="${idx}"]`);
     if (tr) tr.classList.add("selected");
 }
-
-render();
