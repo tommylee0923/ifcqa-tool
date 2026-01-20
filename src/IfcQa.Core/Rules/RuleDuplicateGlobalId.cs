@@ -38,7 +38,13 @@ namespace IfcQa.Core.Rules
                         p.ExpressType.Name,
                         p.GlobalId.ToString(),
                         p.Name?.ToString(),
-                        $"Duplicate GlobalId found: {g.Key}"
+                        $"Duplicate GlobalId"
+                        )
+                        .WithTrace(
+                            path: "Attribute: GlobalId",
+                            source: ValueSource.Attribute,
+                            expected: "Unique",
+                            actual: $"Duplicate: {g.Key} (count = {g.Count()}.)."
                         );
                 }
         }

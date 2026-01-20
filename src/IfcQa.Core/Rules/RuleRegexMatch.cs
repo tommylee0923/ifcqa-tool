@@ -10,8 +10,8 @@ namespace IfcQa.Core.Rules;
 
 public sealed class RuleRegexMatch : IRule
 {
-    public string Id {get; }
-    public Severity Severity {get; }
+    public string Id { get; }
+    public Severity Severity { get; }
 
     private readonly string _ifcClass;
     private readonly string? _attribute;
@@ -46,7 +46,7 @@ public sealed class RuleRegexMatch : IRule
         var products = model.Instances
             .OfType<IIfcProduct>()
             .Where(p => p.ExpressType?.Name?.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
-        
+
         foreach (var p in products)
         {
             var val = GetValue(p);
@@ -55,14 +55,19 @@ public sealed class RuleRegexMatch : IRule
             {
                 if (_skipIfMissing) continue;
 
-                yield return new Issue(
-                    Id,
-                    Severity,
-                    _ifcClass,
-                    p.GlobalId,
+                yield return IssueTraceExtensions.Missing(
+                    Id, 
+                    Severity, 
+                    _ifcClass, 
+                    p.GlobalId, 
                     p.Name,
-                    DescribeTarget() + " is missing/empty."
+                    path: $"Attribute: {DescribeTarget()}",
+                    source: ValueSource.Attribute,
+                    message: $"{DescribeTarget()} is missing/empty.",
+                    expected: "Non-empty",
+                    actual: val ?? ""
                 );
+
                 continue;
             }
 
@@ -75,6 +80,12 @@ public sealed class RuleRegexMatch : IRule
                     p.GlobalId,
                     p.Name,
                     $"{DescribeTarget()} value '{val}' does not match regex '{_regex}'."
+                )
+                .WithTrace(
+                    path: $"Attribute: {DescribeTarget()}",
+                    source: ValueSource.Attribute,
+                    expected: $"Regex: {_regex}",
+                    actual: $"{val}"
                 );
             }
         }
@@ -86,13 +97,13 @@ public sealed class RuleRegexMatch : IRule
     {
         if (!string.IsNullOrWhiteSpace(_attribute))
             return GetAttributeString(p, _attribute);
-        
+
         if (string.IsNullOrWhiteSpace(_pset) || string.IsNullOrWhiteSpace(_key))
             return null;
-        
+
         var ps = IfcPropertyUtils.GetAllPropertySets(p)
             .FirstOrDefault(x => x.Name?.ToString() == _pset);
-        
+
         if (ps?.HasProperties == null) return null;
 
         var prop = ps.HasProperties.FirstOrDefault(hp => hp.Name.ToString() == _key);

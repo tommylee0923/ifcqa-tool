@@ -47,50 +47,53 @@ public static class IssueTraceExtensions
     };
 
     public static Issue Missing(
+    string ruleId,
+    Severity sev,
+    string ifcClass,
+    string globalId,
+    string? name,
+    string path,
+    ValueSource source,
+    string message,
+    string expected = "Present",
+    string actual = "Missing"
+) => new Issue(
+        ruleId,
+        sev,
+        ifcClass,
+        globalId,
+        name,
+        message
+    ).WithTrace(
+        path,
+        source,
+        expected: expected,
+        actual: actual
+    );
+
+
+    public static Issue InvalidValue(
         string ruleId,
         Severity sev,
-        string IfcCLass,
+        string ifcClass,
         string globalId,
         string? name,
         string path,
         ValueSource source,
-        string message
-        ) => new Issue(
-            ruleId, 
-            sev, 
-            IfcCLass, 
-            globalId, 
-            name, 
-            message)
-            .WithTrace(
-                path, 
-                source, 
-                expected: "Present", 
-                actual: "Misisng"
-                );
-
-    public static Issue InvalidValue(
-        string ruleId, 
-        Severity sev, 
-        string ifcClass, 
-        string globalId, 
-        string? name,
-        string path, 
-        ValueSource source, 
-        string expected, 
-        string? actual, 
+        string expected,
+        string? actual,
         string message)
         => new Issue(
-            ruleId, 
-            sev, 
-            ifcClass, 
-            globalId, 
-            name, 
+            ruleId,
+            sev,
+            ifcClass,
+            globalId,
+            name,
             message)
             .WithTrace(
-                path, 
-                source, 
-                expected: expected, 
+                path,
+                source,
+                expected: expected,
                 actual: actual
                 );
 }

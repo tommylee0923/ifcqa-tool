@@ -47,7 +47,7 @@ public sealed class RuleRequireEqualStrings : IRule
             if (string.IsNullOrWhiteSpace(a) || string.IsNullOrWhiteSpace(b))
                 continue;
             
-            if (!string.Equals(a, b, StringComparison.Ordinal))
+            if (!string.Equals(a, b, StringComparison.OrdinalIgnoreCase))
             {
                 yield return new Issue(
                     Id,
@@ -56,6 +56,12 @@ public sealed class RuleRequireEqualStrings : IRule
                     p.GlobalId,
                     p.Name,
                     $"Mismatch: '{_psetA}.{_keyA}' = '{a}' but '{_psetB}.{_keyB}' = '{b}'."
+                )
+                .WithTrace(
+                    path: $"{_psetA}.{_keyA} == {_psetB}.{_keyB}",
+                    source: ValueSource.Derived,
+                    expected: $"{_psetA}.{_keyA} = {_psetB}.{_keyB}",
+                    actual: $"actual: {_psetA}.{_keyA}='{a}', {_psetB}.{_keyB}='{b}'"
                 );
             }
         }

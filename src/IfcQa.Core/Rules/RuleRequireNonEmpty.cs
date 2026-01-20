@@ -45,9 +45,15 @@ public sealed class RuleRequireNonEmpty : IRule
             {
                 if (_skipIfMissing) continue;
 
-                yield return new Issue(
-                    Id, Severity, _ifcClass, p.GlobalId, p.Name,
-                    $"Missing property set '{_pset}' (required for '{_key}')."
+                yield return IssueTraceExtensions.Missing(
+                    Id,
+                    Severity,
+                    _ifcClass,
+                    p.GlobalId,
+                    p.Name,
+                    path: $"Pset: {_pset}",
+                    source: ValueSource.Derived,
+                    message: $"Missing property set '{_pset}' (required for '{_key}')."
                 );
                 continue;
             }
@@ -57,9 +63,15 @@ public sealed class RuleRequireNonEmpty : IRule
             {
                 if (_skipIfMissing) continue;
 
-                yield return new Issue(
-                    Id, Severity, _ifcClass, p.GlobalId, p.Name,
-                    $"Missing property '{_key}' in '{_pset}'."
+                yield return IssueTraceExtensions.Missing(
+                    Id,
+                    Severity,
+                    _ifcClass,
+                    p.GlobalId,
+                    p.Name,
+                    path: $"{_pset}.{_key}",
+                    source: ValueSource.Derived,
+                    message: $"Missing property '{_key}' in '{_pset}'."
                 );
                 continue;
             }
@@ -70,8 +82,17 @@ public sealed class RuleRequireNonEmpty : IRule
                 if (_skipIfMissing) continue;
 
                 yield return new Issue(
-                    Id, Severity, _ifcClass, p.GlobalId, p.Name,
+                    Id,
+                    Severity,
+                    _ifcClass,
+                    p.GlobalId,
+                    p.Name,
                     $"Property '{_pset}.{_key}' must not be empty."
+                ).WithTrace(
+                    path: $"{_pset}.{_key}",
+                    source: ValueSource.Derived,
+                    expected: "Non-empty",
+                    actual: raw ?? ""
                 );
             }
         }

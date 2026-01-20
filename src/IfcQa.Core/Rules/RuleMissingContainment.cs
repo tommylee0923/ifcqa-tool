@@ -37,6 +37,12 @@ namespace IfcQa.Core.Rules
                         e.GlobalId.ToString() ?? "",
                         e.Name?.ToString(),
                         "Element is not contained in a spatial structure (storey/building)."
+                        )
+                        .WithTrace(
+                            path: "RelContainedInSpatialStructure",
+                            source: ValueSource.Derived,
+                            expected: ">= 1 containment relationship",
+                            actual: "0"
                         );
                 }
             }
