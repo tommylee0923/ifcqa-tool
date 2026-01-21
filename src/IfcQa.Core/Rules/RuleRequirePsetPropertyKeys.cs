@@ -28,7 +28,7 @@ namespace IfcQa.Core.Rules
         {
             var products = model.Instances
                 .OfType<IIfcProduct>()
-                .Where(p => p.ExpressType.Name.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase));
+                .Where(p => p.ExpressType?.Name?.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
 
             foreach (var p in products)
             {
@@ -42,12 +42,14 @@ namespace IfcQa.Core.Rules
 
                 if (!hasKey)
                 {
-                    yield return new Issue(
+                    yield return IssueTraceExtensions.Missing(
                         Id,
                         Severity,
-                        p.ExpressType.Name,
+                        _ifcClass,
                         p.GlobalId.ToString() ?? "",
                         p.Name?.ToString(),
+                        path: $"{_psetName}.{_propertyKey}",
+                        source: ValueSource.Derived,
                         $"Pset {_psetName} is missing property key '{_propertyKey}'."
                     );
                 }

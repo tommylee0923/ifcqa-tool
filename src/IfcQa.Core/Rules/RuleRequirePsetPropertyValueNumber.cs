@@ -37,7 +37,7 @@ public sealed class RuleRequirePsetPropertyValueNumber : IRule
     public IEnumerable<Issue> Evaluate(IfcStore model)
     {
         var products = model.Instances.OfType<IIfcProduct>()
-            .Where(p => p.ExpressType.Name.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase));
+            .Where(p => p.ExpressType?.Name?.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
 
         foreach (var p in products)
         {
@@ -56,10 +56,15 @@ public sealed class RuleRequirePsetPropertyValueNumber : IRule
                 yield return new Issue(
                     Id,
                     Severity,
-                    p.ExpressType.Name,
+                    p.ExpressType!.Name,
                     p.GlobalId.ToString() ?? "",
                     p.Name?.ToString(),
                     $"Property '{_propertyKey}' in '{_psetName}' is missing or not numeric."
+                ).WithTrace(
+                    path: $"{_psetName}.{_propertyKey}",
+                    source: ValueSource.Derived,
+                    expected: "Numeric",
+                    actual: "Missing or invalid"
                 );
             }
             else if (v <= _minExclusive)
@@ -67,10 +72,15 @@ public sealed class RuleRequirePsetPropertyValueNumber : IRule
                 yield return new Issue(
                     Id,
                     Severity,
-                    p.ExpressType.Name,
+                    p.ExpressType!.Name,
                     p.GlobalId.ToString() ?? "",
                     p.Name?.ToString(),
                     $"Property '{_propertyKey}' in '{_psetName}' must be > {_minExclusive} (found {v})."
+                ).WithTrace(
+                    path: $"{_psetName}.{_propertyKey}",
+                    source: ValueSource.Derived,
+                    expected: $"> {_minExclusive}",
+                    actual: v.ToString()
                 );
             }
         }

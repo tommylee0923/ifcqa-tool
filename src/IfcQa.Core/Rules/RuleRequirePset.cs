@@ -26,20 +26,22 @@ namespace IfcQa.Core.Rules
         public IEnumerable<Issue> Evaluate(IfcStore model)
         {
             var products = model.Instances.OfType<IIfcProduct>()
-                .Where(p => p.ExpressType.Name.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase));
+                .Where(p => p.ExpressType?.Name?.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
 
 
             foreach (var p in products)
             {
                 if (!IfcPropertyUtils.HasPset(p, _psetName))
                 {
-                    yield return new Issue(
+                    yield return IssueTraceExtensions.Missing(
                         Id,
                         Severity,
-                        p.ExpressType.Name,
+                        _ifcClass,
                         p.GlobalId.ToString() ?? "",
                         p.Name?.ToString(),
-                        $"Missing required property set: {_psetName}"
+                        path: $"Pset: {_psetName}",
+                        source: ValueSource.Derived,
+                        message: $"Missing required property set."
                         );
                 }
             }

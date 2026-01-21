@@ -35,7 +35,7 @@ public sealed class RuleRequireNonEmptyAny : IRule
     {
         var products = model.Instances
             .OfType<IIfcProduct>()
-            .Where(p => p.ExpressType?.Name == _ifcClass);
+            .Where(p => p.ExpressType?.Name?.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
         
         foreach (var p in products)
         {
@@ -51,7 +51,13 @@ public sealed class RuleRequireNonEmptyAny : IRule
                 _ifcClass,
                 p.GlobalId,
                 p.Name,
-                $"Expectd non-empty value in either attribute '{_attribute}' or '{_pset}.{_key}'."
+                $"Expected non-empty value in either attribute '{_attribute}' or '{_pset}.{_key}'."
+            )
+            .WithTrace(
+                path: $"Either Attribute: {_attribute} or {_pset}.{_key}",
+                source: ValueSource.Derived,
+                expected: "Non-Empty",
+                actual: $"Attribute: {attrVal ?? ""}; Pset:{psetVal}"
             );
         }
     }

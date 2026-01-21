@@ -35,7 +35,7 @@ public sealed class RuleRequireQtoQuantityNames : IRule
     public IEnumerable<Issue> Evaluate(IfcStore model)
     {
         var products = model.Instances.OfType<IIfcProduct>()
-            .Where(p => p.ExpressType.Name.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase));
+            .Where(p => p.ExpressType?.Name?.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
 
         foreach (var p in products)
         {
@@ -56,12 +56,14 @@ public sealed class RuleRequireQtoQuantityNames : IRule
             {
                 if (!available.Contains(req))
                 {
-                    yield return new Issue(
+                    yield return IssueTraceExtensions.Missing(
                         Id,
                         Severity,
                         p.ExpressType.Name,
                         p.GlobalId.ToString() ?? "",
                         p.Name?.ToString(),
+                        path: $"Qto: {_qtoName}",
+                        source: ValueSource.Derived,
                         $"Qto '{_qtoName}' is missing quantity '{req}."
                     );
                 }

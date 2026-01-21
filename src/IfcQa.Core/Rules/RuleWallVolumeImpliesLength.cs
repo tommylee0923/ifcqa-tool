@@ -44,6 +44,11 @@ public sealed class RuleWallVolumeImpliesLength : IRule
                     w.GlobalId.ToString() ?? "",
                     w.Name?.ToString(),
                     "Wall has NetVolume > 0 but Length is missing or <= 0"
+                ).WithTrace(
+                    path: $"{qto}: NetVolume > 0 implies Length > 0",
+                    source: ValueSource.Derived,
+                    expected: $"Length > 0 (when NetVolume > 0)",
+                    actual: $"NetVolume = {netVol}, Length = {(len is null ? "Missing" : len.ToString())}"
                 );
             }
         }

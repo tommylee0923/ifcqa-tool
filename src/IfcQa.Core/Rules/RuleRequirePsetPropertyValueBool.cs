@@ -27,7 +27,7 @@ namespace IfcQa.Core.Rules
         public IEnumerable<Issue> Evaluate(IfcStore model)
         {
             var products = model.Instances.OfType<IIfcProduct>()
-                .Where(p => p.ExpressType.Name.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase));
+                .Where(p => p.ExpressType?.Name?.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
 
             foreach (var p in products)
             {
@@ -49,6 +49,11 @@ namespace IfcQa.Core.Rules
                         p.GlobalId.ToString() ?? "",
                         p.Name?.ToString(),
                         $"Property '{_propertyKey}' in '{_psetName}' is missing or not a boolean."
+                    ).WithTrace(
+                        path: $"{_psetName}.{_propertyKey}",
+                        source: ValueSource.Derived,
+                        expected: "Boolean",
+                        actual: "Missing or invalid"
                     );
                 }
             }

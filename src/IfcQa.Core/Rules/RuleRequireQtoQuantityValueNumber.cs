@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Net;
 using System.Net.Quic;
@@ -67,6 +68,11 @@ public sealed class RuleRequireQtoQuantityValueNumber : IRule
                     p.GlobalId.ToString() ?? "",
                     p.Name?.ToString(),
                     $"Quantity '{_quantityName}' in '{_qtoName}' is missing or not numeric."
+                ).WithTrace(
+                    path: $"Qto: {_qtoName}.{_quantityName}",
+                    source: ValueSource.Derived,
+                    expected: "Numeric",
+                    actual: "Missing or invalid"
                 );
             }
             else if (v <= _minExclusive)
@@ -78,6 +84,11 @@ public sealed class RuleRequireQtoQuantityValueNumber : IRule
                     p.GlobalId.ToString() ?? "",
                     p.Name?.ToString(),
                     $"Quantity '{_quantityName}' in '{_qtoName}' must be > {_minExclusive} (found {v})."
+                ).WithTrace(
+                    path: $"{_qtoName}.{_quantityName}",
+                    source: ValueSource.Derived,
+                    expected: $"> {_minExclusive}",
+                    actual: v.ToString()
                 );
             }
         }

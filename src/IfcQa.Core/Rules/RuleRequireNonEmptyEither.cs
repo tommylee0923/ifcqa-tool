@@ -41,7 +41,7 @@ public sealed class RuleRequireNonEmptyEither : IRule
     {
         var products = model.Instances
             .OfType<IIfcProduct>()
-            .Where(p => p.ExpressType.Name?.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
+            .Where(p => p.ExpressType?.Name?.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
         
         foreach (var p in products)
         {
@@ -65,6 +65,11 @@ public sealed class RuleRequireNonEmptyEither : IRule
                 p.GlobalId,
                 p.Name,
                 $"Expected non-empty value in either '{_psetA}.{_keyA}' or '{_psetB}.{_keyB}'."
+            ).WithTrace(
+                path: $"Either(Pset:{_psetA}.{_keyA}, Pset:{_psetB}.{_keyB})",
+                source: ValueSource.Derived,
+                expected: "Non-empty",
+                actual: $"{_psetA}.{_keyA}='{a ?? ""}, {_psetB}.{_keyB}='{b ?? ""}"
             );
         }
     }

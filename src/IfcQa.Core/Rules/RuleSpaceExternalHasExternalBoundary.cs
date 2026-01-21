@@ -65,6 +65,11 @@ public sealed class RuleSpaceExternalHasExternalBoundary : IRule
                     space.GlobalId.ToString() ?? "",
                     space.Name?.ToString(),
                     "Space is marked IsExternal=TRUE but no bounding wall is marked IsExternal=TRUE."
+                ).WithTrace(
+                    path: "If Space(Pset_SpaceCommon.IsExternal)=TRUE then Any(BoundaryWall.Pset_WallCommon.IsExternal)=TRUE",
+                    source: ValueSource.Derived,
+                    expected: "Any boundary wall IsExternal = TRUE",
+                    actual: "No boundary wall IsExternal = TRUE"
                 );
             }
         }
