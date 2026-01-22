@@ -1,145 +1,157 @@
-# IfcQaTool
+# IfcQA — IFC Quality Gate for BIM Pipelines
 
-IfcQaTool is a lightweight, ruleset-driven IFC quality assurance (QA) and validation tool
-built in **C#/.NET** using **xBIM**.
+**IfcQA** is a lightweight, standards-oriented **IFC quality-gate CLI** built in **C# / .NET**, designed to evaluate BIM models against configurable QA rulesets and produce **human-readable, shareable reports**.
 
-It is designed to run as a **command-line quality gate** for IFC files and output (JSON / CSV) that can be used in CI pipelines or future web apps.
+The tool aims to be intentionally **tool-agnostic** (no Revit dependency) and suitable for **local QA, CI pipelines, and downstream AEC automation workflows**.
 
-The tool focuses on:
-- Rule-based IFC validation
-- Deterministic outputs
-- Configurable rulesets (JSON)
-- Automation-ready exit codes
+---
 
+## Why this exists
 
-## Requirements
-- .NET SDK 7.0 or later
-- IFC files compatible with xBIM (IFC2x3 / IFC4)
+In many AEC pipelines, IFC validation is either:
+- locked behind heavy BIM tools, or
+- limited to schema-level checks with poor UX
 
+IfcQA focuses on:
+- **semantic model quality** (properties, consistency, naming, containment)
+- **transparent rule logic**
+- **outputs that non-BIM stakeholders can read and trust**
+- **utilizes open-source XBim toolkit and IFC standards.**
 
-## Build & Run
-Run directly using `dotnet`:
+This project was built to demonstrate **AEC software development, BIM data reasoning, and QA pipeline design**.
 
-````bash
-  dotnet run --project src/IfcQa.Cli -- check path/to/model.ifc
-````
+---
 
-Specify a ruleset and output directory:
+## Key Features
 
-````bash
-  dotnet run --project src/IfcQa.Cli -- check model.ifc --rules rulesets/basic-ifcqa.json --out out
-````
+### 1. Rule-based IFC QA Engine
+- Modular rule system implemented in C#
+- Operates directly on IFC semantics via **xBIM**
+- Rule types include:
+  - Required / non-empty properties
+  - Instance vs. type consistency
+  - Allowed-value checks
+  - Regex-based naming rules
+  - Cross-property numeric comparisons
+  - Spatial containment validation
 
-Generate a catalog of available Psets and Qtos:
-
-````bash
-  dotnet run --project src/IfcQa.Cli -- catalog model.ifc --out out
-````
-
-
-## Rulesets
-
-Rules are defined in JSON files and loaded at runtime.
-
-Each ruleset contains:
-- `name`        Human-readable name
-- `version`     Ruleset version
-- `rules[]`     List of rule definitions
-
-Example (simplified):
-````bash
-{
-  "name": "Basic IFC QA",
-  "version": "0.2.0",
-  "rules": [
-    {
-      "id": "R002",
-      "type": "MissingContainment"
-    },
-    {
-      "id": "P101",
-      "type": "RequirePset",
-      "ifcClass": "IfcWall",
-      "pset": "Pset_WallCommon"
-    }
-  ]
-}
-````
-
-Rulesets are validated on load:
-- Duplicate rule IDs cause failure
-- Missing required fields cause failure
-- Unknown rule types cause failure
-
-
-## Outputs
-
-check command writes the following files into the output directory:
-
-issues.json
------------
-Structured list of all detected issues.
-Each issue includes:
-- RuleId
-- Severity (Info / Warning / Error)
-- IfcClass
+Each rule emits structured issues with:
+- severity (`Info`, `Warning`, `Error`)
+- IFC class
 - GlobalId
-- Name
-- Message
+- human-readable message
+- trace metadata (path, expected, actual, source)
 
-issues.csv
-----------
-Same issues in CSV format for spreadsheets and reporting.
+---
 
-report.json
------------
-Summary metadata including:
-- IFC file path
-- Ruleset name/version/path
-- Output directory
-- Issue counts by severity
-- Per-rule issue counts
-- Unique elements affected
+### 2. JSON-Driven Rulesets (Standards-Oriented)
+Rules are grouped into **portable JSON rulesets**, not hardcoded logic.
 
-report.html
------------
-- Open out/report.html in a browser
+Current packs include:
+- **Tool-agnostic baseline** (IFC-common checks)
+- **Revit-export-aware ruleset** (accounts for exporter behavior without hard dependencies)
 
-## Exit Codes (Quality Gate)
-------------------------
-The CLI can act as a quality gate using `--fail-on`.
+Rulesets support:
+- rule metadata (title, why it matters, description)
+- severity tuning
+- fallback logic (instance OR type property)
+- noise suppression (`skipIfMissing`)
 
-Default behavior:
-- Fails only on Error
+This mirrors how real BIM QA standards evolve in practice.
 
-Examples:
-````bash
-  IfcQa.Cli check model.ifc
-    -> exit 0 if no Errors
+---
 
-  IfcQa.Cli check model.ifc --fail-on Warning
-    -> exit 1 if any Warning or Error exists
-````
-Supported values:
-- `Error`   (default)
-- `Warning`
-- `Info`
-- `None`
+### 3. Zero-Backend HTML QA Report (Milestone 3)
+IfcQA generates a **single static `report.html`** alongside JSON/CSV output.
 
-Exit codes:
-- `0` = pass
-- `1` = quality gate failed
-- `2` = invalid ruleset or input error
+Report features:
+- Summary cards (total / errors / warnings / info)
+- Filterable issue table
+- Group-by-rule view
+- Click-through issue detail drawer
+- Rule metadata panel
+- Copyable GlobalIds for coordination
 
+No backend, no build step — open in a browser and review.
+
+---
+
+### 4. CLI-First, Automation-Friendly
+IfcQA is designed as a **quality gate**, not just an inspector.
+
+- Deterministic output
+- Machine-readable JSON payload
+- Clean separation between:
+  - core analysis
+  - CLI orchestration
+  - report generation
+
+Suitable for local QA, CI pipelines, and downstream integrations.
+
+---
+
+## Example Usage
+
+```bash
+ifcqa check sample.ifc --rules rulesets/revit-export.json
+```
+
+Outputs:
+- `report.html`
+- `report.json`
+- optional CSV
+
+---
+
+## Project Structure
+
+```
+src/
+ ├─ IfcQa.Core
+ │   ├─ Rules/
+ │   ├─ Issue + trace extensions
+ │   └─ IFC utilities
+ │
+ ├─ IfcQa.Cli
+ │   ├─ Program.cs
+ │   ├─ HtmlReportWriter.cs
+ │   └─ ReportTemplates/
+ │       ├─ report.template.html
+ │       ├─ report.css
+ │       └─ report.js
+ │
+ └─ rulesets/
+     ├─ tool-agnostic-common.json
+     └─ revit-export.json
+```
+
+---
 
 ## Roadmap
 
-- Relationship-based rules (IfcRelSpaceBoundary, semantic checks)
-- Stable DTOs for web API integration
-- IFC file hashing and run metadata
-- CI examples and sample IFC fixtures
+### One-click distribution
+- Package as a single executable (`dotnet publish`)
+- Include default rulesets in build output
+- `--init` command to scaffold a starter QA project
 
+### CI Example
+- GitHub Actions workflow
+- Run IfcQA on a sample IFC
+- Fail build on errors
+- Upload HTML report as an artifact
 
-## License
+---
 
-MIT (or specify otherwise)
+## Tech Stack
+- **Language:** C# (.NET)
+- **IFC Engine:** xBIM
+- **Frontend:** Vanilla HTML / CSS / JS
+- **Architecture:** CLI + static artifacts
+- **Focus:** BIM data quality, IFC semantics, AEC automation
+
+---
+
+## Status
+
+Active development.  
+Scoped to demonstrate **AEC software engineering**, **BIM reasoning**, and **production-quality tooling** without vendor lock-in.
