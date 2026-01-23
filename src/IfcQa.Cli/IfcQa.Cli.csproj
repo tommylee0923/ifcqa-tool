@@ -8,8 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- HTML report templates -->
+    <Content Include="ReportTemplates\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
+    <!-- Ruleset packs -->
+    <Content Include="..\..\rulesets\**\*.json">
+      <Link>rulesets\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <ProjectReference Include="..\IfcQa.Core\IfcQa.Core.csproj" />
-    <None Include="ReportTemplates\**\*.*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

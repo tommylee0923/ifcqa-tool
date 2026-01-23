@@ -8,98 +8,74 @@ The tool aims to be intentionally **tool-agnostic** (no Revit dependency) and su
 
 ## Why this exists
 
-In many AEC pipelines, IFC validation is either:
-- locked behind heavy BIM tools, or
-- limited to schema-level checks with poor UX
+IFC (and BIM workflows more broadly) are often seen as complex and difficult to work with.
 
-IfcQA focuses on:
-- **semantic model quality** (properties, consistency, naming, containment)
-- **transparent rule logic**
-- **outputs that non-BIM stakeholders can read and trust**
-- **utilizes open-source XBim toolkit and IFC standards.**
+This project grew out of my own experience in AEC practice, such as many BIM quality issues come down to missing, inconsistent, or poorly structured data, yet diagnosing them usually requires opening specialized tools and digging through models manually.
 
-This project was built to demonstrate **AEC software development, BIM data reasoning, and QA pipeline design**.
+IfcQA is as an attempt to make those issues easier to detect and explain by turning BIM model quality into clear, human-readable feedback.
 
 ---
 
 ## Key Features
 
 ### 1. Rule-based IFC QA Engine
-- Modular rule system implemented in C#
-- Operates directly on IFC semantics via **xBIM**
-- Rule types include:
-  - Required / non-empty properties
-  - Instance vs. type consistency
-  - Allowed-value checks
-  - Regex-based naming rules
-  - Cross-property numeric comparisons
-  - Spatial containment validation
 
-Each rule emits structured issues with:
-- severity (`Info`, `Warning`, `Error`)
-- IFC class
-- GlobalId
-- human-readable message
-- trace metadata (path, expected, actual, source)
+- Modular C# rule system built on xBIM
+- Operates on IFC semantics (not geometry-only checks)
+- Supports property presence, consistency, naming, and containment rules
+- Each rule emits structured issues with severity + trace metadata
 
 ---
 
 ### 2. JSON-Driven Rulesets (Standards-Oriented)
-Rules are grouped into **portable JSON rulesets**, not hardcoded logic.
 
-Current packs include:
-- **Tool-agnostic baseline** (IFC-common checks)
-- **Revit-export-aware ruleset** (accounts for exporter behavior without hard dependencies)
-
-Rulesets support:
-- rule metadata (title, why it matters, description)
-- severity tuning
-- fallback logic (instance OR type property)
-- noise suppression (`skipIfMissing`)
-
-This mirrors how real BIM QA standards evolve in practice.
+- Portable JSON rulesets (no hardcoded logic)
+- Tool-agnostic baseline + Revit-export-aware pack
+- Supports severity tuning, fallback logic, and noise suppression
+- Mirrors how real BIM QA standards evolve
 
 ---
 
-### 3. Zero-Backend HTML QA Report (Milestone 3)
-IfcQA generates a **single static `report.html`** alongside JSON/CSV output.
+### 3. Zero-Backend HTML QA Report
 
-Report features:
-- Summary cards (total / errors / warnings / info)
-- Filterable issue table
-- Group-by-rule view
-- Click-through issue detail drawer
-- Rule metadata panel
-- Copyable GlobalIds for coordination
-
-No backend, no build step — open in a browser and review.
+- Single, zero-backend report.html
+- Summary cards + filterable issue table
+- Group-by-rule view with detailed issue drawer
+- Rule metadata shown inline (why it matters, how to fix)
 
 ---
 
 ### 4. CLI-First, Automation-Friendly
-IfcQA is designed as a **quality gate**, not just an inspector.
 
-- Deterministic output
-- Machine-readable JSON payload
-- Clean separation between:
-  - core analysis
-  - CLI orchestration
-  - report generation
-
-Suitable for local QA, CI pipelines, and downstream integrations.
+- Deterministic output (JSON / CSV / HTML)
+- Designed as a quality gate, not just an inspector
+- Suitable for local QA, CI pipelines, and automation workflows
 
 ---
 
-## Example Usage
+## Tech Stack
+- **Language:** C# (.NET)
+- **IFC Engine:** xBIM
+- **Frontend:** Vanilla HTML / CSS / JS
+- **Architecture:** CLI + static artifacts
+- **Focus:** BIM data quality, IFC semantics, AEC automation
 
+---
+
+## Quickstart (Windows)
+
+1)  Download the release zip and unzip
+2)  In PowerShell:
 ```bash
-ifcqa check sample.ifc --rules rulesets/revit-export.json
+.\ifcqa.exe init -o Demo
+.\ifcqa.exe check path\to\model.ifc -o Demo\out -r Demo\rulesets\core\tool-agnostic-common.json
 ```
+3)  Open Demo\out\report.html
 
-Outputs:
-- `report.html`
-- `report.json`
-- optional CSV
+    Outputs:
+    - `report.html`
+    - `report.json`
+    - optional CSV
 
 ---
 
@@ -129,25 +105,11 @@ src/
 
 ## Roadmap
 
-### One-click distribution
-- Package as a single executable (`dotnet publish`)
-- Include default rulesets in build output
-- `--init` command to scaffold a starter QA project
-
 ### CI Example
 - GitHub Actions workflow
 - Run IfcQA on a sample IFC
 - Fail build on errors
 - Upload HTML report as an artifact
-
----
-
-## Tech Stack
-- **Language:** C# (.NET)
-- **IFC Engine:** xBIM
-- **Frontend:** Vanilla HTML / CSS / JS
-- **Architecture:** CLI + static artifacts
-- **Focus:** BIM data quality, IFC semantics, AEC automation
 
 ---
 

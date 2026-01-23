@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+dotnet run --project "src/IfcQa.Cli? -- "$@"
+
+# Make it executable
+# chmod -x ./ifcqa
