@@ -1,3 +1,5 @@
+[![IFC QA](https://github.com/tommylee0923/ifc-quality-gate/actions/workflows/ifcqa.yml/badge.svg)](https://github.com/tommylee0923/ifc-quality-gate/actions/workflows/ifcqa.yml)
+
 # IfcQA — IFC Quality Gate for BIM Pipelines
 
 **IfcQA** is a lightweight, standards-oriented **IFC quality-gate CLI** built in **C# / .NET**, designed to evaluate BIM models against configurable QA rulesets and produce **human-readable, shareable reports**.
@@ -21,7 +23,7 @@ IfcQA is as an attempt to make those issues easier to detect and explain by turn
 ### 1. Rule-based IFC QA Engine
 
 - Modular C# rule system built on xBIM
-- Operates on IFC semantics (not geometry-only checks)
+- Operates on IFC semantics
 - Supports property presence, consistency, naming, and containment rules
 - Each rule emits structured issues with severity + trace metadata
 
@@ -29,7 +31,7 @@ IfcQA is as an attempt to make those issues easier to detect and explain by turn
 
 ### 2. JSON-Driven Rulesets (Standards-Oriented)
 
-- Portable JSON rulesets (no hardcoded logic)
+- Portable JSON rulesets
 - Tool-agnostic baseline + Revit-export-aware pack
 - Supports severity tuning, fallback logic, and noise suppression
 - Mirrors how real BIM QA standards evolve
@@ -41,14 +43,13 @@ IfcQA is as an attempt to make those issues easier to detect and explain by turn
 - Single, zero-backend report.html
 - Summary cards + filterable issue table
 - Group-by-rule view with detailed issue drawer
-- Rule metadata shown inline (why it matters, how to fix)
+- Rule metadata shown inline (why it matters, how to fix, etc.)
 
 ---
 
 ### 4. CLI-First, Automation-Friendly
 
 - Deterministic output (JSON / CSV / HTML)
-- Designed as a quality gate, not just an inspector
 - Suitable for local QA, CI pipelines, and automation workflows
 
 ---
@@ -76,6 +77,12 @@ IfcQA is as an attempt to make those issues easier to detect and explain by turn
     - `report.html`
     - `report.json`
     - optional CSV
+
+---
+
+## CI Quality Gate (GitHub Actions)
+
+This repo includes a GitHub Actions workflow that runs IfcQA against a sample IFC on every push/PR and uploads the generated `report.html` as a build artifact.
 
 ---
 
