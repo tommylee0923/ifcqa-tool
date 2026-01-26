@@ -1,0 +1,39 @@
+{
+  "IfcPath": "samples/sample.ifc",
+  "Ruleset": {
+    "Name": "Tool-agnostic IFC QA (Common Psets)",
+    "Version": "0.3.2",
+    "RulesetPth": "/Users/tommylee/Documents/Personal Projects/IfcQaTool/ifc-quality-gate/rulesets/tool-agnostic-common.json"
+  },
+  "OutputDir": "/Users/tommylee/Documents/Personal Projects/IfcQaTool/ifc-quality-gate/artifacts",
+  "Counts": {
+    "Total": 8,
+    "Errors": 0,
+    "Warnings": 0,
+    "Info": 8
+  },
+  "UniqueElementsAffected": 8,
+  "ByRule": [
+    {
+      "RuleId": "CORE-WALL-REF-001",
+      "Total": 4,
+      "Errors": 0,
+      "Warnings": 0,
+      "Info": 4
+    },
+    {
+      "RuleId": "CORE-SLAB-REF-001",
+      "Total": 3,
+      "Errors": 0,
+      "Warnings": 0,
+      "Info": 3
+    },
+    {
+      "RuleId": "CORE-BLDG-STOREYS-001",
+      "Total": 1,
+      "Errors": 0,
+      "Warnings": 0,
+      "Info": 1
+    }
+  ]
+}

@@ -24,7 +24,7 @@ jobs:
         run: |
           dotnet run --project src/IfcQa.Cli -- \
             check samples/sample.ifc \
-            --rules rulesets/tool-agnostic-common.json
+            --rules rulesets/tool-agnostic-common.json \
             --out artifacts \
             --fail-on error
 

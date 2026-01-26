@@ -1,0 +1,1070 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>IfcQA Report</title>
+    <style>
+        :root {
+    --bg: #0b0d12;
+    --card: #121826;
+    --text: #e8eefc;
+    --muted: #9aa7bd;
+    --line: #23304a;
+    --pill: #1b2845;
+}
+
+html {
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+a {
+    color: inherit;
+}
+
+.wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+
+.meta {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 16px;
+    word-break: break-all;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 14px 0 18px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+
+.k {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.v {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 10px 0 12px;
+}
+
+select,
+input {
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+input {
+    min-width: 280px;
+    flex: 1;
+}
+
+.pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--pill);
+    border: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+}
+
+th {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+    background: #0f1523;
+    z-index: 1;
+}
+
+tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.sev {
+    font-weight: 700;
+}
+
+.sev.Error {
+    color: #ff7a7a;
+}
+
+.sev.Warning {
+    color: #ffd27a;
+}
+
+.sev.Info {
+    color: #7ab7ff;
+}
+
+.small {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.copy {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: rgba(232, 238, 252, 0.25);
+}
+
+/* pill toggles */
+.pill-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.pill-toggle input[type="checkbox"] {
+    accent-color: #7ab7ff;
+}
+
+.pill-toggle input[type="file"] {
+    display: none;
+}
+
+/* overlay + drawer */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 50;
+}
+
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(520px, 92vw);
+    height: 100vh;
+    background: var(--card);
+    border-left: 1px solid var(--line);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.35);
+}
+
+.hidden {
+    display: none;
+}
+
+.drawerHeader {
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.drawerTitle {
+    font-weight: 800;
+}
+
+.drawerSubtitle {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 4px;
+    word-break: break-word;
+}
+
+.drawerBody {
+    padding: 14px;
+    overflow: auto;
+}
+
+.btn {
+    background: #0f1523;
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btnSmall {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.kv {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 10px 12px;
+    align-items: start;
+}
+
+.kv .k {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.kv .v {
+    font-size: 14px;
+    word-break: break-word;
+}
+
+#dRuleInfo { white-space: pre-line; }
+
+.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.section {
+    margin-top: 14px;
+}
+
+.sectionTitle {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.messageBox {
+    background: #0f1523;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+    white-space: pre-wrap;
+}
+
+
+
+/* clickable rows */
+tbody tr[data-idx] {
+    cursor: pointer;
+}
+
+tbody tr[data-idx]:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* selected row */
+tbody tr[data-idx].selected {
+    outline: 2px solid rgba(122, 183, 255, 0.6);
+    outline-offset: -2px;
+    background: rgba(122, 183, 255, 0.08);
+}
+
+/* quick filter chips */
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.chip {
+    border: 1px solid var(--line);
+    background: #0f1523;
+    color: var(--text);
+    border-radius: 999px;
+    padding: 8px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.chip.active {
+    border-color: rgba(122, 183, 255, 0.8);
+    box-shadow: 0 0 0 2px rgba(122, 183, 255, 0.15) inset;
+}
+
+.footer {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    input {
+        min-width: 0;
+    }
+}
+    </style>
+</head>
+
+<body>
+
+    <div class="wrap">
+        <div class="h1">IfcQA Report</div>
+        <div id="meta" class="meta"></div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="k">Total</div>
+                <div id="cTotal" class="v">0</div>
+            </div>
+            <div class="card">
+                <div class="k">Errors</div>
+                <div id="cErrors" class="v">0</div>
+            </div>
+            <div class="card">
+                <div class="k">Warnings</div>
+                <div id="cWarnings" class="v">0</div>
+            </div>
+            <div class="card">
+                <div class="k">Info</div>
+                <div id="cInfo" class="v">0</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <select id="fSeverity"></select>
+            <select id="fRule"></select>
+            <select id="fClass"></select>
+
+            <label class="pill pill-toggle">
+                <input id="fGroup" type="checkbox" />
+                Group by rule
+            </label>
+
+            <!-- <label class="pill pill-toggle">
+                <input id="rulesetFile" type="file" accept=".json" />
+                Load Ruleset as Filter
+            </label>
+            <button id="btnClearRuleset" class="btn btnSmall hidden">Clear ruleset</button> -->
+
+
+            <input id="fText" type="text" placeholder="Search GlobalId / Name / Message..." />
+            <span id="shown" class="pill">0 shown</span>
+            <button id="btnExportCsv" class="btn btnSmall">Export filtered CSV</button>
+            <button id="btnCopyLink" class="btn btnSmall">Copy share link</button>
+        </div>
+        <div class="chips" id="sevChips">
+            <button class="chip active" data-sev="">All</button>
+            <button class="chip" data-sev="Error">Errors</button>
+            <button class="chip" data-sev="Warning">Warnings</button>
+            <button class="chip" data-sev="Info">Info</button>
+        </div>
+
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width:110px;">Severity</th>
+                    <th style="width:120px;">Rule</th>
+                    <th style="width:140px;">IfcClass</th>
+                    <th style="width:240px;">GlobalId</th>
+                    <th style="width:200px;">Name</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+        </table>
+
+        <div class="footer">Tip: click a GlobalId to copy it.</div>
+    </div>
+
+    <div id="drawerOverlay" class="overlay hidden"></div>
+    <aside id="drawer" class="drawer hidden" aria-hidden="true">
+        <div class="drawerHeader">
+            <div>
+                <div id="dTitle" class="drawerTitle">Issue</div>
+                <div id="dSubtitle" class="drawerSubtitle"></div>
+            </div>
+            <button id="dClose" class="btn">Close</button>
+        </div>
+
+        <div class="drawerBody">
+            <div class="kv">
+                <div class="k">Severity</div>
+                <div id="dSeverity" class="v"></div>
+                <div class="k">Rule</div>
+                <div id="dRule" class="v"></div>
+                <div class="k">IfcClass</div>
+                <div id="dClass" class="v"></div>
+                <div class="k">GlobalId</div>
+                <div class="v">
+                    <span id="dGlobalId" class="mono"></span>
+                    <button id="dCopy" class="btn btnSmall">Copy</button>
+                </div>
+                <div class="k">Name</div>
+                <div id="dName" class="v"></div>
+                <div class="k">Path</div>
+                <div id="dPath" class="v mono"></div>
+                <div class="k">Source</div>
+                <div id="dSource" class="v"></div>
+                <div class="k">Expected</div>
+                <div id="dExpected" class="v"></div>
+                <div class="k">Actual</div>
+                <div id="dActual" class="v"></div>
+            </div>
+
+            <div class="section">
+                <div class="sectionTitle">Message</div>
+                <div id="dMessage" class="messageBox"></div>
+            </div>
+
+            <div id="dRuleMeta" class="section hidden">
+                <div class="sectionTitle">Rule info</div>
+                <div id="dRuleInfo" class="small"></div>
+            </div>
+        </div>
+    </aside>
+
+
+    <script id="data" type="application/json">
+  {"ifcPath":"samples/sample.ifc","ruleset":{"name":"Tool-agnostic IFC QA (Common Psets)","version":"0.3.2"},"rulesetMeta":{"CORE-WALL-001":{"title":"IfcWall should include required common property set(s)","why":"Common Psets carry key attributes used across tools and downstream workflows.","howToFix":"Ensure the exporter includes Pset_WallCommon for IfcWall.","description":"","references":[]},"CORE-WALLSC-001":{"title":"IfcWallStandardCase should include required common property set(s)","why":"Common Psets carry key attributes used across tools and downstream workflows.","howToFix":"Ensure the exporter includes Pset_WallCommon for IfcWallStandardCase.","description":"","references":[]},"CORE-SLAB-001":{"title":"IfcSlab should include required common property set(s)","why":"Common Psets carry key attributes used across tools and downstream workflows.","howToFix":"Ensure the exporter includes Pset_SlabCommon for IfcSlab.","description":"","references":[]},"CORE-DOOR-001":{"title":"IfcDoor should include required common property set(s)","why":"Common Psets carry key attributes used across tools and downstream workflows.","howToFix":"Ensure the exporter includes Pset_DoorCommon for IfcDoor.","description":"","references":[]},"CORE-WINDOW-001":{"title":"IfcWindow should include required common property set(s)","why":"Common Psets carry key attributes used across tools and downstream workflows.","howToFix":"Ensure the exporter includes Pset_WindowCommon for IfcWindow.","description":"","references":[]},"CORE-WALL-REF-001":{"title":"IfcWall should include Pset_WallCommon.Reference","why":"Missing keys reduce interoperability and can break schedules/filters.","howToFix":"Populate Reference and ensure Pset_WallCommon is exported for IfcWall.","description":"","references":[]},"CORE-WALLSC-REF-001":{"title":"IfcWallStandardCase should include Pset_WallCommon.Reference","why":"Missing keys reduce interoperability and can break schedules/filters.","howToFix":"Populate Reference and ensure Pset_WallCommon is exported for IfcWallStandardCase.","description":"","references":[]},"CORE-SLAB-REF-001":{"title":"IfcSlab should include Pset_SlabCommon.Reference","why":"Missing keys reduce interoperability and can break schedules/filters.","howToFix":"Populate Reference and ensure Pset_SlabCommon is exported for IfcSlab.","description":"","references":[]},"CORE-DOOR-REF-001":{"title":"IfcDoor should include Pset_DoorCommon.Reference","why":"Missing keys reduce interoperability and can break schedules/filters.","howToFix":"Populate Reference and ensure Pset_DoorCommon is exported for IfcDoor.","description":"","references":[]},"CORE-WINDOW-REF-001":{"title":"IfcWindow should include Pset_WindowCommon.Reference","why":"Missing keys reduce interoperability and can break schedules/filters.","howToFix":"Populate Reference and ensure Pset_WindowCommon is exported for IfcWindow.","description":"","references":[]},"CORE-WALL-BOOL-001":{"title":"IfcWallStandardCase should include Pset_WallCommon.IsExternal","why":"Missing keys reduce interoperability and can break schedules/filters.","howToFix":"Populate IsExternal and ensure Pset_WallCommon is exported for IfcWallStandardCase.","description":"","references":[]},"CORE-WALL-BOOL-002":{"title":"IfcWallStandardCase should include Pset_WallCommon.LoadBearing","why":"Missing keys reduce interoperability and can break schedules/filters.","howToFix":"Populate LoadBearing and ensure Pset_WallCommon is exported for IfcWallStandardCase.","description":"","references":[]},"CORE-BLDG-001":{"title":"IfcBuilding should include required common property set(s)","why":"Common Psets carry key attributes used across tools and downstream workflows.","howToFix":"Ensure the exporter includes Pset_BuildingCommon for IfcBuilding.","description":"","references":[]},"CORE-BLDG-STOREYS-001":{"title":"IfcBuilding should include Pset_BuildingCommon.NumberOfStoreys","why":"Missing keys reduce interoperability and can break schedules/filters.","howToFix":"Populate NumberOfStoreys and ensure Pset_BuildingCommon is exported for IfcBuilding.","description":"","references":[]}},"counts":{"total":8,"errors":0,"warnings":0,"info":8},"issues":[{"ruleId":"CORE-BLDG-STOREYS-001","severity":"Info","ifcClass":"IfcBuilding","globalId":"0c$N1CTon2BB2Sp89385G8","name":"Single-family house","message":"Pset Pset_BuildingCommon is missing property key 'NumberOfStoreys'.","path":"Pset_BuildingCommon.NumberOfStoreys","source":"Derived","expected":"Present","actual":"Missing"},{"ruleId":"CORE-SLAB-REF-001","severity":"Info","ifcClass":"IfcSlab","globalId":"3zR0BOEcLADRKln4HYporH","name":"floor","message":"Pset Pset_SlabCommon is missing property key 'Reference'.","path":"Pset_SlabCommon.Reference","source":"Derived","expected":"Present","actual":"Missing"},{"ruleId":"CORE-SLAB-REF-001","severity":"Info","ifcClass":"IfcSlab","globalId":"0ZTBBPo6f6bxqV2K7Oelrq","name":"house - roof - slab left","message":"Pset Pset_SlabCommon is missing property key 'Reference'.","path":"Pset_SlabCommon.Reference","source":"Derived","expected":"Present","actual":"Missing"},{"ruleId":"CORE-SLAB-REF-001","severity":"Info","ifcClass":"IfcSlab","globalId":"12UVOn4wvAJPMUExKdZLb8","name":"house - roof - slab right","message":"Pset Pset_SlabCommon is missing property key 'Reference'.","path":"Pset_SlabCommon.Reference","source":"Derived","expected":"Present","actual":"Missing"},{"ruleId":"CORE-WALL-REF-001","severity":"Info","ifcClass":"IfcWall","globalId":"0OfZwWc8j9QP5uX8xPTxDH","name":"house - outer wall - house left","message":"Pset Pset_WallCommon is missing property key 'Reference'.","path":"Pset_WallCommon.Reference","source":"Derived","expected":"Present","actual":"Missing"},{"ruleId":"CORE-WALL-REF-001","severity":"Info","ifcClass":"IfcWall","globalId":"3wdauVJT5Fx9drrREiDqA$","name":"house - outer wall - house right back","message":"Pset Pset_WallCommon is missing property key 'Reference'.","path":"Pset_WallCommon.Reference","source":"Derived","expected":"Present","actual":"Missing"},{"ruleId":"CORE-WALL-REF-001","severity":"Info","ifcClass":"IfcWall","globalId":"1AQAupaRP1txwK1AGiN61V","name":"house - outer wall - house right front","message":"Pset Pset_WallCommon is missing property key 'Reference'.","path":"Pset_WallCommon.Reference","source":"Derived","expected":"Present","actual":"Missing"},{"ruleId":"CORE-WALL-REF-001","severity":"Info","ifcClass":"IfcWall","globalId":"1uS5vfZPn9R8PlAaVd73on","name":"plumbing wall","message":"Pset Pset_WallCommon is missing property key 'Reference'.","path":"Pset_WallCommon.Reference","source":"Derived","expected":"Present","actual":"Missing"}]}
+  </script>
+
+    <script>
+        let activeRuleIds = null;
+
+const data = JSON.parse(document.getElementById("data").textContent);
+const issues = data.issues || [];
+
+// header
+const meta = document.getElementById("meta");
+meta.textContent = `IFC: ${data.ifcPath} • Ruleset: ${data.ruleset.name} (${data.ruleset.version})`;
+
+document.getElementById("cTotal").textContent = data.counts.total;
+document.getElementById("cErrors").textContent = data.counts.errors;
+document.getElementById("cWarnings").textContent = data.counts.warnings;
+document.getElementById("cInfo").textContent = data.counts.info;
+
+// controls
+const fSeverity = document.getElementById("fSeverity");
+const fRule = document.getElementById("fRule");
+const fClass = document.getElementById("fClass");
+const fText = document.getElementById("fText");
+const fGroup = document.getElementById("fGroup");
+const rulesetFile = document.getElementById("rulesetFile");
+const rows = document.getElementById("rows");
+const shown = document.getElementById("shown");
+const btnExportCsv = document.getElementById("btnExportCsv");
+const btnCopyLink = document.getElementById("btnCopyLink");
+const btnClearRuleset = document.getElementById("btnClearRuleset");
+
+
+// drawer
+const drawer = document.getElementById("drawer");
+const overlay = document.getElementById("drawerOverlay");
+const dClose = document.getElementById("dClose");
+const dTitle = document.getElementById("dTitle");
+const dSubtitle = document.getElementById("dSubtitle");
+const dSeverity = document.getElementById("dSeverity");
+const dRule = document.getElementById("dRule");
+const dClass = document.getElementById("dClass");
+const dGlobalId = document.getElementById("dGlobalId");
+const dCopy = document.getElementById("dCopy");
+const dName = document.getElementById("dName");
+const dMessage = document.getElementById("dMessage");
+const dRuleMeta = document.getElementById("dRuleMeta");
+const dRuleInfo = document.getElementById("dRuleInfo");
+const dPath = document.getElementById("dPath");
+const dSource = document.getElementById("dSource");
+const dExpected = document.getElementById("dExpected");
+const dActual = document.getElementById("dActual");
+
+
+let rulesetMetaByRuleId = {}; // { [ruleId]: { title, why, description } }
+rulesetMetaByRuleId = data.rulesetMeta || {};
+
+let currentIssue = null;
+
+function getStateFromUI() {
+    return {
+        sev: fSeverity?.value || "",
+        rule: fRule?.value || "",
+        cls: fClass?.value || "",
+        q: fText?.value || "",
+        group: (fGroup && fGroup.checked) ? "1" : "0",
+    };
+}
+
+function applyStateToUI(state) {
+    if (state.sev != null) fSeverity.value = state.sev;
+    if (state.rule != null) fRule.value = state.rule;
+    if (state.cls != null) fClass.value = state.cls;
+    if (state.q != null) fText.value = state.q;
+    if (fGroup) fGroup.checked = state.group === "1";
+
+    // keep chips synced (if you added them)
+    const sevChips = document.getElementById("sevChips");
+    if (sevChips) {
+        const v = fSeverity.value || "";
+        sevChips.querySelectorAll(".chip").forEach((c) => {
+            c.classList.toggle("active", (c.dataset.sev ?? "") === v);
+        });
+    }
+}
+
+function writeStateToHash(state) {
+    const p = new URLSearchParams();
+    if (state.sev) p.set("sev", state.sev);
+    if (state.rule) p.set("rule", state.rule);
+    if (state.cls) p.set("cls", state.cls);
+    if (state.q) p.set("q", state.q);
+    if (state.group === "1") p.set("group", "1");
+    const hash = p.toString();
+    // use replaceState so it doesn't spam history while typing
+    history.replaceState(null, "", hash ? `#${hash}` : "#");
+}
+
+function readStateFromHash() {
+    const hash = (location.hash || "").replace(/^#/, "");
+    const p = new URLSearchParams(hash);
+    return {
+        sev: p.get("sev") || "",
+        rule: p.get("rule") || "",
+        cls: p.get("cls") || "",
+        q: p.get("q") || "",
+        group: p.get("group") || "0",
+    };
+}
+
+function uniq(arr) {
+    return Array.from(new Set(arr)).sort();
+}
+function addOptions(select, label, values) {
+    select.innerHTML = "";
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = label;
+    select.appendChild(opt0);
+    values.forEach((v) => {
+        const o = document.createElement("option");
+        o.value = v;
+        o.textContent = v;
+        select.appendChild(o);
+    });
+}
+
+addOptions(fSeverity, "Severity (All)", ["Error", "Warning", "Info"]);
+addOptions(fRule, "RuleId (All)", uniq(issues.map((i) => i.ruleId)));
+addOptions(fClass, "IfcClass (All)", uniq(issues.map((i) => i.ifcClass)));
+applyStateToUI(readStateFromHash());
+rerenderAndPersist();
+
+function severityRank(sev) {
+    if (sev === "Error") return 0;
+    if (sev === "Warning") return 1;
+    return 2;
+}
+
+function matches(issue) {
+    if (activeRuleIds && !activeRuleIds.has(issue.ruleId)) return false;
+
+    const sev = fSeverity.value;
+    const rule = fRule.value;
+    const cls = fClass.value;
+    const q = (fText.value || "").trim().toLowerCase();
+
+    if (sev && issue.severity !== sev) return false;
+    if (rule && issue.ruleId !== rule) return false;
+    if (cls && issue.ifcClass !== cls) return false;
+
+    if (!q) return true;
+    return (
+        (issue.globalId || "").toLowerCase().includes(q) ||
+        (issue.name || "").toLowerCase().includes(q) ||
+        (issue.message || "").toLowerCase().includes(q)
+    );
+}
+
+function openDrawer(issue) {
+    currentIssue = issue;
+
+    dTitle.textContent = issue.ruleId || "Issue";
+    dSubtitle.textContent = `${issue.ifcClass || ""} • ${issue.name || ""}`.trim();
+
+    dSeverity.textContent = issue.severity || "";
+    dRule.textContent = issue.ruleId || "";
+    dClass.textContent = issue.ifcClass || "";
+    dGlobalId.textContent = issue.globalId || "";
+    dName.textContent = issue.name || "";
+    dMessage.textContent = issue.message || "";
+    dPath.textContent = issue.path || "";
+    dSource.textContent = issue.source || "";
+    dExpected.textContent = issue.expected || "";
+    dActual.textContent = issue.actual || "";
+
+
+    const meta = rulesetMetaByRuleId[issue.ruleId];
+    if (meta && (meta.title || meta.why || meta.description)) {
+        dRuleMeta.classList.remove("hidden");
+        dRuleInfo.textContent = [
+            meta.title ? `Title: ${meta.title}` : "",
+            meta.why ? `Why it matters: ${meta.why}` : "",
+            meta.howToFix ? `How to fix: ${meta.howToFix}` : "",
+            meta.description ? `Description: ${meta.description}` : "",
+            meta.references && meta.references.length ? `References: ${meta.references.join(", ")}` : "",
+        ]
+            .filter(Boolean)
+            .join("\n");
+    } else {
+        dRuleMeta.classList.add("hidden");
+        dRuleInfo.textContent = "";
+    }
+
+    overlay.classList.remove("hidden");
+    drawer.classList.remove("hidden");
+    drawer.setAttribute("aria-hidden", "false");
+}
+
+function closeDrawer() {
+    overlay.classList.add("hidden");
+    drawer.classList.add("hidden");
+    drawer.setAttribute("aria-hidden", "true");
+    currentIssue = null;
+    clearSelectedRow();
+}
+
+function rerenderAndPersist() {
+    writeStateToHash(getStateFromUI());
+    render();
+}
+
+dClose.addEventListener("click", closeDrawer);
+overlay.addEventListener("click", closeDrawer);
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeDrawer();
+});
+
+dCopy.addEventListener("click", async () => {
+    const txt = (currentIssue && currentIssue.globalId) || "";
+    if (!txt) return;
+    try {
+        await navigator.clipboard.writeText(txt);
+        dCopy.textContent = "Copied!";
+        setTimeout(() => (dCopy.textContent = "Copy"), 700);
+    } catch {
+        prompt("Copy GlobalId:", txt);
+    }
+});
+
+// Event delegation for copy clicks + row clicks
+rows.addEventListener("click", async (e) => {
+    const copyEl = e.target.closest(".copy");
+    if (copyEl) {
+        const txt = copyEl.dataset.copy || "";
+        try {
+            await navigator.clipboard.writeText(txt);
+            const prev = copyEl.textContent;
+            copyEl.textContent = "Copied!";
+            setTimeout(() => (copyEl.textContent = prev), 600);
+        } catch {
+            prompt("Copy GlobalId:", txt);
+        }
+        return;
+    }
+
+    const tr = e.target.closest("tr[data-idx]");
+    if (tr) {
+        const idx = Number(tr.dataset.idx);
+        const issue = window.__viewIssues?.[idx];
+        if (issue) {
+            selectRowByIdx(idx);
+            openDrawer(issue);
+        }
+
+    }
+});
+
+function renderFlat(filtered) {
+    rows.innerHTML = "";
+    const frag = document.createDocumentFragment();
+
+    filtered.forEach((i, idx) => {
+        const tr = document.createElement("tr");
+        tr.dataset.idx = String(idx);
+
+        const tdSev = document.createElement("td");
+        tdSev.className = `sev ${i.severity}`;
+        tdSev.textContent = i.severity;
+
+        const tdRule = document.createElement("td");
+        tdRule.textContent = i.ruleId;
+
+        const tdClass = document.createElement("td");
+        tdClass.textContent = i.ifcClass;
+
+        const tdGid = document.createElement("td");
+        const gidSpan = document.createElement("span");
+        gidSpan.className = "copy";
+        gidSpan.dataset.copy = i.globalId || "";
+        gidSpan.textContent = i.globalId || "";
+        tdGid.appendChild(gidSpan);
+
+        const tdName = document.createElement("td");
+        tdName.className = "small";
+        tdName.textContent = i.name || "";
+
+        const tdMsg = document.createElement("td");
+        tdMsg.textContent = i.message || "";
+
+        tr.append(tdSev, tdRule, tdClass, tdGid, tdName, tdMsg);
+        frag.appendChild(tr);
+    });
+
+    rows.appendChild(frag);
+}
+
+function renderGrouped(filtered) {
+    rows.innerHTML = "";
+
+    // Rebuild view list in EXACT row-render order
+    window.__viewIssues = [];
+
+    // Group by ruleId
+    const groups = new Map();
+    filtered.forEach((i) => {
+        if (!groups.has(i.ruleId)) groups.set(i.ruleId, []);
+        groups.get(i.ruleId).push(i);
+    });
+
+    // Sort rules deterministically: severity -> ruleId
+    const ruleIds = Array.from(groups.keys()).sort((a, b) => {
+        const la = groups.get(a);
+        const lb = groups.get(b);
+        const ra = severityRank(la[0]?.severity);
+        const rb = severityRank(lb[0]?.severity);
+        if (ra !== rb) return ra - rb;
+        return (a || "").localeCompare(b || "");
+    });
+
+    const frag = document.createDocumentFragment();
+
+    ruleIds.forEach((ruleId) => {
+        const list = groups.get(ruleId);
+        const sev = list[0]?.severity || "Info";
+        const meta = rulesetMetaByRuleId[ruleId] || {};
+
+        const trGroup = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 6;
+
+        const details = document.createElement("details");
+        details.open = true;
+
+        const summary = document.createElement("summary");
+        summary.style.cursor = "pointer";
+        summary.innerHTML = `
+      <span class="sev ${sev}">${sev}</span>
+      <span style="margin-left:10px;font-weight:800;">${ruleId}</span>
+      <span class="pill" style="margin-left:10px;">${list.length} issues</span>
+      ${meta.title ? `<span class="small" style="margin-left:10px;">${meta.title}</span>` : ""}
+    `;
+
+        const body = document.createElement("div");
+        body.style.marginTop = "10px";
+
+        if (meta.why) {
+            const why = document.createElement("div");
+            why.className = "small";
+            why.style.margin = "0 0 10px";
+            why.textContent = `Why it matters: ${meta.why}`;
+            body.appendChild(why);
+        }
+
+        const inner = document.createElement("table");
+        inner.className = "table";
+        inner.innerHTML = `
+      <thead>
+        <tr>
+          <th style="width:140px;">IfcClass</th>
+          <th style="width:240px;">GlobalId</th>
+          <th style="width:200px;">Name</th>
+          <th>Message</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+
+        const tbody = inner.querySelector("tbody");
+
+        list
+            .slice()
+            .sort(
+                (a, b) =>
+                    (a.ifcClass || "").localeCompare(b.ifcClass || "") ||
+                    (a.name || "").localeCompare(b.name || "") ||
+                    (a.globalId || "").localeCompare(b.globalId || "")
+            )
+            .forEach((i) => {
+                const tr = document.createElement("tr");
+
+                // Map row -> issue
+                window.__viewIssues.push(i);
+                tr.dataset.idx = String(window.__viewIssues.length - 1);
+
+                const tdClass = document.createElement("td");
+                tdClass.textContent = i.ifcClass || "";
+
+                const tdGid = document.createElement("td");
+                const gidSpan = document.createElement("span");
+                gidSpan.className = "copy";
+                gidSpan.dataset.copy = i.globalId || "";
+                gidSpan.textContent = i.globalId || "";
+                tdGid.appendChild(gidSpan);
+
+                const tdName = document.createElement("td");
+                tdName.className = "small";
+                tdName.textContent = i.name || "";
+
+                const tdMsg = document.createElement("td");
+                tdMsg.textContent = i.message || "";
+
+                tr.append(tdClass, tdGid, tdName, tdMsg);
+                tbody.appendChild(tr);
+            });
+
+        body.appendChild(inner);
+        details.append(summary, body);
+        td.appendChild(details);
+        trGroup.appendChild(td);
+        frag.appendChild(trGroup);
+    });
+
+    rows.appendChild(frag);
+}
+
+
+function render() {
+    const filtered = issues.filter(matches);
+
+    filtered.sort((a, b) => {
+        const ra = severityRank(a.severity);
+        const rb = severityRank(b.severity);
+        if (ra !== rb) return ra - rb;
+        return (a.ruleId || "").localeCompare(b.ruleId || "") ||
+            (a.ifcClass || "").localeCompare(b.ifcClass || "") ||
+            (a.name || "").localeCompare(b.name || "") ||
+            (a.globalId || "").localeCompare(b.globalId || "");
+    });
+    window.__currentFiltered = filtered;
+
+    shown.textContent = `${filtered.length} shown`;
+
+    if (fGroup && fGroup.checked) {
+        renderGrouped(filtered);          // grouped rebuilds __viewIssues internally
+    } else {
+        window.__viewIssues = filtered;   // flat uses direct mapping
+        renderFlat(filtered);
+    }
+
+}
+
+
+// controls wiring
+const sevChips = document.getElementById("sevChips");
+if (sevChips) {
+    sevChips.addEventListener("click", (e) => {
+        const btn = e.target.closest(".chip");
+        if (!btn) return;
+
+        const sev = btn.dataset.sev ?? "";
+        fSeverity.value = sev;
+
+        // update active chip
+        sevChips.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+        btn.classList.add("active");
+
+        rerenderAndPersist();
+    });
+}
+// Rule & class dropdowns can stay simple
+[fRule, fClass].forEach((s) => s.addEventListener("change", rerenderAndPersist));
+
+// Severity dropdown needs to sync chips
+fSeverity.addEventListener("change", () => {
+    if (sevChips) {
+        const v = fSeverity.value || "";
+        sevChips.querySelectorAll(".chip").forEach((c) => {
+            c.classList.toggle("active", (c.dataset.sev ?? "") === v);
+        });
+    }
+    rerenderAndPersist();
+});
+
+fText.addEventListener("input", rerenderAndPersist);
+if (fGroup) fGroup.addEventListener("change", rerenderAndPersist);
+
+// ruleset decoration (optional)
+if (rulesetFile) {
+    rulesetFile.addEventListener("change", async () => {
+        const f = rulesetFile.files?.[0];
+        if (!f) return;
+
+        try {
+            const text = await f.text();
+            const rs = JSON.parse(text);
+            activeRuleIds = new Set((rs.rules || []).map(r => r.id));
+            setRulesetActive(true);
+            const map = {};
+            (rs.rules || []).forEach((r) => {
+                const m = r.meta || {};
+                map[r.id] = {
+                    title: m.title || r.title || "",
+                    why: m.why || r.whyItMatters || r.why || "",
+                    howToFix: m.howToFix || "",
+                    description: r.description || m.description || "",
+                    references: Array.isArray(m.references) ? m.references : []
+                };
+            });
+
+            rulesetMetaByRuleId = map;
+
+            rerenderAndPersist();
+        } catch (err) {
+            alert("Failed to load ruleset JSON.");
+            console.error(err);
+        }
+    });
+}
+
+function clearSelectedRow() {
+    rows.querySelectorAll("tr.selected").forEach(el => el.classList.remove("selected"));
+}
+
+function selectRowByIdx(idx) {
+    clearSelectedRow();
+    const tr = rows.querySelector(`tr[data-idx="${idx}"]`);
+    if (tr) tr.classList.add("selected");
+}
+
+function csvEscape(v) {
+    const s = (v ?? "").toString();
+    if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    return s;
+}
+
+function toCsv(rows) {
+    const header = ["severity", "ruleId", "ifcClass", "globalId", "name", "message"];
+    const lines = [header.join(",")];
+
+    for (const r of rows) {
+        lines.push([
+            csvEscape(r.severity),
+            csvEscape(r.ruleId),
+            csvEscape(r.ifcClass),
+            csvEscape(r.globalId),
+            csvEscape(r.name),
+            csvEscape(r.message),
+        ].join(","));
+    }
+
+    return lines.join("\n");
+}
+
+if (btnExportCsv) {
+    btnExportCsv.addEventListener("click", () => {
+        const filtered = window.__currentFiltered || [];
+        const csv = toCsv(filtered);
+
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "ifcqa_filtered.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+    });
+}
+
+if (btnCopyLink) {
+    btnCopyLink.addEventListener("click", async () => {
+        const url = location.href; // includes #hash
+        try {
+            await navigator.clipboard.writeText(url);
+            btnCopyLink.textContent = "Copied!";
+            setTimeout(() => (btnCopyLink.textContent = "Copy share link"), 800);
+        } catch {
+            prompt("Copy link:", url);
+        }
+    });
+}
+
+function setRulesetActive(isActive) {
+  if (!btnClearRuleset) return;
+  btnClearRuleset.classList.toggle("hidden", !isActive);
+}
+
+if (btnClearRuleset) {
+  btnClearRuleset.addEventListener("click", () => {
+    activeRuleIds = null;
+    // restore meta back to embedded pack (if you want)
+    rulesetMetaByRuleId = data.rulesetMeta || {};
+    setRulesetActive(false);
+    rerenderAndPersist();
+  });
+}
+    </script>
+</body>
+
+</html>

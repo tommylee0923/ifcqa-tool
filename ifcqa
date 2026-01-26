@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-dotnet run --project "src/IfcQa.Cli? -- "$@"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+REPO_ROOT="$SCRIPT_DIR"
 
-# Make it executable
-# chmod -x ./ifcqa
+dotnet run --project "$REPO_ROOT/src/IfcQa.Cli" -- "$@"

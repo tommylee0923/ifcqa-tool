@@ -1,0 +1,9 @@
+RuleId,Severity,IfcClass,GlobalId,Name,Path,Source,Expected,Actual,Message
+"CORE-WALL-REF-001","Info","IfcWall","1AQAupaRP1txwK1AGiN61V","house - outer wall - house right front","Pset_WallCommon.Reference","Derived","Present","Missing","Pset Pset_WallCommon is missing property key 'Reference'."
+"CORE-WALL-REF-001","Info","IfcWall","3wdauVJT5Fx9drrREiDqA$","house - outer wall - house right back","Pset_WallCommon.Reference","Derived","Present","Missing","Pset Pset_WallCommon is missing property key 'Reference'."
+"CORE-WALL-REF-001","Info","IfcWall","0OfZwWc8j9QP5uX8xPTxDH","house - outer wall - house left","Pset_WallCommon.Reference","Derived","Present","Missing","Pset Pset_WallCommon is missing property key 'Reference'."
+"CORE-WALL-REF-001","Info","IfcWall","1uS5vfZPn9R8PlAaVd73on","plumbing wall","Pset_WallCommon.Reference","Derived","Present","Missing","Pset Pset_WallCommon is missing property key 'Reference'."
+"CORE-SLAB-REF-001","Info","IfcSlab","3zR0BOEcLADRKln4HYporH","floor","Pset_SlabCommon.Reference","Derived","Present","Missing","Pset Pset_SlabCommon is missing property key 'Reference'."
+"CORE-SLAB-REF-001","Info","IfcSlab","0ZTBBPo6f6bxqV2K7Oelrq","house - roof - slab left","Pset_SlabCommon.Reference","Derived","Present","Missing","Pset Pset_SlabCommon is missing property key 'Reference'."
+"CORE-SLAB-REF-001","Info","IfcSlab","12UVOn4wvAJPMUExKdZLb8","house - roof - slab right","Pset_SlabCommon.Reference","Derived","Present","Missing","Pset Pset_SlabCommon is missing property key 'Reference'."
+"CORE-BLDG-STOREYS-001","Info","IfcBuilding","0c$N1CTon2BB2Sp89385G8","Single-family house","Pset_BuildingCommon.NumberOfStoreys","Derived","Present","Missing","Pset Pset_BuildingCommon is missing property key 'NumberOfStoreys'."
