@@ -110,16 +110,6 @@ src/
 
 ---
 
-## Roadmap
-
-### CI Example
-- GitHub Actions workflow
-- Run IfcQA on a sample IFC
-- Fail build on errors
-- Upload HTML report as an artifact
-
----
-
 ## Status
 
 Active development.  
