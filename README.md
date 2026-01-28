@@ -2,7 +2,7 @@
 
 # IfcQA — IFC Quality Gate for BIM Pipelines
 
-**IfcQA** is a lightweight, standards-oriented **IFC quality-gate CLI** built in **C# / .NET**, designed to evaluate BIM models against configurable QA rulesets and produce **human-readable, shareable reports**.
+**IfcQA** is a lightweight, standards-oriented **IFC quality-gate CLI** built in **C# / .NET / xBIM toolkit** , designed to evaluate BIM models against configurable QA rulesets and produce **human-readable, shareable reports**.
 
 The tool aims to be intentionally **tool-agnostic** (no Revit dependency) and suitable for **local QA, CI pipelines, and downstream AEC automation workflows**.
 
