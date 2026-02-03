@@ -1,10 +1,10 @@
 :root {
-    --bg: #0b0d12;
-    --card: #121826;
-    --text: #e8eefc;
-    --muted: #9aa7bd;
-    --line: #23304a;
-    --pill: #1b2845;
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --pill: #f3f4f6;
 }
 
 html {
@@ -26,7 +26,7 @@ a {
 .wrap {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 24px;
+    padding: 32px;
 }
 
 .h1 {
@@ -42,29 +42,45 @@ a {
     word-break: break-all;
 }
 
+.meta::after {
+    content: "";
+    display: block;
+    height: 1px;
+    background: var(--line);
+    margin-top: 16px;
+}
+
+.copyright {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 16px;
+    word-break: break-all;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    margin: 14px 0 18px;
+    gap: 14px;
+    margin: 18px 0 22px;
 }
 
 .card {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 12px 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .k {
     color: var(--muted);
     font-size: 12px;
     margin-bottom: 8px;
+    text-align: center;
 }
 
 .v {
     font-size: 20px;
-    font-weight: 800;
+    font-weight: 400;
+    text-align: center;
 }
 
 .controls {
@@ -86,18 +102,20 @@ input {
 }
 
 input {
-    min-width: 280px;
+    min-width: 0px;
     flex: 1;
 }
 
 .pill {
-    display: inline-block;
+    display: inline-flex;
     padding: 4px 10px;
     border-radius: 999px;
     background: var(--pill);
     border: 1px solid var(--line);
     font-size: 12px;
     color: var(--muted);
+    flex: 0 0 auto;
+    width: auto;
 }
 
 .table {
@@ -112,7 +130,7 @@ input {
 th,
 td {
     text-align: left;
-    padding: 10px 12px;
+    padding: 12px 14px;
     border-bottom: 1px solid var(--line);
     vertical-align: top;
 }
@@ -123,12 +141,12 @@ th {
     font-weight: 700;
     position: sticky;
     top: 0;
-    background: #0f1523;
+    background: #f9fafb;
     z-index: 1;
 }
 
 tr:hover td {
-    background: rgba(255, 255, 255, 0.03);
+    background: #f9fafb
 }
 
 .sev {
@@ -136,15 +154,15 @@ tr:hover td {
 }
 
 .sev.Error {
-    color: #ff7a7a;
+    color: #b91c1c;
 }
 
 .sev.Warning {
-    color: #ffd27a;
+    color: #b45309;
 }
 
 .sev.Info {
-    color: #7ab7ff;
+    color: #1d4ed8;
 }
 
 .small {
@@ -168,6 +186,11 @@ tr:hover td {
 
 .pill-toggle input[type="checkbox"] {
     accent-color: #7ab7ff;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    flex: 0 0 14px;
+    display: inline-block;
 }
 
 .pill-toggle input[type="file"] {
@@ -226,7 +249,7 @@ tr:hover td {
 }
 
 .btn {
-    background: #0f1523;
+    background: var(--pill);
     border: 1px solid var(--line);
     color: var(--text);
     border-radius: 10px;
@@ -273,11 +296,12 @@ tr:hover td {
 }
 
 .messageBox {
-    background: #0f1523;
+    background: var(--bg);
     border: 1px solid var(--line);
     border-radius: 12px;
     padding: 10px 12px;
     white-space: pre-wrap;
+    font-size: 14px;
 }
 
 
@@ -308,7 +332,7 @@ tbody tr[data-idx].selected {
 
 .chip {
     border: 1px solid var(--line);
-    background: #0f1523;
+    background: var(--pill);
     color: var(--text);
     border-radius: 999px;
     padding: 8px 10px;
@@ -318,7 +342,7 @@ tbody tr[data-idx].selected {
 }
 
 .chip.active {
-    border-color: rgba(122, 183, 255, 0.8);
+    border-color: #93c5fd;
     box-shadow: 0 0 0 2px rgba(122, 183, 255, 0.15) inset;
 }
 

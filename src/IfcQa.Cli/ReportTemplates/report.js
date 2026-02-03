@@ -121,7 +121,7 @@ function addOptions(select, label, values) {
 }
 
 addOptions(fSeverity, "Severity (All)", ["Error", "Warning", "Info"]);
-addOptions(fRule, "RuleId (All)", uniq(issues.map((i) => i.ruleId)));
+addOptions(fRule, "Rule ID (All)", uniq(issues.map((i) => i.ruleId)));
 addOptions(fClass, "IfcClass (All)", uniq(issues.map((i) => i.ifcClass)));
 applyStateToUI(readStateFromHash());
 rerenderAndPersist();
