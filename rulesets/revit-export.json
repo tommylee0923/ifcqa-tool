@@ -150,7 +150,7 @@
       "severity": "Info",
       "ifcClass": "IfcSpace",
       "attribute": "Name",
-      "regex": "^[A-Za-z0-9 _-]{2,}$",
+      "regex": "[A-Za-z0-9 _\\-/:\\(\\)]",
       "meta": {
         "title": "Space Name should meet basic naming rules",
         "why": "Catches blank/garbled names and improves consistency.",
