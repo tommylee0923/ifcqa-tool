@@ -48,11 +48,11 @@
 
 ## Quickstart (Windows)
 
-1)  Download the release zip and unzip
-2)  In PowerShell:
+1)  Download and unzip the Windows release.
+2)  Open PowerShell / Terminal in the extracted folder:
 ```bash
 .\ifcqa.exe init -o Demo
-.\ifcqa.exe check path\to\model.ifc -o Demo\out -r Demo\rulesets\core\tool-agnostic-common.json
+.\ifcqa.exe check path\to\model.ifc -r Demo\rulesets\core\tool-agnostic-common.json -o Demo\out
 ```
 3)  Open Demo\out\report.html
 
