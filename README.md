@@ -32,7 +32,7 @@
 
 ---
 
-### 4. CLI-First, Automation-Friendly
+### CLI-First, Automation-Friendly
 
 - Deterministic output (JSON / CSV / HTML)
 - Designed for local QA, CI pipelines, and automation workflows
