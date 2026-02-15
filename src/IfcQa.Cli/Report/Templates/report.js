@@ -223,7 +223,9 @@ dCopy.addEventListener("click", async () => {
     }
 });
 
-// Event delegation for copy clicks + row clicks
+let __hoveredIdx = null;
+let __hoveredGid = null;
+
 rows.addEventListener("click", async (e) => {
     const copyEl = e.target.closest(".copy");
     if (copyEl) {
@@ -245,11 +247,39 @@ rows.addEventListener("click", async (e) => {
         const issue = window.__viewIssues?.[idx];
         if (issue) {
             selectRowByIdx(idx);
+            window.dispatchEvent(new CustomEvent("ifcqa:select", { detail: { gid: issue.globalId } }));
             openDrawer(issue);
         }
 
     }
 });
+
+rows.addEventListener("mouseover", (e) => {
+  const tr = e.target.closest("tr[data-idx]");
+  if (!tr) return;
+
+  const idx = Number(tr.dataset.idx);
+  if (__hoveredIdx === idx) return;
+  __hoveredIdx = idx;
+
+  const issue = window.__viewIssues?.[idx];
+  const gid = issue?.globalId || tr.dataset.gid || null;
+
+  window.dispatchEvent(new CustomEvent("ifcqa:hover", { detail: { gid } }));
+});
+
+rows.addEventListener("mouseout", (e) => {
+  const tr = e.target.closest("tr[data-idx]");
+  if (!tr) return;
+
+  const to = e.relatedTarget;
+  if (to && tr.contains(to)) return;
+
+  __hoveredIdx = null;
+  window.dispatchEvent(new CustomEvent("ifcqa:hover", { detail: { gid: null } }));
+});
+
+
 
 function renderFlat(filtered) {
     rows.innerHTML = "";
@@ -258,6 +288,7 @@ function renderFlat(filtered) {
     filtered.forEach((i, idx) => {
         const tr = document.createElement("tr");
         tr.dataset.idx = String(idx);
+        tr.dataset.gid = i.globalId || "";
 
         const tdSev = document.createElement("td");
         tdSev.className = `sev ${i.severity}`;
@@ -377,6 +408,7 @@ function renderGrouped(filtered) {
                 // Map row -> issue
                 window.__viewIssues.push(i);
                 tr.dataset.idx = String(window.__viewIssues.length - 1);
+                tr.dataset.gid = i.globalId || "";
 
                 const tdClass = document.createElement("td");
                 tdClass.textContent = i.ifcClass || "";
@@ -570,18 +602,16 @@ if (btnCopyLink) {
 }
 
 function setRulesetActive(isActive) {
-  if (!btnClearRuleset) return;
-  btnClearRuleset.classList.toggle("hidden", !isActive);
+    if (!btnClearRuleset) return;
+    btnClearRuleset.classList.toggle("hidden", !isActive);
 }
 
 if (btnClearRuleset) {
-  btnClearRuleset.addEventListener("click", () => {
-    activeRuleIds = null;
-    // restore meta back to embedded pack (if you want)
-    rulesetMetaByRuleId = data.rulesetMeta || {};
-    setRulesetActive(false);
-    rerenderAndPersist();
-  });
+    btnClearRuleset.addEventListener("click", () => {
+        activeRuleIds = null;
+        // restore meta back to embedded pack (if you want)
+        rulesetMetaByRuleId = data.rulesetMeta || {};
+        setRulesetActive(false);
+        rerenderAndPersist();
+    });
 }
-
-window.dispatchEvent(new CustomEvent("ifcqa:select", {detail: { gid: issue.GlobalId } }));

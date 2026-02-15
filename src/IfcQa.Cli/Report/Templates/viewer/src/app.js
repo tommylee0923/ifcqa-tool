@@ -1,28 +1,34 @@
-console.log("viewer src/app.js booted");
-
-window.addEventListener("error", (e) => console.log("WINDOW ERROR:", e.message));
-window.addEventListener("unhandledrejection", (e) => console.log("PROMISE ERROR:", e.reason));
-
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+//#region state
 const state = {
   renderer: null,
   scene: null,
   camera: null,
   controls: null,
 
-  modelRoot: null,                 // gltf.scene
-  objectsByGlobalId: new Map(),    // gid -> Mesh[]
-  issuesByGid: new Map(),          // gid -> Issue[]
+  modelRoot: null,              // gltf.scene
+  objectsByGlobalId: new Map(), // gid -> Mesh[]
+  issuesByGid: new Map(),       // gid -> Issue[]
 
+  hoveredGid: null,
   selectedGid: null,
-  originalMaterials: new WeakMap(),
 
   viewerInfo: null,
-};
 
+  originalMatState: new WeakMap(), // material -> saved values
+  outlineMap: new WeakMap(),       // mesh -> LineSegments
+};
+//#endregion
+
+//#region scratch
+const visRaycaster = new THREE.Raycaster();
+const tmpCenter = new THREE.Vector3();
+//#endregion
+
+//#region data
 async function fetchIssues() {
   const res = await fetch("./issues.json");
   const data = await res.json();
@@ -39,8 +45,9 @@ function buildIssuesByGlobalId(issues) {
   }
   return map;
 }
+//#endregion
 
-// Some GLB pipelines store gid on parent nodes; climb up to find a name.
+//#region model utils
 function findNamedAncestor(obj) {
   let cur = obj;
   while (cur) {
@@ -50,76 +57,265 @@ function findNamedAncestor(obj) {
   return null;
 }
 
-function setHighlighted(mesh, on) {
+function looksLikeIfcGuid(name) {
+  return  typeof name === "string" && 
+          name.length >= 20 &&
+          name.length <= 30 &&
+          /[A-Za-z0-9_$]/.test(name);
+}
+
+function indexMeshesByGuidNode() {
+  state.objectsByGlobalId.clear();
+  if (!state.modelRoot) return;
+
+  state.modelRoot.traverse((node) => {
+    if (!node.name) return;
+    if (!looksLikeIfcGuid(node.name)) return;
+
+    const gid = node.name;
+
+    const meshes = [];
+    node.traverse((child) => {
+      if (child.isMesh) meshes.push(child);
+    });
+
+    if (meshes.length > 0) {
+      const prev = state.objectsByGlobalId.get(gid);
+      if (prev) prev.push(...meshes);
+      else state.objectsByGlobalId.set(gid, meshes);
+    }
+  });
+}
+
+
+//#endregion
+
+//#region camera
+function simpleFit(sceneRoot, camera, controls) {
+  const box = new THREE.Box3().setFromObject(sceneRoot);
+  const center = box.getCenter(new THREE.Vector3());
+  const sizeVec = box.getSize(new THREE.Vector3());
+  const size = Math.max(sizeVec.x, sizeVec.y, sizeVec.z);
+
+  controls.target.copy(center);
+
+  camera.near = Math.max(size / 1000, 0.01);
+  camera.far = Math.max(size * 20, 1000);
+  camera.updateProjectionMatrix();
+
+  camera.position.set(
+    center.x + size * 1.2,
+    center.y + size * 0.8,
+    center.z + size * 1.2
+  );
+
+  controls.update();
+}
+//#endregion
+
+//#region highlight (fill)
+function setFillHighlight(mesh, on) {
   if (!mesh?.isMesh) return;
 
-  if (on) {
-    if (!state.originalMaterials.has(mesh)) state.originalMaterials.set(mesh, mesh.material);
-    mesh.material = new THREE.MeshStandardMaterial({
-      emissive: 0xffcc00,
-      emissiveIntensity: 0.9,
-    });
-  } else {
-    const orig = state.originalMaterials.get(mesh);
-    if (orig) mesh.material = orig;
+  const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+
+  for (const m of materials) {
+    if (!m) continue;
+
+    if (on) {
+      if (!state.originalMatState.has(m)) {
+        state.originalMatState.set(m, {
+          hasColor: !!m.color,
+          color: m.color ? m.color.clone() : null,
+          hasEmissive: !!m.emissive,
+          emissive: m.emissive ? m.emissive.clone() : null,
+          emissiveIntensity: m.emissiveIntensity ?? 1,
+        });
+      }
+
+      if (m.color) m.color.setHex(0xff6666);
+      if (m.emissive) {
+        m.emissive.setHex(0x330000);
+        m.emissiveIntensity = 0.6;
+      }
+      m.needsUpdate = true;
+    } else {
+      const prev = state.originalMatState.get(m);
+      if (!prev) continue;
+
+      if (prev.hasColor && m.color && prev.color) m.color.copy(prev.color);
+      if (prev.hasEmissive && m.emissive && prev.emissive) {
+        m.emissive.copy(prev.emissive);
+        m.emissiveIntensity = prev.emissiveIntensity;
+      }
+      m.needsUpdate = true;
+    }
   }
 }
+//#endregion
 
-function clearSelection() {
-  if (!state.selectedGid) return;
-  const prev = state.objectsByGlobalId.get(state.selectedGid) ?? [];
-  for (const m of prev) setHighlighted(m, false);
-  state.selectedGid = null;
+//#region highlight (outline)
+function ensureOutline(mesh) {
+  if (state.outlineMap.has(mesh)) return state.outlineMap.get(mesh);
+
+  const outlineMat = new THREE.MeshBasicMaterial({
+    color: 0xff6666,
+    side: THREE.BackSide,
+    depthTest: false,
+    transparent: true,
+    opacity: 0.75,
+    // polygonOffset: true,
+    // polygonOffsetFactor: 1,
+    // polygonOffsetUnits: 1,
+  });
+
+  const outline = new THREE.Mesh(mesh.geometry, outlineMat);
+
+  outline.frustumCulled = false;
+  outline.renderOrder = 9999;
+  outline.visible = false;
+
+  outline.scale.set(1.05, 1.05, 1.05);
+
+  mesh.add(outline);
+
+  state.outlineMap.set(mesh, outline);
+  return outline;
 }
 
-function focusOnMeshes(meshes) {
-  if (!meshes.length) return;
+function setOutlineHighlight(mesh, on) {
+  if (!mesh?.isMesh) return;
+  const outline = ensureOutline(mesh);
+  outline.visible = !!on;
+}
 
-  const group = new THREE.Group();
-  for (const m of meshes) group.add(m);
+//#endregion
 
-  const box = new THREE.Box3().setFromObject(group);
-  const center = box.getCenter(new THREE.Vector3());
-  const size = box.getSize(new THREE.Vector3()).length();
+//#region visibility test
+function isMeshVisible(mesh, camera, sceneRoot) {
+  const box = new THREE.Box3().setFromObject(mesh);
+  box.getCenter(tmpCenter);
 
-  state.controls.target.copy(center);
+  const dir = tmpCenter.clone().sub(camera.position).normalize();
+  visRaycaster.set(camera.position, dir);
 
-  const dir = new THREE.Vector3(1, 1, 1).normalize();
-  state.camera.position.copy(center).add(dir.multiplyScalar(Math.max(size, 1) * 0.8));
+  const dist = camera.position.distanceTo(tmpCenter);
+  const hits = visRaycaster.intersectObject(sceneRoot, true);
+  if (!hits.length) return true;
 
-  state.camera.near = Math.max(size / 1000, 0.01);
-  state.camera.far = Math.max(size * 20, 1000);
-  state.camera.updateProjectionMatrix();
-  state.controls.update();
+  const first = hits[0];
+  if (first.distance > dist - 1e-3) return true;
+
+  return first.object === mesh;
+}
+//#endregion
+
+//#region hover
+function clearHover() {
+  if (!state.hoveredGid) return;
+  if (state.hoveredGid === state.selectedGid) return;
+
+  const meshes = state.objectsByGlobalId.get(state.hoveredGid) ?? [];
+  for (const m of meshes) {
+    setFillHighlight(m, false);
+    setOutlineHighlight(m, false);
+  }
+  state.hoveredGid = null;
+}
+
+function hoverGlobalId(gid) {
+  if (!state.modelRoot || state.objectsByGlobalId.size === 0) return;
+
+  if (gid === state.hoveredGid) return;
+
+  clearHover();
+
+  if (!gid) return;
+  if (gid === state.selectedGid) return;
+
+  state.hoveredGid = gid;
+
+  const meshes = state.objectsByGlobalId.get(gid) ?? [];
+  if (meshes.length === 0) {
+    state.viewerInfo && (state.viewerInfo.textContent = `${gid}\nNo geometry for this issue (type-level / non-geometric).`);
+    return;
+  }
+  for (const m of meshes) {
+    const visible = isMeshVisible(m, state.camera, state.modelRoot);
+    if (visible) {
+      setOutlineHighlight(m, false);
+      setFillHighlight(m, true);
+    } else {
+      setFillHighlight(m, false);
+      setOutlineHighlight(m, true);
+    }
+  }
+}
+//#endregion
+
+//#region selection
+function clearSelection() {
+  if (!state.selectedGid) return;
+
+  const prev = state.objectsByGlobalId.get(state.selectedGid) ?? [];
+  for (const m of prev) {
+    setFillHighlight(m, false);
+    setOutlineHighlight(m, false);
+  }
+
+  state.selectedGid = null;
+  showIssuesForGlobalId(null);
 }
 
 function showIssuesForGlobalId(gid) {
   if (!state.viewerInfo) return;
 
+  if (!gid) {
+    state.viewerInfo.textContent = "";
+    return;
+  }
+
   const list = state.issuesByGid.get(gid) ?? [];
   const header = `${gid} — ${list.length} issue(s)`;
-  const lines = list.slice(0, 8).map(it => `- [${it.Severity}] ${it.Message}`);
+  const lines = list.slice(0, 8).map((it) => `- [${it.Severity}] ${it.Message}`);
   state.viewerInfo.textContent = [header, ...lines].join("\n");
 }
 
 function selectGlobalId(gid) {
-  clearSelection();
+  if (!state.modelRoot || state.objectsByGlobalId.size === 0) return;
+
+  // clear prior selection
+  if (state.selectedGid) {
+    const prev = state.objectsByGlobalId.get(state.selectedGid) ?? [];
+    for (const m of prev) {
+      setFillHighlight(m, false);
+      setOutlineHighlight(m, false);
+    }
+  }
 
   state.selectedGid = gid;
-  const meshes = state.objectsByGlobalId.get(gid) ?? [];
 
-  for (const m of meshes) setHighlighted(m, true);
-  focusOnMeshes(meshes);
-  showIssuesForGlobalId(gid);
-
-  console.log("Selected gid:", gid, "meshes:", meshes.length);
-}
-
-function onCanvasPick(ev) {
-  if (!state.modelRoot) {
-    console.log("Model not loaded yet.");
+  if (!gid) {
+    showIssuesForGlobalId(null);
     return;
   }
+
+  // selection wins over hover
+  clearHover();
+
+  const meshes = state.objectsByGlobalId.get(gid) ?? [];
+  for (const m of meshes) setFillHighlight(m, true);
+
+  showIssuesForGlobalId(gid);
+
+  // focus later (click issue -> focus). keep disabled for now.
+  // focusGlobalId(gid);
+}
+//#endregion
+
+//#region canvas picking
+function onCanvasPick(ev) {
+  if (!state.modelRoot) return;
 
   const rect = state.renderer.domElement.getBoundingClientRect();
   const mouse = new THREE.Vector2(
@@ -131,40 +327,31 @@ function onCanvasPick(ev) {
   raycaster.setFromCamera(mouse, state.camera);
 
   const hits = raycaster.intersectObject(state.modelRoot, true);
-  console.log("hits:", hits.length);
 
-  if (!hits.length) return;
-
-  const hit = hits[0].object;
-  const named = findNamedAncestor(hit);
-  const gid = named?.name;
-
-  console.log("hit name:", hit.name);
-  console.log("resolved gid:", gid);
-
-  if (gid) selectGlobalId(gid);
-}
-
-async function main() {
-  let isDragging = false;
-  let downPos = { x: 0, y: 0 };
-
-  const DRAG_PX = 6;
-
-  const canvas = document.getElementById("viewerCanvas");
-  if (!canvas) {
-    console.warn("viewerCanvas not found. Add <canvas id='viewerCanvas'> to report.");
+  // click void -> clear selection
+  if (!hits.length) {
+    clearSelection();
     return;
   }
 
+  const hitObj = hits[0].object;
+  const named = findNamedAncestor(hitObj);
+  const gid = named?.name ?? null;
+
+  selectGlobalId(gid);
+}
+//#endregion
+
+//#region app init
+async function main() {
+  const canvas = document.getElementById("viewerCanvas");
+  if (!canvas) return;
+
   state.viewerInfo = document.getElementById("viewerInfo") ?? null;
 
-  // Load issues and build lookup
   const issues = await fetchIssues();
   state.issuesByGid = buildIssuesByGlobalId(issues);
-  console.log("Issues loaded:", issues.length, "Unique gids:", state.issuesByGid.size);
 
-  // Three setup
   state.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   state.renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -190,6 +377,11 @@ async function main() {
   window.addEventListener("resize", resize);
   resize();
 
+  // click vs drag guard
+  let isDragging = false;
+  let downPos = { x: 0, y: 0 };
+  const DRAG_PX = 6;
+
   state.renderer.domElement.addEventListener("pointerdown", (e) => {
     isDragging = false;
     downPos = { x: e.clientX, y: e.clientY };
@@ -201,45 +393,47 @@ async function main() {
     if (dx * dx + dy * dy > DRAG_PX * DRAG_PX) isDragging = true;
   });
 
-  // pointerup as “click” event
   state.renderer.domElement.addEventListener("pointerup", (e) => {
     if (isDragging) return;
     if (e.button !== 0) return;
     onCanvasPick(e);
   });
 
-  // Load GLB
   const loader = new GLTFLoader();
-  loader.load("./model.glb", (gltf) => {
-    state.modelRoot = gltf.scene;
-    state.scene.add(state.modelRoot);
+  loader.load(
+    "./model.glb",
+    (gltf) => {
+      state.modelRoot = gltf.scene;
+      state.scene.add(state.modelRoot);
 
-    // Build objectsByGlobalId
-    state.objectsByGlobalId = new Map();
-    state.modelRoot.traverse((obj) => {
-      if (!obj.isMesh) return;
-      const gid = obj.name;
-      if (!gid) return;
+      resize();
+      simpleFit(state.modelRoot, state.camera, state.controls);
 
-      if (!state.objectsByGlobalId.has(gid)) state.objectsByGlobalId.set(gid, []);
-      state.objectsByGlobalId.get(gid).push(obj);
-    });
-
-    console.log("GLB loaded. Meshes indexed by GlobalId:", state.objectsByGlobalId.size);
-  }, undefined, (err) => {
-    console.error("Failed to load model.glb:", err);
-  });
+      indexMeshesByGuidNode();
+    },
+    undefined,
+    (err) => console.error("Failed to load model.glb:", err)
+  );
 
   function animate() {
     requestAnimationFrame(animate);
     state.renderer.render(state.scene, state.camera);
   }
   animate();
+
+  window.addEventListener("ifcqa:hover", (e) => hoverGlobalId(e.detail?.gid ?? null));
+  window.addEventListener("ifcqa:select", (e) => selectGlobalId(e.detail?.gid ?? null));
 }
 
-main().catch(console.error);
+function hasNodeNamed(root, gid) {
+  let found = false;
+  root.traverse((obj) => {
+    if (found) return;
+    if (obj.name === gid) found = true;
+  });
+  return found;
+}
 
-window.addEventListener("ifcqa:select", (e) => {
-  const gid = e.detail?.gid;
-  if (gid) selectGlobalId(gid);
-});
+
+main().catch(console.error);
+//#endregion
