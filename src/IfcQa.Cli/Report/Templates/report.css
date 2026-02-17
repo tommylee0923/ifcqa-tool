@@ -26,8 +26,76 @@ a {
 .wrap {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 32px;
 }
+
+.layout {
+    position: relative;
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.leftPanel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 520px;
+    height: 100vh;
+    overflow: auto;
+    padding: 16px;
+    box-sizing: border-box;
+    background: #fff;
+    border-right: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.rightPanel {
+    position: fixed;
+    top: 0;
+    left: 520px;
+    right: 0;
+    height: 100vh;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.viewerPane {
+    height: calc(100vh - 32px);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+#viewerCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.tableWrap {
+    overflow: auto;
+    max-height: calc(100vh - 380px);
+    border-radius: 12px;
+}
+
+/* Mobile: stack (viewer on top or bottom—pick one) */
+@media (max-width: 900px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .rightPanel {
+        position: relative;
+        height: auto;
+    }
+
+    .tableWrap {
+        max-height: none;
+    }
+
+    .viewerPane {
+        height: 50vh;
+    }
+}
+
 
 .h1 {
     font-size: 20px;
@@ -67,7 +135,7 @@ a {
 .card {
     background: var(--card);
     border: 1px solid var(--line);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .k {
@@ -153,6 +221,18 @@ tr:hover td {
     font-weight: 700;
 }
 
+.sevBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+}
+
 .sev.Error {
     color: #b91c1c;
 }
@@ -164,6 +244,54 @@ tr:hover td {
 .sev.Info {
     color: #1d4ed8;
 }
+
+
+.muted {
+    opacity: 0.65;
+    font-weight: 500;
+}
+
+.sub {
+    margin-top: 4px;
+    font-size: 12px;
+    opacity: 0.7;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.col-msg .msgText {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ruleOneLine,
+.nameOneLine {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.msgTwoLine {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.copyIcon {
+    font-size: 12px;
+    opacity: 0.7;
+    cursor: pointer;
+    user-select: none;
+}
+
+.copyIcon:hover {
+    opacity: 1;
+}
+
 
 .small {
     font-size: 12px;
@@ -280,7 +408,9 @@ tr:hover td {
     word-break: break-word;
 }
 
-#dRuleInfo { white-space: pre-line; }
+#dRuleInfo {
+    white-space: pre-line;
+}
 
 .mono {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

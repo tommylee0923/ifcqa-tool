@@ -255,64 +255,88 @@ rows.addEventListener("click", async (e) => {
 });
 
 rows.addEventListener("mouseover", (e) => {
-  const tr = e.target.closest("tr[data-idx]");
-  if (!tr) return;
+    const tr = e.target.closest("tr[data-idx]");
+    if (!tr) return;
 
-  const idx = Number(tr.dataset.idx);
-  if (__hoveredIdx === idx) return;
-  __hoveredIdx = idx;
+    const idx = Number(tr.dataset.idx);
+    if (__hoveredIdx === idx) return;
+    __hoveredIdx = idx;
 
-  const issue = window.__viewIssues?.[idx];
-  const gid = issue?.globalId || tr.dataset.gid || null;
+    const issue = window.__viewIssues?.[idx];
+    const gid = issue?.globalId || tr.dataset.gid || null;
 
-  window.dispatchEvent(new CustomEvent("ifcqa:hover", { detail: { gid } }));
+    window.dispatchEvent(new CustomEvent("ifcqa:hover", { detail: { gid } }));
 });
 
 rows.addEventListener("mouseout", (e) => {
-  const tr = e.target.closest("tr[data-idx]");
-  if (!tr) return;
+    const tr = e.target.closest("tr[data-idx]");
+    if (!tr) return;
 
-  const to = e.relatedTarget;
-  if (to && tr.contains(to)) return;
+    const to = e.relatedTarget;
+    if (to && tr.contains(to)) return;
 
-  __hoveredIdx = null;
-  window.dispatchEvent(new CustomEvent("ifcqa:hover", { detail: { gid: null } }));
+    __hoveredIdx = null;
+    window.dispatchEvent(new CustomEvent("ifcqa:hover", { detail: { gid: null } }));
 });
 
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+}
 
 
 function renderFlat(filtered) {
     rows.innerHTML = "";
     const frag = document.createDocumentFragment();
 
+    const sevLetter = (s) => (s === "Error" ? "E" : s === "Warning" ? "W" : "I");
+
     filtered.forEach((i, idx) => {
         const tr = document.createElement("tr");
         tr.dataset.idx = String(idx);
         tr.dataset.gid = i.globalId || "";
 
+        // Severity badge
+        // const tdSev = document.createElement("td");
+        // tdSev.className = "col-sev";
+        // const badge = document.createElement("span");
+        // badge.className = `sevBadge sev-${i.severity || "Info"}`;
+        // badge.title = i.severity || "Info";
+        // badge.textContent = sevLetter(i.severity);
+        // tdSev.appendChild(badge);
         const tdSev = document.createElement("td");
-        tdSev.className = `sev ${i.severity}`;
-        tdSev.textContent = i.severity;
+        tdSev.className = `col-sev sev ${i.severity}`;
+        tdSev.textContent = i.severity || "";
 
+        // Rule + class combined (primary meta)
         const tdRule = document.createElement("td");
-        tdRule.textContent = i.ruleId;
+        tdRule.className = "col-rule ruleOneLine";
+        tdRule.title = i.ruleId || "";
+        tdRule.textContent = i.ruleId || "";
+
 
         const tdClass = document.createElement("td");
-        tdClass.textContent = i.ifcClass;
+        tdClass.className = "col-class";
+        tdClass.textContent = i.ifcClass || "";
 
         const tdGid = document.createElement("td");
-        const gidSpan = document.createElement("span");
-        gidSpan.className = "copy";
-        gidSpan.dataset.copy = i.globalId || "";
-        gidSpan.textContent = i.globalId || "";
-        tdGid.appendChild(gidSpan);
+        tdGid.className = "col-gid";
+        const gidCopy = document.createElement("span");
+        gidCopy.className = "copy copyIcon";
+        gidCopy.dataset.copy = i.globalId || "";
+        gidCopy.title = "Copy GlobalId";
+        gidCopy.textContent = "Copy";
+        tdGid.appendChild(gidCopy);
 
         const tdName = document.createElement("td");
-        tdName.className = "small";
+        tdName.className = "col-name small nameOneLine";
+        tdName.title = i.name || "";
         tdName.textContent = i.name || "";
 
         const tdMsg = document.createElement("td");
-        tdMsg.textContent = i.message || "";
+        tdMsg.className = "col-msg";
+        tdMsg.innerHTML = `<div class="msgTwoLine">${escapeHtml(i.message || "")}</div>`;
 
         tr.append(tdSev, tdRule, tdClass, tdGid, tdName, tdMsg);
         frag.appendChild(tr);
@@ -320,6 +344,7 @@ function renderFlat(filtered) {
 
     rows.appendChild(frag);
 }
+
 
 function renderGrouped(filtered) {
     rows.innerHTML = "";

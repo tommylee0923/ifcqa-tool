@@ -58,10 +58,10 @@ function findNamedAncestor(obj) {
 }
 
 function looksLikeIfcGuid(name) {
-  return  typeof name === "string" && 
-          name.length >= 20 &&
-          name.length <= 30 &&
-          /[A-Za-z0-9_$]/.test(name);
+  return typeof name === "string" &&
+    name.length >= 20 &&
+    name.length <= 30 &&
+    /[A-Za-z0-9_$]/.test(name);
 }
 
 function indexMeshesByGuidNode() {
@@ -368,14 +368,20 @@ async function main() {
   state.scene.add(dir);
 
   function resize() {
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
+    if (!state.renderer || !state.camera) return;
+
+    // Prefer parent container size (more reliable than canvas.clientWidth/Height)
+    const host = canvas.parentElement; // e.g. #viewerPane / .viewerPane
+    const w = Math.max(1, host?.clientWidth ?? canvas.clientWidth);
+    const h = Math.max(1, host?.clientHeight ?? canvas.clientHeight);
+
     state.renderer.setSize(w, h, false);
     state.camera.aspect = w / h;
     state.camera.updateProjectionMatrix();
   }
   window.addEventListener("resize", resize);
-  resize();
+  requestAnimationFrame(resize);
+  setTimeout(resize, 0);
 
   // click vs drag guard
   let isDragging = false;
