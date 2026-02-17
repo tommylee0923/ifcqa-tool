@@ -12,6 +12,9 @@ document.getElementById("cErrors").textContent = data.counts.errors;
 document.getElementById("cWarnings").textContent = data.counts.warnings;
 document.getElementById("cInfo").textContent = data.counts.info;
 
+// Sections
+const leftPanel = document.querySelector(".leftPanel");
+
 // controls
 const fSeverity = document.getElementById("fSeverity");
 const fRule = document.getElementById("fRule");
@@ -24,7 +27,7 @@ const shown = document.getElementById("shown");
 const btnExportCsv = document.getElementById("btnExportCsv");
 const btnCopyLink = document.getElementById("btnCopyLink");
 const btnClearRuleset = document.getElementById("btnClearRuleset");
-
+const floatingCopyBtn = document.getElementById("floatingCopyBtn");
 
 // drawer
 const drawer = document.getElementById("drawer");
@@ -51,6 +54,76 @@ let rulesetMetaByRuleId = {}; // { [ruleId]: { title, why, description } }
 rulesetMetaByRuleId = data.rulesetMeta || {};
 
 let currentIssue = null;
+let activeRowEl = null;
+let activeGid = "";
+
+function positionFloatingCopy(rowEl) {
+    if (!rowEl) return;
+
+    const panelRect = leftPanel.getBoundingClientRect();
+    const rowRect = rowEl.getBoundingClientRect();
+
+    const btnRect = floatingCopyBtn.getBoundingClientRect();
+    const left = panelRect.right - 12 - (btnRect.width || 44);
+
+    const top = rowRect.top + rowRect.height / 2 - (btnRect.height || 28) / 2;
+
+    floatingCopyBtn.style.left = `${left}px`;
+    floatingCopyBtn.style.top = `${top}px`;
+}
+
+function showFloatingCopy(rowEl) {
+    activeRowEl = rowEl;
+    activeGid = rowEl?.dataset?.gid || "";
+    if (!activeGid) return;
+
+    floatingCopyBtn.classList.remove("hidden");
+    positionFloatingCopy(rowEl);
+}
+
+function hideFloatingCopy() {
+    activeRowEl = null;
+    activeGid = "";
+    floatingCopyBtn.classList.add("hidden");
+}
+
+rows.addEventListener("mousemove", (e) => {
+    const tr = e.target.closest("tr");
+    if (!tr || !rows.contains(tr)) return;
+    if (tr === activeRowEl) return;
+    showFloatingCopy(tr);
+});
+
+const tableWrap = document.querySelector(".tableWrap");
+tableWrap.addEventListener("mouseleave", (e) => {
+    // if moving into the floating button, don't hide
+    if (e.relatedTarget && floatingCopyBtn.contains(e.relatedTarget)) return;
+    hideFloatingCopy();
+});
+
+floatingCopyBtn.addEventListener("mouseleave", (e) => {
+    // if moving back into table, don't hide
+    if (e.relatedTarget && tableWrap.contains(e.relatedTarget)) return;
+    hideFloatingCopy();
+});
+
+
+leftPanel.addEventListener("scroll", () => {
+    if (activeRowEl) positionFloatingCopy(activeRowEl);
+});
+
+floatingCopyBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (!activeGid) return;
+
+    try {
+        await navigator.clipboard.writeText(activeGid);
+        floatingCopyBtn.textContent = "Copied";
+        positionFloatingCopy(activeRowEl);
+        setTimeout(() => (floatingCopyBtn.textContent = "Copy GlobalID"), 600);
+    } catch {
+    }
+});
 
 function getStateFromUI() {
     return {
@@ -69,7 +142,7 @@ function applyStateToUI(state) {
     if (state.q != null) fText.value = state.q;
     if (fGroup) fGroup.checked = state.group === "1";
 
-    // keep chips synced (if you added them)
+    // keep chips synced (if added)
     const sevChips = document.getElementById("sevChips");
     if (sevChips) {
         const v = fSeverity.value || "";
@@ -87,7 +160,7 @@ function writeStateToHash(state) {
     if (state.q) p.set("q", state.q);
     if (state.group === "1") p.set("group", "1");
     const hash = p.toString();
-    // use replaceState so it doesn't spam history while typing
+    // use replaceState to prevent spamming history while typing
     history.replaceState(null, "", hash ? `#${hash}` : "#");
 }
 
@@ -297,14 +370,6 @@ function renderFlat(filtered) {
         tr.dataset.idx = String(idx);
         tr.dataset.gid = i.globalId || "";
 
-        // Severity badge
-        // const tdSev = document.createElement("td");
-        // tdSev.className = "col-sev";
-        // const badge = document.createElement("span");
-        // badge.className = `sevBadge sev-${i.severity || "Info"}`;
-        // badge.title = i.severity || "Info";
-        // badge.textContent = sevLetter(i.severity);
-        // tdSev.appendChild(badge);
         const tdSev = document.createElement("td");
         tdSev.className = `col-sev sev ${i.severity}`;
         tdSev.textContent = i.severity || "";
@@ -322,12 +387,6 @@ function renderFlat(filtered) {
 
         const tdGid = document.createElement("td");
         tdGid.className = "col-gid";
-        const gidCopy = document.createElement("span");
-        gidCopy.className = "copy copyIcon";
-        gidCopy.dataset.copy = i.globalId || "";
-        gidCopy.title = "Copy GlobalId";
-        gidCopy.textContent = "Copy";
-        tdGid.appendChild(gidCopy);
 
         const tdName = document.createElement("td");
         tdName.className = "col-name small nameOneLine";
@@ -338,7 +397,7 @@ function renderFlat(filtered) {
         tdMsg.className = "col-msg";
         tdMsg.innerHTML = `<div class="msgTwoLine">${escapeHtml(i.message || "")}</div>`;
 
-        tr.append(tdSev, tdRule, tdClass, tdGid, tdName, tdMsg);
+        tr.append(tdSev, tdRule, tdClass, tdName, tdMsg);
         frag.appendChild(tr);
     });
 

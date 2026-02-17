@@ -23,6 +23,7 @@ a {
     color: inherit;
 }
 
+
 .wrap {
     max-width: 1200px;
     margin: 0 auto;
@@ -46,6 +47,21 @@ a {
     box-sizing: border-box;
     background: #fff;
     border-right: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.floatingCopy {
+    position: fixed;
+    z-index: 50;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    background: #fff;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.floatingCopy .hidden {
+    display: none !important;
 }
 
 .rightPanel {
@@ -198,9 +214,8 @@ input {
 th,
 td {
     text-align: left;
-    padding: 12px 14px;
+    padding: 6px 14px;
     border-bottom: 1px solid var(--line);
-    vertical-align: top;
 }
 
 th {
@@ -281,15 +296,21 @@ tr:hover td {
     overflow: hidden;
 }
 
-.copyIcon {
+.copyAction {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms ease;
     font-size: 12px;
-    opacity: 0.7;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    background: transparent;
     cursor: pointer;
-    user-select: none;
 }
 
-.copyIcon:hover {
+tr:hover .copyAction {
     opacity: 1;
+    pointer-events: auto;
 }
 
 
