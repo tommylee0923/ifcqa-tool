@@ -6,3 +6,4 @@ obj/
 out/
 .vs/
 .DS_Store
+.temp
