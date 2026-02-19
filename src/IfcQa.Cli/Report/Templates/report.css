@@ -371,6 +371,26 @@ tbody tr[data-idx].selected {
     font-size: 12px;
 }
 
+.drawerEdgeClose {
+    position: fixed;
+    z-index: 999;
+    width: 28px;
+    height: 56px;
+    border-radius: 0 10px 10px 0;
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.10);
+}
+
+.drawerEdgeClose.hidden {
+    display: none !important;
+}
 
 .overlay {
     display: none !important;
@@ -405,15 +425,6 @@ tbody tr[data-idx].selected {
     display: flex;
     align-items: start;
     gap: 10px;
-}
-
-#dClose {
-    background: none;
-    border: none;
-}
-
-#leftCloseArrow {
-    width: 20px;
 }
 
 .drawerTitle {

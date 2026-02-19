@@ -164,9 +164,6 @@ function ensureOutline(mesh) {
     depthTest: false,
     transparent: true,
     opacity: 0.75,
-    // polygonOffset: true,
-    // polygonOffsetFactor: 1,
-    // polygonOffsetUnits: 1,
   });
 
   const outline = new THREE.Mesh(mesh.geometry, outlineMat);
@@ -370,8 +367,7 @@ async function main() {
   function resize() {
     if (!state.renderer || !state.camera) return;
 
-    // Prefer parent container size (more reliable than canvas.clientWidth/Height)
-    const host = canvas.parentElement; // e.g. #viewerPane / .viewerPane
+    const host = canvas.parentElement;
     const w = Math.max(1, host?.clientWidth ?? canvas.clientWidth);
     const h = Math.max(1, host?.clientHeight ?? canvas.clientHeight);
 
