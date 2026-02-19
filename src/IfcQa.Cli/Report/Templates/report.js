@@ -58,7 +58,6 @@ const dPath = document.getElementById("dPath");
 const dSource = document.getElementById("dSource");
 const dExpected = document.getElementById("dExpected");
 const dActual = document.getElementById("dActual");
-
 //#endregion
 
 
@@ -415,6 +414,7 @@ function openDrawer(issue) {
   leftPanel.classList.add("drawerOpen");
   drawer.classList.remove("hidden");
   drawer.setAttribute("aria-hidden", "false");
+  showDrawerClose();
 }
 
 function closeDrawer() {
@@ -422,6 +422,7 @@ function closeDrawer() {
   drawer.classList.add("hidden");
   drawer.setAttribute("aria-hidden", "true");
   currentIssue = null;
+  hideDrawerClose();
 }
 
 // Drawer events
@@ -470,12 +471,13 @@ document.addEventListener("pointerdown", (e) => {
   const t = e.target;
 
   if (
-    t.closest('tr[data-gid]') ||          
-    t.closest("#floatingCopyBtn") ||      
-    t.closest(".controls") ||             
-    t.closest(".chips") ||                
-    t.closest(".drawer") ||              
-    t.closest("#viewerPane")              
+    t.closest('tr[data-gid]') ||
+    t.closest("#floatingCopyBtn") ||
+    t.closest(".controls") ||
+    t.closest(".chips") ||
+    t.closest(".drawer") ||
+    t.closest("#viewerPane") ||
+    t.closest("#drawerEdgeClose")
   ) {
     return;
   }
@@ -512,7 +514,6 @@ rows.addEventListener("click", async (e) => {
   showFloatingCopy(tr);
   window.dispatchEvent(new CustomEvent("ifcqa:select", { detail: { gid: selectedGid } }));
   openDrawer(issue);
-  positionCloseButton()
 });
 
 rows.addEventListener("mouseover", (e) => {
@@ -542,6 +543,34 @@ rows.addEventListener("mouseout", (e) => {
 
 //#endregion
 
+//#region Close Button
+const drawerEdgeClose = document.getElementById("drawerEdgeClose");
+
+function positionCloseButton() {
+  const r = leftPanel.getBoundingClientRect();
+  const btnH = drawerEdgeClose.offsetHeight || 56;
+
+  drawerEdgeClose.style.left = `${r.right - 1}px`; // slightly overlap border
+  drawerEdgeClose.style.top = `${(window.innerHeight / 2) - (btnH / 2)}px`;
+}
+
+function showDrawerClose() {
+  drawerEdgeClose.classList.remove("hidden");
+  requestAnimationFrame(positionCloseButton());
+}
+
+function hideDrawerClose() {
+  drawerEdgeClose.classList.add("hidden");
+}
+
+window.addEventListener("resize", () => {
+  if (!drawerEdgeClose.classList.contains("hidden")) positionCloseButton();
+});
+
+drawerEdgeClose.addEventListener("click", closeDrawer);
+
+console.log("drawerEdgeClose:", drawerEdgeClose);
+//#endregion
 
 //#region Floating Copy Button
 
