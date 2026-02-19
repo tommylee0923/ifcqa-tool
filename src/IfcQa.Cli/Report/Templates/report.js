@@ -68,6 +68,7 @@ let rulesetMetaByRuleId = data.rulesetMeta || {};
 let currentIssue = null;
 
 let __hoveredIdx = null;
+let selectedGid = "";
 
 // Floating copy tracking
 let activeRowEl = null;
@@ -294,7 +295,6 @@ function renderGrouped(filtered) {
       <thead>
         <tr>
           <th style="width:140px;">IfcClass</th>
-          <th style="width:240px;">GlobalId</th>
           <th style="width:200px;">Name</th>
           <th>Message</th>
         </tr>
@@ -320,23 +320,19 @@ function renderGrouped(filtered) {
         tr.dataset.gid = i.globalId || "";
 
         const tdClass = document.createElement("td");
+        tdClass.className = "ruleOneLine";
+        tdClass.title = i.ifcClass || "";
         tdClass.textContent = i.ifcClass || "";
 
-        const tdGid = document.createElement("td");
-        const gidSpan = document.createElement("span");
-        gidSpan.className = "copy";
-        gidSpan.dataset.copy = i.globalId || "";
-        gidSpan.textContent = i.globalId || "";
-        tdGid.appendChild(gidSpan);
-
         const tdName = document.createElement("td");
-        tdName.className = "small";
+        tdName.className = "small nameOneLine";
+        tdName.title = i.name || "";
         tdName.textContent = i.name || "";
 
         const tdMsg = document.createElement("td");
-        tdMsg.textContent = i.message || "";
+        tdMsg.innerHTML = `<div class="msgTwoLine">${escapeHtml(i.message || "")}</div>`;
 
-        tr.append(tdClass, tdGid, tdName, tdMsg);
+        tr.append(tdClass, tdName, tdMsg);
         tbody.appendChild(tr);
       });
 
@@ -426,7 +422,6 @@ function closeDrawer() {
   drawer.classList.add("hidden");
   drawer.setAttribute("aria-hidden", "true");
   currentIssue = null;
-  clearSelectedRow();
 }
 
 // Drawer events
@@ -453,14 +448,42 @@ dCopy?.addEventListener("click", async () => {
 //#region Row Selection + Viewer Events (hover/select)
 
 function clearSelectedRow() {
-  rows.querySelectorAll("tr.selected").forEach(el => el.classList.remove("selected"));
+  document.querySelectorAll("tr.selected").forEach(el => el.classList.remove("selected"));
 }
 
-function selectRowByIdx(idx) {
+function selectRowByGid(gid) {
   clearSelectedRow();
-  const tr = rows.querySelector(`tr[data-idx="${idx}"]`);
+  if (!gid) return;
+  const tr = document.querySelector(`tr[data-gid="${CSS.escape(gid)}"]`);
   if (tr) tr.classList.add("selected");
 }
+
+function clearSelection() {
+  selectedGid = "";
+  clearSelectedRow();
+  hideFloatingCopy();
+  window.dispatchEvent(new CustomEvent("ifcqa:clear"));
+}
+
+// Clear selection when clicking empty areas
+document.addEventListener("pointerdown", (e) => {
+  const t = e.target;
+
+  if (
+    t.closest('tr[data-gid]') ||          
+    t.closest("#floatingCopyBtn") ||      
+    t.closest(".controls") ||             
+    t.closest(".chips") ||                
+    t.closest(".drawer") ||              
+    t.closest("#viewerPane")              
+  ) {
+    return;
+  }
+
+  clearSelection();
+}, {
+  capture: true
+});
 
 rows.addEventListener("click", async (e) => {
   const copyEl = e.target.closest(".copy");
@@ -477,16 +500,19 @@ rows.addEventListener("click", async (e) => {
     return;
   }
 
-  const tr = e.target.closest("tr[data-idx]");
+  const tr = e.target.closest('tr[data-idx]');
   if (!tr) return;
 
   const idx = Number(tr.dataset.idx);
   const issue = window.__viewIssues?.[idx];
   if (!issue) return;
 
-  selectRowByIdx(idx);
-  window.dispatchEvent(new CustomEvent("ifcqa:select", { detail: { gid: issue.globalId } }));
+  selectedGid = issue.globalId || "";
+  selectRowByGid(selectedGid);
+  showFloatingCopy(tr);
+  window.dispatchEvent(new CustomEvent("ifcqa:select", { detail: { gid: selectedGid } }));
   openDrawer(issue);
+  positionCloseButton()
 });
 
 rows.addEventListener("mouseover", (e) => {
@@ -552,25 +578,60 @@ function hideFloatingCopy() {
   floatingCopyBtn.classList.add("hidden");
 }
 
-rows.addEventListener("mousemove", (e) => {
+leftPanel.addEventListener("scroll", () => {
+  if (activeRowEl) positionFloatingCopy(activeRowEl);
+});
+
+rows.addEventListener("pointermove", (e) => {
   const tr = e.target.closest("tr");
   if (!tr || !rows.contains(tr)) return;
   if (tr === activeRowEl) return;
   showFloatingCopy(tr);
 });
 
-tableWrap?.addEventListener("mouseleave", (e) => {
+leftPanel.addEventListener("pointermove", (e) => {
+  const tr = e.target.closest('tr[data-gid]');
+  if (!tr) return;
+  if (tr === activeRowEl) return;
+  showFloatingCopy(tr);
+});
+
+leftPanel.addEventListener("pointerleave", (e) => {
   if (e.relatedTarget && floatingCopyBtn.contains(e.relatedTarget)) return;
   hideFloatingCopy();
 });
 
-floatingCopyBtn?.addEventListener("mouseleave", (e) => {
-  if (e.relatedTarget && tableWrap.contains(e.relatedTarget)) return;
+tableWrap?.addEventListener("pointerleave", (e) => {
+  if (e.relatedTarget && floatingCopyBtn.contains(e.relatedTarget)) return;
   hideFloatingCopy();
 });
 
-leftPanel.addEventListener("scroll", () => {
-  if (activeRowEl) positionFloatingCopy(activeRowEl);
+floatingCopyBtn?.addEventListener("pointerleave", (e) => {
+  if (e.relatedTarget && (tableWrap.contains(e.relatedTarget) || leftPanel.contains(e.relatedTarget))) return;
+  hideFloatingCopy();
+});
+
+tableWrap.addEventListener("pointermove", (e) => {
+  const tr = e.target.closest("tr[data-gid]");
+  if (tr) {
+    if (tr !== activeRowEl) showFloatingCopy(tr);
+    return;
+  }
+
+  if (selectedGid) return;
+
+  if (e.target === floatingCopyBtn || floatingCopyBtn.contains(e.target)) return;
+  hideFloatingCopy();
+});
+
+tableWrap.addEventListener("pointerleave", (e) => {
+  if (e.relatedTarget && floatingCopyBtn.contains(e.relatedTarget)) return;
+  hideFloatingCopy();
+});
+
+floatingCopyBtn.addEventListener("pointerleave", (e) => {
+  if (e.relatedTarget && tableWrap.contains(e.relatedTarget)) return;
+  hideFloatingCopy();
 });
 
 floatingCopyBtn?.addEventListener("click", async (e) => {

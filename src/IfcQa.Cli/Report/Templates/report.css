@@ -55,7 +55,7 @@ a {
     left: 0;
     width: 520px;
     height: 100vh;
-    overflow: auto;
+    overflow: scroll;
     padding: 16px;
     box-sizing: border-box;
     background: var(--bg);
@@ -280,6 +280,7 @@ th {
     background: #f9fafb;
     z-index: 1;
 }
+
 
 tr:hover td {
     background: #f9fafb;
