@@ -9,7 +9,8 @@ export default defineConfig({
             formats: ["iife"],
             fileName: () => "viewer.bundle.js",
         },
-        outDir: path.resolve(__dirname, "../viewer"),
+        outDir: ".",
         emptyOutDir: false,
+        rollupOptions: { output: { entryFileNames: "viewer.bundle.js" } }
     },
 });

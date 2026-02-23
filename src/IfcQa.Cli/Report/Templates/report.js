@@ -18,7 +18,9 @@ document.getElementById("cInfo").textContent = data.counts.info;
 
 //#region DOM References
 
+const root = document.documentElement;
 const leftPanel = document.querySelector(".leftPanel");
+const splitter = document.getElementById("splitter");
 
 const fSeverity = document.getElementById("fSeverity");
 const fRule = document.getElementById("fRule");
@@ -543,6 +545,95 @@ rows.addEventListener("mouseout", (e) => {
 
 //#endregion
 
+//#region Splitter
+
+const saved = Number(localStorage.getItem("ifcqa:leftW"));
+if (!Number.isNaN(saved) && saved > 0) {
+  root.style.setProperty("--leftW", `${saved}px`);
+  requestAnimationFrame(() => {
+    if (typeof window.ifcqaViewerResize === "function") window.ifcqaViewerResize();
+  });
+}
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+};
+
+let dragging = false;
+let rafId = 0;
+let nextW = 0;
+
+function applyWidth(w) {
+  root.style.setProperty("--leftW", `${w}px`);
+  if (typeof positionCloseButton === "function") positionCloseButton();
+};
+
+function scheduleApply() {
+  if (rafId) return;
+  rafId = requestAnimationFrame(() => {
+    rafId = 0;
+    applyWidth(nextW);
+  });
+};
+
+splitter.addEventListener("pointerdown", (e) => {
+  dragging = true;
+  splitter.setPointerCapture(e.pointerId);
+  document.body.classList.add("resizing");
+  window.dispatchEvent(new Event("ifcqa:dragstart"));
+
+  const min = 320;
+  const max = Math.max(min + 50, window.innerWidth - 320);
+
+  splitter.dataset.min = String(min);
+  splitter.dataset.max = String(max);
+});
+
+splitter.addEventListener("pointermove", (e) => {
+  if (!dragging) return;
+
+  const min = Number(splitter.dataset.min || 320);
+  const max = Number(splitter.dataset.max || (window.innerWidth - 320));
+
+  nextW = clamp(e.clientX, min, max);
+  scheduleApply();
+});
+
+function endDrag(e) {
+  if (!dragging) return;
+
+  dragging = false;
+  document.body.classList.remove("resizing");
+
+  const w = parseFloat(getComputedStyle(root).getPropertyValue("--leftW")) || nextW || 520;
+  localStorage.setItem("ifcqa:leftW", String(Math.round(w)));
+  window.dispatchEvent(new Event("ifcqa:layout"));
+
+  try {
+    splitter.releasePointerCapture(e.pointerId);
+  } catch { }
+};
+
+splitter.addEventListener("pointerup", (e) => {
+  window.dispatchEvent(new Event("ifcqa:dragend"));
+  endDrag(e);
+});
+
+splitter.addEventListener("pointercancel", (e) => {
+  window.dispatchEvent(new Event("ifcqa:dragend"));
+  endDrag(e);
+});
+
+window.addEventListener("resize", () => {
+  const current = parseFloat(getComputedStyle(root).getPropertyValue("--leftW")) || 520;
+  const min = 320;
+  const max = Math.max(min + 50, window.innerWidth - 320);
+  const clamped = clamp(current, min, max);
+  applyWidth(clamped);
+});
+
+//#endregion
+
 //#region Close Button
 const drawerEdgeClose = document.getElementById("drawerEdgeClose");
 
@@ -581,7 +672,7 @@ function positionFloatingCopy(rowEl) {
   const rowRect = rowEl.getBoundingClientRect();
 
   const btnRect = floatingCopyBtn.getBoundingClientRect();
-  const left = panelRect.right - 12 - (btnRect.width || 44);
+  const left = panelRect.right - 36 - (btnRect.width || 44);
   const top = rowRect.top + rowRect.height / 2 - (btnRect.height || 28) / 2;
 
   floatingCopyBtn.style.left = `${left}px`;

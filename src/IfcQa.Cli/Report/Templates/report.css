@@ -5,6 +5,11 @@
     --muted: #6b7280;
     --line: #e5e7eb;
     --pill: #f3f4f6;
+
+    --leftMin: 320px;
+    --leftMax: 760px;
+    --leftW: 520px;
+    --gutterW: 10px;
 }
 
 html {
@@ -17,6 +22,17 @@ body {
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     background: var(--bg);
     color: var(--text);
+}
+
+body.resizing {
+    cursor: col-resize;
+    user-select: none;
+}
+
+body.resizing #viewerCanvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
 }
 
 a {
@@ -53,23 +69,51 @@ a {
     position: fixed;
     top: 0;
     left: 0;
-    width: 520px;
+    width: var(--leftW);
     height: 100vh;
     overflow: scroll;
     padding: 16px;
     box-sizing: border-box;
     background: var(--bg);
     border-right: 1px solid rgba(0, 0, 0, 0.12);
+    z-index: 2;
+}
+
+.splitter {
+    position: fixed;
+    top: 0;
+    left: var(--leftW);
+    width: var(--gutterW);
+    height: 100vh;
+    cursor: col-resize;
+    z-index: 5;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.splitter:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.splitter::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.18);
 }
 
 .rightPanel {
     position: fixed;
     top: 0;
-    left: 520px;
+    left: calc(var(--leftW) + var(--gutterW));
     right: 0;
     height: 100vh;
     overflow: hidden;
     box-sizing: border-box;
+    z-index: 1;
 }
 
 .wrap {
@@ -82,6 +126,7 @@ a {
     height: calc(100vh - 32px);
     overflow: hidden;
     border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #000;
 }
 
 #viewerCanvas {

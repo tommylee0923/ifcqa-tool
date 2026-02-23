@@ -339,10 +339,38 @@ function onCanvasPick(ev) {
 }
 //#endregion
 
+//#region Dragging Left Panel
+
+const canvas = document.getElementById("viewerCanvas");
+const viewerPane = document.getElementById("viewerPane");
+
+function freezeViewerSnapshot() {
+  try {
+    const dataUrl = canvas.toDataURL("image/png");
+    viewerPane.style.backgroundImage = `url(${dataUrl})`;
+    viewerPane.style.backgroundSize = "cover";
+    viewerPane.style.backgroundPosition = "center";
+    viewerPane.style.backgroundRepeat = "no-repeat";
+    canvas.style.opacity = "0";          
+  } catch {
+    canvas.style.opacity = "0";
+  }
+}
+
+function unfreezeViewerSnapshot() {
+  canvas.style.opacity = "1";
+  viewerPane.style.backgroundImage = "";
+}
+
+window.addEventListener("ifcqa:dragstart", freezeViewerSnapshot);
+window.addEventListener("ifcqa:dragend", unfreezeViewerSnapshot);
+
+//#endregion
+
 //#region app init
 async function main() {
-  const canvas = document.getElementById("viewerCanvas");
   if (!canvas) return;
+
 
   state.viewerInfo = document.getElementById("viewerInfo") ?? null;
 
@@ -375,6 +403,13 @@ async function main() {
     state.camera.aspect = w / h;
     state.camera.updateProjectionMatrix();
   }
+
+  window.ifcqaViewerResize = () => resize();
+  window.addEventListener("ifcqa:layout", () => {
+    resize();
+  });
+  console.log("viewer resize hook installed");
+
   window.addEventListener("resize", resize);
   requestAnimationFrame(resize);
   setTimeout(resize, 0);
@@ -435,7 +470,6 @@ function hasNodeNamed(root, gid) {
   });
   return found;
 }
-
 
 main().catch(console.error);
 //#endregion
