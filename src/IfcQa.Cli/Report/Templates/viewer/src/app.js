@@ -97,20 +97,46 @@ function simpleFit(sceneRoot, camera, controls) {
   const sizeVec = box.getSize(new THREE.Vector3());
   const size = Math.max(sizeVec.x, sizeVec.y, sizeVec.z);
 
-  controls.target.copy(center);
-
   camera.near = Math.max(size / 1000, 0.01);
   camera.far = Math.max(size * 20, 1000);
   camera.updateProjectionMatrix();
 
   camera.position.set(
     center.x + size * 1.2,
-    center.y + size * 0.8,
+    center.y + size * 0.5,
     center.z + size * 1.2
   );
 
+  const aim = center.clone().add(new THREE.Vector3(0, size * 0.25, 0));
+
+  controls.target.copy(aim);
+  camera.lookAt(aim);
   controls.update();
 }
+//#endregion
+
+//#region Ground Plane
+let ground = null;
+
+function ensureGround(scene) {
+  if (ground) return ground;
+
+  const geo = new THREE.PlaneGeometry(5000, 5000);
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xeeeeee,
+    roughness: 1.0,
+    metalness: 0.0
+  });
+  mat.side = THREE.DoubleSide;
+
+  ground = new THREE.Mesh(geo, mat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.renderOrder = -1;
+  scene.add(ground);
+
+  return ground;
+}
+
 //#endregion
 
 //#region highlight (fill)
@@ -351,7 +377,7 @@ function freezeViewerSnapshot() {
     viewerPane.style.backgroundSize = "cover";
     viewerPane.style.backgroundPosition = "center";
     viewerPane.style.backgroundRepeat = "no-repeat";
-    canvas.style.opacity = "0";          
+    canvas.style.opacity = "0";
   } catch {
     canvas.style.opacity = "0";
   }
@@ -379,6 +405,7 @@ async function main() {
 
   state.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   state.renderer.setPixelRatio(window.devicePixelRatio);
+  state.renderer.setClearColor(0xb9d9ff, 1);
 
   state.scene = new THREE.Scene();
   state.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
@@ -387,9 +414,11 @@ async function main() {
   state.controls = new OrbitControls(state.camera, state.renderer.domElement);
   state.controls.update();
 
-  state.scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.0));
+  // Lighting
+  const hemi = new THREE.HemisphereLight(0xb9d9ff, 0xd9d9d9, 0.9);
+  state.scene.add(hemi);
   const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-  dir.position.set(10, 20, 10);
+  dir.position.set(50, 120, 80);
   state.scene.add(dir);
 
   function resize() {
@@ -408,7 +437,6 @@ async function main() {
   window.addEventListener("ifcqa:layout", () => {
     resize();
   });
-  console.log("viewer resize hook installed");
 
   window.addEventListener("resize", resize);
   requestAnimationFrame(resize);
@@ -447,6 +475,18 @@ async function main() {
       simpleFit(state.modelRoot, state.camera, state.controls);
 
       indexMeshesByGuidNode();
+
+      // Computing Bounding box and place the plane
+      const box = new THREE.Box3().setFromObject(state.modelRoot);
+      const sphere = box.getBoundingSphere(new THREE.Sphere());
+
+      state.camera.near = Math.max(0.01, sphere.radius / 1000);
+      state.camera.far = sphere.radius * 100;
+      state.camera.updateProjectionMatrix();
+
+      const minY = box.min.y;
+      const g = ensureGround(state.scene);
+      g.position.y = minY - 0.5;
     },
     undefined,
     (err) => console.error("Failed to load model.glb:", err)
