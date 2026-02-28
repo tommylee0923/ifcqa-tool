@@ -6,6 +6,8 @@
 
 **IfcQA** is a lightweight **IFC quality-gate CLI** built with **C# / .NET / xBIM toolkit**. It validates BIM models against configurable rulesets and generates interactive HTML reports with 3D model viewer that links QA issues directly to the elements.
 
+Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
+
 ---
 
 ## Key Features
