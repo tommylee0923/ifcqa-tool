@@ -123,7 +123,7 @@ function ensureGround(scene) {
 
   const geo = new THREE.PlaneGeometry(5000, 5000);
   const mat = new THREE.MeshStandardMaterial({
-    color: 0xeeeeee,
+    color: 0x7CBA68,
     roughness: 1.0,
     metalness: 0.0
   });
@@ -408,7 +408,8 @@ async function main() {
   state.renderer.setClearColor(0xb9d9ff, 1);
 
   state.scene = new THREE.Scene();
-  state.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
+  state.scene.fog = new THREE.Fog(0xb9d9ff, 200, 2000);
+  state.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000);
   state.camera.position.set(10, 10, 10);
 
   state.controls = new OrbitControls(state.camera, state.renderer.domElement);
