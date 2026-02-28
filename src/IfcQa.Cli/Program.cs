@@ -24,7 +24,7 @@ if (cmd != "check" && cmd != "catalog" && cmd != "init")
     return;
 }
 
-if (args.Length < 2)
+if (args.Length < 2 && cmd != "init")
 {
     Console.WriteLine("Missing IFC file path.");
     PrintUsage();
@@ -107,7 +107,7 @@ if (cmd == "check")
         // Copy viewer JS from Report/Templates into output folder
         var viewerSrc = Path.Combine(AppContext.BaseDirectory, "Report", "Templates", "viewer");
         var viewerDst = Path.Combine(outDir, "viewer");
-        if (Directory.Exists(viewerSrc))
+        if (withViewer && Directory.Exists(viewerSrc))
         {
             CopyDir(viewerSrc, viewerDst);
         }
@@ -199,7 +199,7 @@ static void PrintUsage()
     Console.WriteLine("Usage:");
     Console.WriteLine(" ifcqa init      [--out <dir> | -o <dir>]");
     Console.WriteLine(" ifcqa catalog   <path-to-ifc> [--out <dir> | -o <dir>]");
-    Console.WriteLine(" ifcqa check     <path-to-ifc> [--rules <ruleset.json>] [--out <dir> | -o <dir>] [--fail-on Error|Warning|Info|None] [--viewer]");
+    Console.WriteLine(" ifcqa check     <path-to-ifc> [--rules <ruleset.json>] [--out <dir> | -o <dir>] [--fail-on Error|Warning|Info|None] [--viewer | --with-viewer]");
 }
 
 static JsonSerializerOptions JsonOpts() => new()
