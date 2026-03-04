@@ -580,6 +580,7 @@ splitter.addEventListener("pointerdown", (e) => {
   dragging = true;
   splitter.setPointerCapture(e.pointerId);
   document.body.classList.add("resizing");
+  document.body.classList.add("no-select");
   window.dispatchEvent(new Event("ifcqa:dragstart"));
 
   const min = 320;
@@ -604,6 +605,7 @@ function endDrag(e) {
 
   dragging = false;
   document.body.classList.remove("resizing");
+  document.body.classList.remove("no-select");
 
   const w = parseFloat(getComputedStyle(root).getPropertyValue("--leftW")) || nextW || 520;
   localStorage.setItem("ifcqa:leftW", String(Math.round(w)));

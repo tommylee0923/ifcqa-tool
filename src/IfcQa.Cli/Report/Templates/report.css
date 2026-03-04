@@ -79,6 +79,10 @@ a {
     z-index: 2;
 }
 
+.no-select {
+    user-select: none;
+}
+
 .splitter {
     position: fixed;
     top: 0;
