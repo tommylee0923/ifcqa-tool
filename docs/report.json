@@ -5,7 +5,7 @@
     "Version": "0.2.3",
     "RulesetPth": "/Users/tommylee/Documents/Personal Projects/IfcQaTool/ifc-quality-gate/rulesets/revit-export.json"
   },
-  "OutputDir": "/Users/tommylee/Documents/Personal Projects/IfcQaTool/ifc-quality-gate/docs/demo",
+  "OutputDir": "/Users/tommylee/Documents/Personal Projects/IfcQaTool/ifc-quality-gate/out/",
   "Counts": {
     "Total": 44,
     "Errors": 0,

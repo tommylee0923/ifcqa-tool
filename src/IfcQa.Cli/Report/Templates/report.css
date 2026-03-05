@@ -81,6 +81,7 @@ a {
 
 .no-select {
     user-select: none;
+    -webkit-user-select: none;
 }
 
 .splitter {
