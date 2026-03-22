@@ -5,7 +5,8 @@ const state = {
     runs: [],
     issues: [],
     activeRunId: null,
-    activeClass: "",    // "" means "All" — same pattern as IfcQA's severity filter
+    activeClass: "",
+    activeSource: "",
 };
 // #endregion
 
@@ -120,6 +121,38 @@ function renderRunHeader(run) {
     `;
 }
 
+function renderSourceChips(issues) {
+    const sources = [...new Set(issues.map(i => i.source || "Unknown"))].sort();
+
+    if (sources.length <= 1) {
+        sourceChips.innerHTML = ""
+        return;
+    }
+
+    const html = `
+        <span class="chip-label">Engine</span>
+        <button class="chip active" data-source="">All</button>
+        ${sources.map(src => `
+            <button class="chip" data-source="${escapeHtml(src)}">
+                ${src === "ifcqa" ? "IfcQA" : src === "python" ? "Python" : escapeHtml(src)}
+            </button>
+        `).join("")}
+    `;
+
+    sourceChips.innerHTML = html;
+
+    sourceChips.addEventListener("click", (event) => {
+        const chip = event.target.closest(".chip");
+        if (!chip) return;
+
+        sourceChips.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+
+        state.activeSource = chip.dataset.source;
+        applyFilter();
+    });
+}
+
 function renderClassChips(issues) {
     const classes = [...new Set(issues.map(i => i.ifc_class || "Unknown"))].sort();
 
@@ -157,15 +190,18 @@ function renderIssues(issues) {
             <table class="table">
                 <thead>
                     <tr>
+                        <th style="width: 120px;">Severity</th>
                         <th style="width: 140px;">Code</th>
                         <th>Message</th>
-                        <th style="width: 180px;">IFC Class</th>
-                        <th style="width: 200px;">GlobalID</th>
+                        <th style="width: 160px;">IFC Class</th>
+                        <th style="width: 80px;">Source</th>
+                        <th style="width: 180px;">GlobalID</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${issues.map(issue => `
                         <tr>
+                            <td>${severityBadge(issue.severity)}</td>
                             <td><span class="issue-code">${escapeHtml(issue.issue_code)}</span></td>
                             <td>
                                 <div>${escapeHtml(issue.message)}</div>
@@ -174,6 +210,7 @@ function renderIssues(issues) {
             : ""}
                             </td>
                             <td>${escapeHtml(issue.ifc_class || "Unknown")}</td>
+                            <td class="small">${escapeHtml(issue.source || "")}</td>
                             <td><span class="global-id">${escapeHtml(issue.global_id)}</span></td>
                         </tr>
                     `).join("")}
@@ -192,12 +229,14 @@ function renderIssues(issues) {
 async function openRun(runId) {
     state.activeRunId = runId;
     state.activeClass = "";
+    state.activeSource = "";
 
     const run = state.runs.find(r => r.id === runId);
     const issues = await fetchIssues(runId);
     state.issues = issues;
 
     renderRunHeader(run);
+    renderSourceChips(issues);
     renderClassChips(issues);
     renderIssues(issues);
 
@@ -209,6 +248,7 @@ function goBack() {
     state.activeRunId = null;
     state.issues = [];
     state.activeClass = "";
+    state.activeSource = "";
 
     detailView.classList.add("hidden");
     runsView.classList.remove("hidden");
@@ -219,9 +259,15 @@ function goBack() {
 // #region FILTERING
 // ============================================================
 function applyFilter() {
-    const filtered = state.activeClass
-        ? state.issues.filter(i => (i.ifc_class || "Unknown") === state.activeClass)
-        : state.issues;
+    let filtered = state.issues;
+
+    if (state.activeSource) {
+        filtered = filtered.filter(i => (i.source || "") === state, activeSource);
+    }
+
+    if (state.activeClass) {
+        filtered = filtered.filter(i => (i.ifc_class || "Unknown") === state.activeClass);
+    }
 
     renderIssues(filtered);
 }
@@ -230,6 +276,11 @@ function applyFilter() {
 // ============================================================
 // #region HELPERS
 // ============================================================
+function severityBadge(severity) {
+    if (!severity) return `<span class="sev unknown">—</span>`;
+    return `<span class="sev ${escapeHtml(severity)}">${escapeHtml(severity)}</span>`;
+}
+
 function showEmpty(container, message) {
     container.innerHTML = `<div class="state-message">${message}</div>`;
 }
@@ -258,6 +309,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.runsList = document.getElementById("runs-list");
     window.runHeader = document.getElementById("run-header");
     window.issuesList = document.getElementById("issues-list");
+    window.sourceChips = document.getElementById("source-chips");
+
     window.classChips = document.getElementById("class-chips");
     window.backBtn = document.getElementById("back-btn");
 

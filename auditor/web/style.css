@@ -2,7 +2,7 @@
    DESIGN TOKENS — matches IfcQA color palette exactly
    ============================================================ */
 :root {
-    --bg: #f6f7fb;
+    --bg:   #f6f7fb;
     --card: #ffffff;
     --text: #111827;
     --muted: #6b7280;
@@ -15,9 +15,7 @@
 /* ============================================================
    BASE
    ============================================================ */
-*,
-*::before,
-*::after {
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -36,9 +34,7 @@ body {
     line-height: 1.5;
 }
 
-a {
-    color: inherit;
-}
+a { color: inherit; }
 
 .hidden {
     display: none !important;
@@ -136,8 +132,7 @@ a {
     overflow: hidden;
 }
 
-th,
-td {
+th, td {
     text-align: left;
     padding: 6px 14px;
     border-bottom: 1px solid var(--line);
@@ -305,6 +300,45 @@ tbody tr.selected td {
     font-size: 12px;
     color: var(--muted);
     margin-top: 2px;
+}
+
+/* ============================================================
+   SEVERITY — matches IfcQA's .sev.Error / .sev.Warning / .sev.Info
+   ============================================================ */
+.sev {
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.sev.Error {
+    color: #b91c1c;
+}
+
+.sev.Warning {
+    color: #b45309;
+}
+
+.sev.Info {
+    color: #1d4ed8;
+}
+
+/* NULL severity — Python issues before severity is assigned */
+.sev.unknown {
+    color: var(--muted);
+    font-weight: 400;
+}
+
+/* ============================================================
+   CHIP GROUP LABEL
+   ============================================================ */
+.chip-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    align-self: center;
+    margin-right: 2px;
 }
 
 /* ============================================================
