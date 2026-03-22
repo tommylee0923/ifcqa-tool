@@ -80,6 +80,7 @@ if (cmd == "check")
     try
     {
         var withViewer = HasFlag(args, "--viewer", "--with-viewer");
+        var withSqlite = HasFlag(args, "--sqlite");
         var modelGlbPath = Path.Combine(outDir, "model.glb");
         bool viewerReady = false;
         if (withViewer)
@@ -112,6 +113,10 @@ if (cmd == "check")
             CopyDir(viewerSrc, viewerDst);
         }
 
+        if (withSqlite)
+        {
+            SqliteWriter.Write(run, outDir);
+        }
 
         var byRule = run.Issues
             .GroupBy(i => i.RuleId)
@@ -199,7 +204,7 @@ static void PrintUsage()
     Console.WriteLine("Usage:");
     Console.WriteLine(" ifcqa init      [--out <dir> | -o <dir>]");
     Console.WriteLine(" ifcqa catalog   <path-to-ifc> [--out <dir> | -o <dir>]");
-    Console.WriteLine(" ifcqa check     <path-to-ifc> [--rules <ruleset.json>] [--out <dir> | -o <dir>] [--fail-on Error|Warning|Info|None] [--viewer | --with-viewer]");
+    Console.WriteLine(" ifcqa check     <path-to-ifc> [--rules <ruleset.json>] [--out <dir> | -o <dir>] [--fail-on Error|Warning|Info|None] [--viewer | --with-viewer] [--sqlite]");
 }
 
 static JsonSerializerOptions JsonOpts() => new()
