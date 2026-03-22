@@ -1,0 +1,341 @@
+/* ============================================================
+   DESIGN TOKENS — matches IfcQA color palette exactly
+   ============================================================ */
+:root {
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --pill: #f3f4f6;
+    --accent: #7ab7ff;
+    --accent-dark: #004492;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+a {
+    color: inherit;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.small {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+/* ============================================================
+   HEADER — matches IfcQA .h1 and .meta
+   ============================================================ */
+.h1 {
+    font-size: 18px;
+    font-weight: 750;
+    margin: 0 0 6px;
+    letter-spacing: 0.2px;
+}
+
+.meta {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 0 0 10px;
+    word-break: break-all;
+}
+
+.meta::after {
+    content: "";
+    display: block;
+    height: 1px;
+    background: var(--line);
+    margin-top: 12px;
+}
+
+/* ============================================================
+   STAT CARDS GRID — matches IfcQA .grid / .card / .k / .v
+   ============================================================ */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 12px 0 18px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.k {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 0 0 6px;
+    text-align: center;
+}
+
+.v {
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* ============================================================
+   RUNS TABLE — styled as a card table like IfcQA
+   ============================================================ */
+.tableWrap {
+    overflow: auto;
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 6px 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+th {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+    background: #f9fafb;
+    z-index: 1;
+}
+
+tbody tr {
+    font-size: 14px;
+    cursor: pointer;
+}
+
+tbody tr:hover td {
+    background: #f9fafb;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Selected row — same blue outline as IfcQA */
+tbody tr.selected td {
+    background: rgba(122, 183, 255, 0.08);
+    outline: 2px solid rgba(122, 183, 255, 0.6);
+    outline-offset: -2px;
+}
+
+/* ============================================================
+   PILLS — matches IfcQA .pill
+   ============================================================ */
+.pill {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--pill);
+    border: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--muted);
+    flex: 0 0 auto;
+}
+
+.pill-issue {
+    background: rgba(185, 28, 28, 0.07);
+    color: #b91c1c;
+    border-color: rgba(185, 28, 28, 0.2);
+}
+
+/* ============================================================
+   BUTTONS — matches IfcQA .btn / .btnSmall
+   ============================================================ */
+.btn {
+    background: var(--pill);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: var(--line);
+}
+
+.btnSmall {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* ============================================================
+   CHIPS — matches IfcQA .chips / .chip / .chip.active
+   Used for IFC class filters in the detail view
+   ============================================================ */
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin: 12px 0 10px;
+}
+
+.chip {
+    border: 1px solid var(--line);
+    background: var(--pill);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 7px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.chip.active {
+    border-color: var(--accent-dark);
+    box-shadow: 0 0 0 2px rgba(122, 183, 255, 0.15) inset;
+}
+
+/* ============================================================
+   CONTROLS ROW
+   ============================================================ */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 6px 0 10px;
+}
+
+/* ============================================================
+   RUN DETAIL HEADER
+   ============================================================ */
+.run-detail-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.run-detail-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.run-detail-meta {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.run-detail-stats {
+    display: flex;
+    gap: 8px;
+}
+
+/* ============================================================
+   ISSUE CODE AND GLOBAL ID STYLING
+   ============================================================ */
+.issue-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: var(--accent-dark);
+}
+
+.global-id {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.issue-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+/* ============================================================
+   EMPTY / ERROR STATES
+   ============================================================ */
+.state-message {
+    padding: 32px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    background: var(--card);
+}
+
+.state-message.error {
+    color: #b91c1c;
+    border-color: rgba(185, 28, 28, 0.25);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 700px) {
+    .grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}

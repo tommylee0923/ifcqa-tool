@@ -34,7 +34,7 @@ if (args.Length < 2 && cmd != "init")
 var ifcPath = args.Length > 1 ? args[1] : throw new ArgumentException("Missing IFC File.");
 
 
-var outDir = GetOption(args, new[] { "--out", "-o" }, "out");
+var outDir = GetOption(args, new[] { "--out", "-o" }, "output");
 outDir = Path.GetFullPath(outDir);
 Directory.CreateDirectory(outDir);
 

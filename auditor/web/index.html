@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IFC Auditor</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <div class="wrap">
+
+        <!-- HEADER -->
+        <div class="h1">IFC Auditor</div>
+        <div class="meta">BIM Model Audit Dashboard</div>
+
+        <!-- VIEW 1: Runs list -->
+        <section id="runs-view">
+            <div class="grid">
+                <div class="card">
+                    <div class="k">Total Runs</div>
+                    <div id="stat-runs" class="v">—</div>
+                </div>
+                <div class="card">
+                    <div class="k">Total Elements</div>
+                    <div id="stat-elements" class="v">—</div>
+                </div>
+                <div class="card">
+                    <div class="k">Total Issues</div>
+                    <div id="stat-issues" class="v">—</div>
+                </div>
+                <div class="card">
+                    <div class="k">Latest Run</div>
+                    <div id="stat-latest" class="v small">—</div>
+                </div>
+            </div>
+
+            <div id="runs-list">
+                <!-- JavaScript injects run rows here -->
+            </div>
+
+        </section>
+
+        <!-- VIEW 2: Run detail -->
+        <section id="detail-view" class="hidden">
+
+            <button id="back-btn" class="btn btnSmall" style="margin-bottom: 14px;">← Back to Runs</button>
+
+            <div id="run-header"></div>
+
+            <div class="chips" id="class-chips">
+                <!-- JavaScript injects one chip per IFC class here -->
+            </div>
+
+            <div class="controls">
+                <span id="shown" class="pill">0 shown</span>
+            </div>
+
+            <div id="issues-list">
+                <!-- JavaScript injects issue table here -->
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

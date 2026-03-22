@@ -4,6 +4,7 @@ venv/
 bin/
 obj/
 out/
+output/
 .vs/
 .DS_Store
 .temp

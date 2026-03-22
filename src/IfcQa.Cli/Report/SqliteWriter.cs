@@ -48,7 +48,7 @@ internal static class SqliteWriter
             CREATE TABLE IF NOT EXISTS audit_runs (
                 id              INTEGER PRIMARY KEY AUTOINCREMENT,
                 source_file     TEXT    NOT NULL,
-                run_timestamp   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
+                run_timestamp   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 total_elements  INTEGER NOT NULL,
                 total_issues    INTEGER NOT NULL
             )
