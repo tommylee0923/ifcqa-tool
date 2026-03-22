@@ -81,7 +81,7 @@ internal static class SqliteWriter
                 path                TEXT,
                 expected            TEXT,
                 actual              TEXT,
-                source              TEXT    NOT NULL DEFAULT 'python'
+                source              TEXT    NOT NULL DEFAULT 'python',
                 FOREIGN KEY (audit_run_id) REFERENCES audit_runs(id)
             )
             """
@@ -131,7 +131,7 @@ internal static class SqliteWriter
         cmd.CommandText =
         """
         INSERT INTO audit_runs (source_file, run_timestamp, total_elements, total_issues)
-        VALUE ($sourceFile, $runTimestamp, $totalElements, $totalIssues)
+        VALUES ($sourceFile, $runTimestamp, $totalElements, $totalIssues)
         """;
 
         cmd.Parameters.AddWithValue("$sourceFile", run.IfcPath);

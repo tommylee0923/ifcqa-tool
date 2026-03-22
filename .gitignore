@@ -8,3 +8,7 @@ output/
 .vs/
 .DS_Store
 .temp
+auditor/.venv/
+auditor/__pycache__/
+auditor/**/__pycache__/
+auditor/output/audit.db

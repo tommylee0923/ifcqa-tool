@@ -323,7 +323,7 @@ def _insert_issues(
             None,       # path
             None,       # expected
             None,       # actual
-            "python,"   # source
+            "python"   # source
         )
         for issue in report.issues
     ]

@@ -1,5 +1,8 @@
+import sys
 from pathlib import Path
-from flask import Flask, jsonify, abort, send_from_directory
+from flask import Flask, jsonify, abort, send_from_directory, request
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from infrastructure.sqlite_writer import (
     query_runs,
@@ -14,7 +17,7 @@ from infrastructure.sqlite_writer import (
 
 BASE_DIR = Path(__file__).parent.parent
 app = Flask(__name__, static_folder=str(BASE_DIR / "web"), static_url_path="")
-OUTPUT_DIR = Path(__file__).parent.parent / "output"
+OUTPUT_DIR = Path(__file__).parent.parent.parent / "output"
 
 # ========================================================================
 # ROOT ROUTES
@@ -42,12 +45,20 @@ def get_runs():
 
 @app.route("/runs/<int:run_id>/issues", methods=["GET"])
 def get_issues_by_run(run_id: int):
-    """Return all issues for a specific audit run."""
+    """Return all issues for a specific audit run.
+    
+    Optional query parameter:
+        ?source=python      - return only Python auditor issues
+        ?source=ifcqa       - return only IfcQA issues
+    """
     
     try:
         rows = query_issues_by_run(OUTPUT_DIR, run_id)
         if not rows:
             abort(404, description=f"No issues found for run ID {run_id}.")
+        source = request.args.get("source")
+        if source:
+            rows = [r for r in rows if r.get("source") == source]
         return jsonify(rows)
     except FileNotFoundError as e:
         abort(404, description=str(e))
