@@ -133,28 +133,49 @@ as a build artifact.
 ## Project Structure
 
 ```
-src/
-├─ IfcQa.Core/
-│   ├─ Rules/           Rule engine + validation logic
-│   ├─ Models/          Issue models + trace metadata
-│   ├─ Analysis/        IFC analysis orchestration
-│   └─ IFC utilities/   xBIM-based helpers
+ifcqa-tool/
+├─ src/
+│   ├─ IfcQa.Core/
+│   │   ├─ Rules/           Rule engine + validation logic
+│   │   ├─ Models/          Issue models + trace metadata
+│   │   ├─ Analysis/        IFC analysis orchestration
+│   │   └─ IFC utilities/   xBIM-based helpers
+│   │
+│   └─ IfcQa.Cli/
+│       ├─ Program.cs
+│       ├─ HtmlReportWriter.cs
+│       ├─ SqliteWriter.cs  Shared SQLite output (--sqlite flag)
+│       └─ Report/
+│           └─ Templates/
+│               ├─ report.template.html
+│               ├─ report.css
+│               ├─ report.js
+│               └─ viewer/
+│                   ├─ viewer.bundle.js
+│                   ├─ app.js
+│                   └─ modules/
 │
-├─ IfcQa.Cli/
-│   ├─ Program.cs
-│   ├─ HtmlReportWriter.cs
-│   ├─ SqliteWriter.cs  Shared SQLite output (--sqlite flag)
-│   └─ Report/
-│       └─ Templates/
-│           ├─ report.template.html
-│           ├─ report.css
-│           ├─ report.js
-│           └─ viewer/
-│               ├─ viewer.bundle.js
-│               ├─ app.js
-│               └─ modules/
+├─ auditor/                     ← Python auditor
+│   ├─ app/
+│   │   ├─ main.py              CLI (audit + query subcommands)
+│   │   └─ server.py            Flask API
+│   ├─ core/
+│   │   ├─ model.py             ElementInfo, IssueRecord, AuditReport
+│   │   └─ auditor.py           Validation logic (MISSING_NAME rule)
+│   ├─ infrastructure/
+│   │   ├─ ifc_reader.py        IFC parsing via IfcOpenShell
+│   │   ├─ sqlite_writer.py     SQLite write + query layer
+│   │   ├─ json_writer.py
+│   │   ├─ csv_writer.py
+│   │   └─ console_writer.py
+│   └─ web/
+│       ├─ index.html
+│       ├─ style.css
+│       └─ app.js
 │
-└─ rulesets/
+├─ output/                      Shared output dir (audit.db lives here)
+├─ samples/                     Shared IFC sample files
+└─ rulesets/                    IfcQA JSON rulesets
 ```
 
 ---
