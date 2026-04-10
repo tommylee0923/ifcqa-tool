@@ -2,7 +2,7 @@
    DESIGN TOKENS — matches IfcQA color palette exactly
    ============================================================ */
 :root {
-    --bg:   #f6f7fb;
+    --bg: #f6f7fb;
     --card: #ffffff;
     --text: #111827;
     --muted: #6b7280;
@@ -10,12 +10,16 @@
     --pill: #f3f4f6;
     --accent: #7ab7ff;
     --accent-dark: #004492;
+    --leftW: 520px;
+    --gutterW: 10px;
 }
 
 /* ============================================================
    BASE
    ============================================================ */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -34,7 +38,20 @@ body {
     line-height: 1.5;
 }
 
-a { color: inherit; }
+body.resizing {
+    cursor: col-resize;
+}
+
+body.no-select,
+body.no-select * {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+a {
+    color: inherit;
+}
 
 .hidden {
     display: none !important;
@@ -53,8 +70,8 @@ a { color: inherit; }
    LAYOUT
    ============================================================ */
 .wrap {
-    max-width: 960px;
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
     padding: 24px 16px 48px;
 }
 
@@ -132,7 +149,8 @@ a { color: inherit; }
     overflow: hidden;
 }
 
-th, td {
+th,
+td {
     text-align: left;
     padding: 6px 14px;
     border-bottom: 1px solid var(--line);
@@ -282,6 +300,32 @@ tbody tr.selected td {
 }
 
 /* ============================================================
+   LEFT PANEL
+   ============================================================ */
+
+.detail-panes {
+    display: flex;
+    align-items: stretch;
+    height: 600px;
+    min-width: 0;
+}
+
+/* ============================================================
+   LEFT PANEL
+   ============================================================ */
+
+.issues-pane {
+    flex: 0 0 var(--leftW);
+    min-width: 320px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+}
+
+/* ============================================================
    ISSUE CODE AND GLOBAL ID STYLING
    ============================================================ */
 .issue-code {
@@ -357,6 +401,67 @@ tbody tr.selected td {
 .state-message.error {
     color: #b91c1c;
     border-color: rgba(185, 28, 28, 0.25);
+}
+
+/* ============================================================
+   SPLITTER
+   ============================================================ */
+.splitter {
+    flex: 0 0 var(--gutterW);
+    cursor: col-resize;
+    position: relative;
+    background: rgba(0, 0, 0, 0.04);
+    touch-action: none;
+}
+
+.splitter:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.splitter::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.18);
+}
+
+/* ============================================================
+   RIGHT PANEL: VIEWER
+   ============================================================ */
+
+.viewer-pane {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 320px;
+    min-height: 0;
+    background: #b9d9ff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.viewer-pane canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#viewerInfo {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    margin: 0;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 11px;
+    border-radius: 4px;
+    pointer-events: none;
+    white-space: pre-wrap;
+    max-width: 90%;
 }
 
 /* ============================================================

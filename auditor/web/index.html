@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Auditor</title>
     <link rel="stylesheet" href="style.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 
 <body>
@@ -16,7 +20,6 @@
         <div class="h1">IFC Auditor</div>
         <div class="meta">BIM Model Audit Dashboard</div>
 
-        <!-- VIEW 1: Runs list -->
         <section id="runs-view">
             <div class="grid">
                 <div class="card">
@@ -40,36 +43,56 @@
             <div id="runs-list">
                 <!-- JavaScript injects run rows here -->
             </div>
-
         </section>
 
-        <!-- VIEW 2: Run detail -->
         <section id="detail-view" class="hidden">
 
             <button id="back-btn" class="btn btnSmall" style="margin-bottom: 14px;">← Back to Runs</button>
 
             <div id="run-header"></div>
 
-            <div class="chips" id="source-chips">
-                <!-- Source chips - filter by engine (All / Python / IfcQA) -->
-            </div>
+            <!-- TWO-PANE LAYOUT: viewer left, issues right -->
+            <div class="detail-panes">
 
-            <div class="chips" id="class-chips">
-                <!-- JavaScript injects one chip per IFC class here -->
-            </div>
+                <!-- LEFT: filters + issues table -->
+                <div class="issues-pane">
 
-            <div class="controls">
-                <span id="shown" class="pill">0 shown</span>
-            </div>
+                    <div class="chips" id="source-chips">
+                        <!-- Source chips injected by app.js -->
+                    </div>
 
-            <div id="issues-list">
-                <!-- JavaScript injects issue table here -->
+                    <div class="chips" id="class-chips">
+                        <!-- Class chips injected by app.js -->
+                    </div>
+
+                    <div class="controls">
+                        <span id="shown" class="pill">0 shown</span>
+                    </div>
+
+                    <div id="issues-list">
+                        <!-- Issues table injected by app.js -->
+                    </div>
+
+                </div>
+
+                <div id="splitter" class="splitter" role="separator" aria-orientation="vertical"
+                    aria-label="Resize panels">
+                </div>
+                
+                <!-- RIGHT: 3D viewer -->
+                <div class="viewer-pane">
+                    <canvas id="viewerCanvas"></canvas>
+                    <pre id="viewerInfo"></pre>
+                </div>
+
             </div>
 
         </section>
 
     </div>
 
+    <!-- viewer.js must load before app.js -->
+    <script src="viewer.js"></script>
     <script src="app.js"></script>
 
 </body>

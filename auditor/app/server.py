@@ -30,6 +30,19 @@ def index():
     return send_from_directory(app.static_folder, "index.html")
 
 # ========================================================================
+# MODEL ROUTES
+# ========================================================================
+
+@app.route("/model.glb")
+def serve_glb():
+    """Serve the GLB model file from the shared output directory"""
+    
+    glb_path = OUTPUT_DIR / "model.glb"
+    if not glb_path.exists():
+        abort(404, description="model.glb not found in the output directory. Run IfcQA with --viewer flag first.")
+    return send_from_directory(str(OUTPUT_DIR), "model.glb")
+
+# ========================================================================
 # API ROUTES
 # ========================================================================
 

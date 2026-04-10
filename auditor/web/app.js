@@ -200,7 +200,10 @@ function renderIssues(issues) {
                 </thead>
                 <tbody>
                     ${issues.map(issue => `
-                        <tr>
+                        <tr
+                            data-gid="${escapeHtml(issue.global_id)}"
+                            style="cursor:pointer"
+                        >
                             <td>${severityBadge(issue.severity)}</td>
                             <td><span class="issue-code">${escapeHtml(issue.issue_code)}</span></td>
                             <td>
@@ -220,6 +223,25 @@ function renderIssues(issues) {
     `;
 
     issuesList.innerHTML = html;
+
+    // Hover — highlight element in viewer
+    issuesList.addEventListener("mouseover", (e) => {
+        const row = e.target.closest("tr[data-gid]");
+        const gid = row?.dataset.gid ?? null;
+        window.dispatchEvent(new CustomEvent("ifcqa:hover", { detail: { gid } }));
+    });
+
+    issuesList.addEventListener("mouseleave", () => {
+        window.dispatchEvent(new CustomEvent("ifcqa:hover", { detail: { gid: null } }));
+    });
+
+    // Click — select element in viewer
+    issuesList.addEventListener("click", (e) => {
+        const row = e.target.closest("tr[data-gid]");
+        if (!row) return;
+        const gid = row.dataset.gid ?? null;
+        window.dispatchEvent(new CustomEvent("ifcqa:select", { detail: { gid } }));
+    });
 }
 
 
@@ -240,8 +262,14 @@ async function openRun(runId) {
     renderClassChips(issues);
     renderIssues(issues);
 
+    window.loadRun(runId)
+
     runsView.classList.add("hidden");
     detailView.classList.remove("hidden");
+
+    requestAnimationFrame(() => {
+        window.resizeViewer();
+    });
 }
 
 function goBack() {
@@ -256,13 +284,104 @@ function goBack() {
 // #endregion
 
 // ============================================================
+// #region SPLITTER
+// ============================================================
+const root = document.documentElement;
+const splitter = document.getElementById("splitter");
+
+function clamp(n, min, max) {
+    return Math.max(min, Math.min(max, n));
+}
+
+const saved = Number(localStorage.getItem("ifcqa:leftW"));
+if (!Number.isNaN(saved) && saved > 0) {
+    root.style.setProperty("--leftW", `${saved}px`);
+}
+
+let dragging = false;
+
+splitter.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    
+    dragging = true;
+    splitter.setPointerCapture(e.pointerId);
+    document.body.classList.add("resizing");
+    document.body.classList.add("no-select");
+});
+
+splitter.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+
+    e.preventDefault()
+
+    const container = document.querySelector(".detail-panes");
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+
+    const min = 320;
+    const max = Math.max(min + 50, rect.width - 320);
+
+    const localX = e.clientX - rect.left;
+    const nextW = clamp(localX, min, max);
+
+    root.style.setProperty("--leftW", `${nextW}px`);
+
+    if (typeof window.resizeViewer === "function") {
+        window.resizeViewer();
+    }
+});
+
+function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+
+    document.body.classList.remove("resizing");
+    document.body.classList.remove("no-select");
+
+    const w = parseFloat(getComputedStyle(root).getPropertyValue("--leftW")) || 520;
+    localStorage.setItem("ifcqa:leftW", String(Math.round(w)));
+
+    try {
+        splitter.releasePointerCapture(e.pointerId);
+    } catch { }
+
+    if (typeof window.resizeViewer === "function") {
+        window.resizeViewer();
+    }
+}
+
+splitter.addEventListener("pointerup", endDrag);
+splitter.addEventListener("pointercancel", endDrag);
+
+window.addEventListener("resize", () => {
+    const container = document.querySelector(".detail-panes");
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const current = parseFloat(getComputedStyle(root).getPropertyValue("--leftW")) || 520;
+
+    const min = 320;
+    const max = Math.max(min + 50, rect.width - 320);
+    const clamped = clamp(current, min, max);
+
+    root.style.setProperty("--leftW", `${clamped}px`);
+
+    if (typeof window.resizeViewer === "function") {
+        window.resizeViewer();
+    }
+});
+
+// #endregion
+
+// ============================================================
 // #region FILTERING
 // ============================================================
 function applyFilter() {
     let filtered = state.issues;
 
     if (state.activeSource) {
-        filtered = filtered.filter(i => (i.source || "") === state, activeSource);
+        filtered = filtered.filter(i => (i.source || "") === state.activeSource);
     }
 
     if (state.activeClass) {
