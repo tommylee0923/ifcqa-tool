@@ -6,6 +6,7 @@ from infrastructure.ifc_reader import load_ifc_elements
 from infrastructure.console_writer import write_console_report
 from infrastructure.json_writer import write_json_report
 from infrastructure.csv_writer import write_csv_report
+from infrastructure.glb_converter import convert_ifc_to_glb
 from infrastructure.sqlite_writer import (
 write_sqlite_report,
 query_runs,
@@ -40,6 +41,12 @@ def parse_arguments() -> argparse.ArgumentParser:
         "--output",
         default="output",
         help="Output directory for reports (default: output)"
+    )
+    
+    audit_parser.add_argument(
+        "--viewer",
+        action="store_true",
+        help="Convert IFC to GLB for the 3D viewer"
     )
 
     audit_parser.add_argument(
@@ -191,6 +198,9 @@ def run_audit(args) -> None:
     
     if not args.no_sqlite:
         write_sqlite_report(report, output_dir)
+        
+    if args.viewer:
+        convert_ifc_to_glb(str(ifc_path), str(output_dir))
         
     print(f"Outputs written to {output_dir}")
 
