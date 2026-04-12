@@ -26,7 +26,8 @@ OUTPUT_DIR = Path(__file__).parent.parent.parent / "output"
 @app.route("/")
 def index():
     """Serve the web app entry point."""
-    
+    if app.static_folder is None:
+        abort(500, description="Static folder is not configured.")
     return send_from_directory(app.static_folder, "index.html")
 
 # ========================================================================
