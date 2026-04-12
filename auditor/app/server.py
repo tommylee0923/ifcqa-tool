@@ -33,14 +33,16 @@ def index():
 # MODEL ROUTES
 # ========================================================================
 
-@app.route("/model.glb")
-def serve_glb():
+@app.route("/model/<filename>")
+def serve_glb(filename):
     """Serve the GLB model file from the shared output directory"""
     
-    glb_path = OUTPUT_DIR / "model.glb"
+    if not filename.endswith(".glb"):
+        abort(400, description="Only .glb files are served here")
+    glb_path = OUTPUT_DIR / filename
     if not glb_path.exists():
-        abort(404, description="model.glb not found in the output directory. Run IfcQA with --viewer flag first.")
-    return send_from_directory(str(OUTPUT_DIR), "model.glb")
+        abort(404, description="{filename} not found in the output directory. Run audit with --viewer flag first.")
+    return send_from_directory(str(OUTPUT_DIR), filename)
 
 # ========================================================================
 # API ROUTES
@@ -52,6 +54,9 @@ def get_runs():
     
     try:
         rows = query_runs(OUTPUT_DIR)
+        for run in rows:
+            stem = Path(run["source_file"]).stem
+            run["glb_filename"] = f"{stem}.glb"
         return jsonify(rows)
     except FileNotFoundError as e:
         abort(404, description=str(e))
@@ -67,8 +72,6 @@ def get_issues_by_run(run_id: int):
     
     try:
         rows = query_issues_by_run(OUTPUT_DIR, run_id)
-        if not rows:
-            abort(404, description=f"No issues found for run ID {run_id}.")
         source = request.args.get("source")
         if source:
             rows = [r for r in rows if r.get("source") == source]

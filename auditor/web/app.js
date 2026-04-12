@@ -262,7 +262,7 @@ async function openRun(runId) {
     renderClassChips(issues);
     renderIssues(issues);
 
-    window.loadRun(runId)
+    window.loadRun(run)
 
     runsView.classList.add("hidden");
     detailView.classList.remove("hidden");

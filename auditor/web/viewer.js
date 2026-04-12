@@ -487,23 +487,36 @@ function resizeViewer() {
 // ============================================================
 // #region LOAD RUN  ← called by app.js when a run is opened
 // ============================================================
-async function loadRun(runId) {
-    if (viewerState.currentRunId === runId) return;
-    viewerState.currentRunId = runId;
+async function loadRun(run) {
+    if (viewerState.currentRunId === run.id) return;
+    viewerState.currentRunId = run.id;
 
     // Fetch issues for this run and index by global_id
     try {
-        const issues = await fetchIssues(runId);
+        const issues = await fetchIssues(run.id);
         viewerState.issuesByGid = buildIssuesByGlobalId(issues);
-    } catch (err) {
-        console.warn("viewer: could not load issues", err);
+    } catch (e) {
+        console.warn("viewer: could not load issues", e);
     }
 
-    if (viewerState.modelRoot) return;
+    if (viewerState.modelRoot) {
+        viewerState.scene.remove(viewerState.modelRoot);
+        viewerState.modelRoot.traverse((obj) => {
+            if (obj.geometry) obj.geometry.dispose();
+            if (obj.material) {
+                if (Array.isArray(obj.material)) {
+                    obj.material.forEach(m => m.dispose());
+                } else {
+                    obj.material.dispose();
+                }
+            }
+        });
+        viewerState.modelRoot = null;
+    }
 
     const loader = new THREE.GLTFLoader();
     loader.load(
-        "/model.glb",
+        `/model/${run.glb_filename}`,
         (gltf) => {
             viewerState.modelRoot = gltf.scene;
             viewerState.scene.add(viewerState.modelRoot);
@@ -518,7 +531,7 @@ async function loadRun(runId) {
             g.position.y = minY - 0.5;
         },
         undefined,
-        (err) => console.error("viewer: failed to load model.glb", err)
+        (e) => console.error("viewer: failed to load ${run.glb_filename}", e)
     );
 }
 // #endregion
