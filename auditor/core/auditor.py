@@ -1,6 +1,8 @@
 from collections import Counter
 from core.model import ElementInfo, IssueRecord, AuditReport
 
+SKIP_CLASSES = {"IfcAnnotation", "IfcOpeningElement"}
+
 def run_audit(elements: list[ElementInfo], source_file: str) -> AuditReport:
     # Amalyze IFC elements and return an audit report.
 
@@ -32,18 +34,18 @@ def count_elements_by_class(elements: list[ElementInfo]) -> dict[str, int]:
     return dict(counts)
 
 def find_missing_name_issues(elements: list[ElementInfo]) -> list[IssueRecord]:
-    # Find elements that are missing a Name value.
     issues: list[IssueRecord] = []
-
     for element in elements:
+        if element.ifc_class in SKIP_CLASSES:
+            continue
         if element.name is None or element.name.strip() == "":
             issue = IssueRecord(
                 issue_code="MISSING_NAME",
-                message="Element is missing a Name value",
+                message=f"{element.ifc_class} is missing a Name value",
                 global_id=element.global_id,
                 ifc_class=element.ifc_class,
-                element_name=element.name
+                element_name=element.name,
+                severity="Warning",
             )
             issues.append(issue)
-    
     return issues
