@@ -6,6 +6,7 @@ obj/
 out/
 output/
 .vs/
+.vscode/
 .DS_Store
 .temp
 auditor/.venv/
