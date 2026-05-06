@@ -171,14 +171,14 @@ def build_rule(spec: RuleSpec) -> BaseRule:
 
     if rule_type == "RequireQtoQuantityNames":
         _require(spec.ifc_class, spec.qto, rule_type=rule_type)
-        if not spec.qty_name:
+        if not spec.qty_names:
             raise RuleFactoryError(f"Rule '{spec.id}' requires qtyNames.")
         return RuleRequireQtoQuantityNames(
             spec.id,
             spec.severity,
             spec.ifc_class,
             spec.qto,
-            spec.qty_name,
+            spec.qty_names,
         )
 
     if rule_type == "RequireQtoQuantityValueNumber":
