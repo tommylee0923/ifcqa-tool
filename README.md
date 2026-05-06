@@ -66,65 +66,131 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 
 ---
 
-## Quickstart (Windows)
+## Quickstart
 
-1. Download and unzip the Windows release.
-2. Open Terminal in the extracted folder and run:
+### 1. Clone the repository
 
-```powershell
-# (Optional) initialize a local workspace (rulesets + report templates)
-# and outputs in a folder named "Demo"
-.\ifcqa.exe init -o Demo
-
-# Run QA checks + generate interactive report (3D viewer enabled)
-.\ifcqa.exe check PATH_TO_MODEL.ifc -o Demo\out --viewer
-
-# Run QA checks + write results to shared SQLite database
-.\ifcqa.exe check PATH_TO_MODEL.ifc -o Demo\out --sqlite
-
-# Combine both flags
-.\ifcqa.exe check PATH_TO_MODEL.ifc -o Demo\out --viewer --sqlite
-
-# (Optional) specify ruleset:
-# .\ifcqa.exe check PATH_TO_MODEL.ifc -o Demo\out -r Demo\rulesets\PICK_A_RULESET_HERE --viewer
+```bash
+git clone https://github.com/tommylee0923/ifc-quality-gate.git
+cd ifc-quality-gate
 ```
 
-3. Open `Demo\out\report.html` in your browser
+### 2. Create a Python virtual environment
 
-**Outputs:**
-- `report.html` — interactive QA report
-- `report.json` — structured run summary
-- `issues.json` — full issue list
-- `issues.csv` — issue list as CSV
-- `audit.db` — SQLite database (when `--sqlite` is passed)
-- `model.glb` — generated when `--viewer` is enabled
-- `viewer/` — viewer assets copied from `Report/Templates/viewer`
+```bash
+python -m venv .venv
+pip install -r auditor/requirements.txt
+```
+
+Activate it:
+
+#### Windows
+
+```powershell
+.venv\Scripts\activate
+```
+
+#### macOS / Linux
+
+```bash
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Run an IFC audit
+
+```powershell
+python auditor/app/main.py audit samples/model.ifc ^
+    --ruleset rulesets/revit-export.json ^
+    --output output
+```
+
+### 5. Generate GLB viewer assets (optional)
+
+```powershell
+python auditor/app/main.py audit samples/model.ifc ^
+    --ruleset rulesets/revit-export.json ^
+    --output output ^
+    --viewer
+```
+
+### 6. Launch the local web interface
+
+```powershell
+python auditor/app/server.py
+```
+
+Then open:
+
+```text
+http://127.0.0.1:5000
+```
+
+### Outputs
+
+The audit pipeline generates:
+
+- `audit_report.json` — structured audit summary
+- `issues.csv` — issue list export
+- `audit.db` — SQLite database
+- `model.glb` — viewer model asset (optional)
+- `viewer/` — Three.js viewer assets
 
 ---
 
 ## SQLite Integration
 
-IfcQA can write results into a shared SQLite database alongside the
-[IfcModelAuditor](https://github.com/tommylee0923/IfcModelAuditor)
-Python auditor. Both engines write to the same `audit.db` file using
-a common schema, making it possible to query and compare results from
-both tools in one place.
+IfcQA writes structured audit results into a local SQLite database (`audit.db`).
+
+The database stores:
+
+- audit run metadata
+- issue records
+- IFC class statistics
+- validation trace data (`severity`, `path`, `expected`, `actual`)
+
+This enables:
+
+- persistent QA history
+- issue querying and filtering
+- downstream analytics workflows
+- local web-based model review
+
+---
+
+### Example
+
+Run an audit and write results into SQLite:
 
 ```powershell
-# Run IfcQA with SQLite output, pointing at a shared output directory
-.\ifcqa.exe check model.ifc -o shared\output --sqlite
+python auditor/app/main.py audit samples/model.ifc ^
+    --ruleset rulesets/revit-export.json ^
+    --output output
+```
 
-# Run the Python auditor against the same directory
-python auditor/app/main.py audit model.ifc --output shared/output
+Launch the local web interface:
 
-# Launch the unified web interface
+```powershell
 python auditor/app/server.py
 ```
 
-The shared `issues` table includes a `source` column (`'python'` or
-`'ifcqa'`) so results from each engine can be filtered and compared
-in the web application.
+Then open:
 
+```text
+http://127.0.0.1:5000
+```
+
+The web interface reads directly from `audit.db` and displays:
+
+- issue summaries
+- issue tables
+- IFC class statistics
+- interactive model viewer data
 ---
 
 ## CI Quality Gate (GitHub Actions)
