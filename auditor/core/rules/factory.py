@@ -21,6 +21,13 @@ from core.rules.simple import (
     RuleRequireQtoQuantityNames,
     RuleRequireQtoQuantityValueNumber,
 )
+from core.rules.model_rules import (
+    RuleMissingName,
+    RuleDuplicateGlobalId,
+    RuleMissingContainment,
+    RuleSpaceExternalHasExternalBoundary,
+    RuleWallVolumeImpliesLength,
+)
 
 
 class RuleFactoryError(Exception):
@@ -191,6 +198,23 @@ def build_rule(spec: RuleSpec) -> BaseRule:
             spec.qty,
             spec.min_exclusive or 0.0,
         )
+    
+    if rule_type == "MissingName":
+        _require(spec.ifc_class, rule_type=rule_type)
+        return RuleMissingName(spec.id, spec.severity, spec.ifc_class)
+
+    if rule_type == "DuplicateGlobalId":
+        return RuleDuplicateGlobalId(spec.id, spec.severity)
+
+    if rule_type == "MissingContainment":
+        _require(spec.ifc_class, rule_type=rule_type)
+        return RuleMissingContainment(spec.id, spec.severity, spec.ifc_class)
+
+    if rule_type == "SpaceExternalHasExternalBoundary":
+        return RuleSpaceExternalHasExternalBoundary(spec.id, spec.severity)
+
+    if rule_type == "WallVolumeImpliesLength":
+        return RuleWallVolumeImpliesLength(spec.id, spec.severity)
 
     raise RuleFactoryError(f"Unknown rule type '{rule_type}' for rule '{spec.id}'.")
 
