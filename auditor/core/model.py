@@ -15,6 +15,9 @@ class IssueRecord:
     ifc_class: str
     element_name: str | None
     severity: str | None = None
+    path: str | None = None
+    expected: str | None = None
+    actual: str | None = None
 
 @dataclass
 class AuditReport:
