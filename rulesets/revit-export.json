@@ -202,6 +202,102 @@
         "why": "Prevents conflicting notes between instance and type data.",
         "howToFix": "Keep instance comments empty unless overriding type comments; otherwise sync both."
       }
+    },
+    {
+      "type": "MissingName",
+      "id": "MODEL-NAME-WALL-001",
+      "severity": "Warning",
+      "ifcClass": "IfcWall",
+      "meta": {
+        "title": "Walls should have a Name",
+        "why": "Element names improve model review, issue tracking, and downstream reporting.",
+        "howToFix": "Populate the wall Name in the authoring model before IFC export."
+      }
+    },
+    {
+      "type": "MissingName",
+      "id": "MODEL-NAME-DOOR-001",
+      "severity": "Warning",
+      "ifcClass": "IfcDoor",
+      "meta": {
+        "title": "Doors should have a Name",
+        "why": "Door names help identify elements during QA review and coordination.",
+        "howToFix": "Populate the door Name in the authoring model before IFC export."
+      }
+    },
+    {
+      "type": "MissingName",
+      "id": "MODEL-NAME-WINDOW-001",
+      "severity": "Warning",
+      "ifcClass": "IfcWindow",
+      "meta": {
+        "title": "Windows should have a Name",
+        "why": "Window names help identify elements during QA review and coordination.",
+        "howToFix": "Populate the window Name in the authoring model before IFC export."
+      }
+    },
+    {
+      "type": "DuplicateGlobalId",
+      "id": "MODEL-GLOBALID-001",
+      "severity": "Error",
+      "meta": {
+        "title": "Elements should not share the same GlobalId",
+        "why": "Duplicate GlobalIds break reliable element tracking, issue linking, and model comparison workflows.",
+        "howToFix": "Regenerate or repair IFC export identifiers so each IFC root object has a unique GlobalId."
+      }
+    },
+    {
+      "type": "MissingContainment",
+      "id": "MODEL-CONTAINMENT-WALL-001",
+      "severity": "Warning",
+      "ifcClass": "IfcWall",
+      "meta": {
+        "title": "Walls should be assigned to a spatial container",
+        "why": "Spatial containment connects elements to levels, buildings, or spaces and supports model navigation and filtering.",
+        "howToFix": "Check the authoring model level/story assignment and re-export with spatial containment enabled."
+      }
+    },
+    {
+      "type": "MissingContainment",
+      "id": "MODEL-CONTAINMENT-DOOR-001",
+      "severity": "Warning",
+      "ifcClass": "IfcDoor",
+      "meta": {
+        "title": "Doors should be assigned to a spatial container",
+        "why": "Spatial containment helps locate doors by building, story, or space during coordination.",
+        "howToFix": "Check the door host and level/story assignment before IFC export."
+      }
+    },
+    {
+      "type": "MissingContainment",
+      "id": "MODEL-CONTAINMENT-WINDOW-001",
+      "severity": "Warning",
+      "ifcClass": "IfcWindow",
+      "meta": {
+        "title": "Windows should be assigned to a spatial container",
+        "why": "Spatial containment helps locate windows by building, story, or space during coordination.",
+        "howToFix": "Check the window host and level/story assignment before IFC export."
+      }
+    },
+    {
+      "type": "SpaceExternalHasExternalBoundary",
+      "id": "MODEL-SPACE-BOUNDARY-001",
+      "severity": "Info",
+      "meta": {
+        "title": "External spaces should have boundary relationships",
+        "why": "External space boundaries support spatial analysis, envelope checks, and model coordination.",
+        "howToFix": "Review space boundary export settings and confirm the external space is properly bounded in the authoring model."
+      }
+    },
+    {
+      "type": "WallVolumeImpliesLength",
+      "id": "MODEL-WALL-QTO-001",
+      "severity": "Info",
+      "meta": {
+        "title": "Walls with volume should also report length",
+        "why": "A positive wall volume without length suggests incomplete quantity export or inconsistent base quantity data.",
+        "howToFix": "Review wall quantity export settings and confirm base quantities are included in the IFC export."
+      }
     }
   ],
   "description": "Rules tuned for common Revit-to-IFC export patterns (identity/phasing/type fallback, naming/mark conventions). Rule IDs use the 'RV-' prefix for Revit export checks."
