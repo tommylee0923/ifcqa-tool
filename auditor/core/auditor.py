@@ -1,20 +1,49 @@
+from __future__ import annotations
+
 from collections import Counter
+import ifcopenshell
+
 from core.model import ElementInfo, IssueRecord, AuditReport
+from core.rules.factory import build_rules, RuleFactoryError
+from infrastructure.ruleset_loader import load_ruleset, RulesetValidationError
+
 
 SKIP_CLASSES = {"IfcAnnotation", "IfcOpeningElement"}
 
-def run_audit(elements: list[ElementInfo], source_file: str) -> AuditReport:
-    # Amalyze IFC elements and return an audit report.
+
+def run_audit(
+    elements: list[ElementInfo], 
+    source_file: str,
+    model: ifcopenshell.file | None = None,
+    ruleset_path: str | None = None,
+    ) -> AuditReport:
+    """
+    Amalyze IFC elements and return an audit report.
+    
+    Built-in checks use ElementInfo.
+    JSON ruleset checks use the raw IfcOpenShell model.
+    """
 
     total_elements = len(elements)
-
     counts_by_class = count_elements_by_class(elements)
 
-    issues = find_missing_name_issues(elements)
+    issues: list[IssueRecord] = []
+    issues.extend(find_missing_name_issues(elements))
+    
+    if ruleset_path:
+        if model is None:
+            raise ValueError(
+                "ruleset_path was provided, but no IFC model was pssed to run_audit()."
+            )
+        ruleset = load_ruleset(ruleset_path)
+        rules = build_rules(ruleset.rules)
+        
+        for rule in rules:
+            issues.extend(rule.evaluate(model))
 
     total_issues = len(issues)
 
-    report = AuditReport(
+    return AuditReport(
         source_file=source_file,
         total_elements=total_elements,
         counts_by_class=counts_by_class,
@@ -22,10 +51,10 @@ def run_audit(elements: list[ElementInfo], source_file: str) -> AuditReport:
         issues=issues
     )
 
-    return report
-
 def count_elements_by_class(elements: list[ElementInfo]) -> dict[str, int]:
-    # Count how many elements exist for each IFC class.
+    """
+    Count how many elements exist for each IFC class.
+    """
 
     class_names = [element.ifc_class for element in elements]
 
@@ -34,6 +63,10 @@ def count_elements_by_class(elements: list[ElementInfo]) -> dict[str, int]:
     return dict(counts)
 
 def find_missing_name_issues(elements: list[ElementInfo]) -> list[IssueRecord]:
+    """
+    Built-in rule: flag elements missing name.
+    """
+    
     issues: list[IssueRecord] = []
     for element in elements:
         if element.ifc_class in SKIP_CLASSES:

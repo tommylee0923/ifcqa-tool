@@ -1,3 +1,4 @@
+import ifcopenshell
 import argparse, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -37,10 +38,16 @@ def parse_arguments() -> argparse.ArgumentParser:
         "ifc_file",
         help="Path to the IFC file"
     )
+    
     audit_parser.add_argument(
         "--output",
         default="output",
         help="Output directory for reports (default: output)"
+    )
+    
+    audit_parser.add_argument(
+        "--ruleset",
+        help="Path to a JSON ruleset file"
     )
     
     audit_parser.add_argument(
@@ -180,11 +187,28 @@ def run_audit(args) -> None:
     if not ifc_path.exists():
         raise FileNotFoundError(f"IFC file not found at: {ifc_path}")
     
+    ruleset_path = Path(args.ruleset) if args.ruleset else None
+    
+    if ruleset_path and not ruleset_path.exists():
+        raise FileNotFoundError(f"Ruleset file not found at: {ruleset_path}")
+    
     print (f"Reading IFC file: {ifc_path}")
+    
     elements = load_ifc_elements(str(ifc_path))
     print(f"Loaded {len(elements)} elements")
     
-    report = run_core_audit(elements, source_file=str(ifc_path))
+    model = None
+    if ruleset_path:
+        print(f"Loading ruleset: {ruleset_path}")
+        model = ifcopenshell.open(str(ifc_path))
+    
+    report = run_core_audit(
+        elements,
+        source_file=str(ifc_path),
+        model=model,
+        ruleset_path=str(ruleset_path) if ruleset_path else None,
+        )
+    
     print(f"Audit complete: {report.total_elements} elements, {report.total_issues} issues")
     
     if not args.no_console:
