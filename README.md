@@ -4,7 +4,8 @@
 
 ![IfcQA HTML Report](docs/images/report-overview.png)
 
-**IfcQA** is a lightweight **IFC quality-gate CLI** built with **C# / .NET / xBIM toolkit**. It validates BIM models against configurable rulesets and generates interactive HTML reports with a 3D model viewer that links QA issues directly to the elements.
+**IfcQA** is a lightweight IFC quality-gate and validation framework built primarily with Python and IfcOpenShell.
+It validates BIM models against configurable JSON rulesets and generates structured QA outputs including JSON, CSV, SQLite, and interactive 3D web reports.
 
 Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 
@@ -13,10 +14,10 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 ## Key Features
 
 ### Rule-based IFC QA Engine
-- Modular C# rule system built on xBIM and JSON-driven rulesets
-- Validates properties, naming, containment, and consistency
-- Emits structured issues with severity + trace metadata
-- Summary metrics + filterable issue table
+- Modular Python rule engine built on IfcOpenShell
+- JSON-driven validation rulesets
+- Extensible rule architecture (property, quantity, regex, comparison, and model traversal rules)
+- Structured issue trace metadata (severity, path, expected, actual)
 
 ### Interactive, Zero-Backend HTML QA Report
 - Fully static HTML report (no server required)
@@ -30,34 +31,38 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 - `--fail-on` threshold support for CI gating
 - Designed for local QA, model audits, and pipeline integration
 
-### SQLite Integration — Shared Data Layer
-- `--sqlite` flag writes structured results into a shared `audit.db`
-- Compatible with the IfcModelAuditor Python pipeline's SQLite schema
-- Enables multi-engine comparison: IfcQA and Python auditor results
-  in one queryable database, surfaced through a unified web interface
-- Issues stored with full trace metadata: severity, path, expected,
-  actual, source engine
+### SQLite Integration
+- Structured audit results written to SQLite
+- Queryable issue history and audit runs
+- Shared persistence layer for CLI and web interfaces
+- Supports downstream analytics and QA workflows
 
 ---
 
 ## Architecture
 
 ### Validation Engine
-- C# / .NET
-- xBIM Toolkit
+- Python
+- IfcOpenShell
+- JSON-driven modular rule system
 
-### IFC Model Processing
-- IfcOpenShell (IfcConvert) — IFC → GLB export
+### IFC Processing
+- IfcOpenShell
+- IfcConvert (GLB export)
 
-### Report Output
-- Three.js — GLB rendering & scene graph indexing
-- Static HTML / CSS / JS (zero-backend distribution)
+### Persistence Layer
+- SQLite
 
-### Shared Data Layer (optional)
-- SQLite — shared schema with IfcModelAuditor Python pipeline
-- `source='ifcqa'` written on all issue rows for engine identification
-- See [IfcModelAuditor](https://github.com/tommylee0923/IfcModelAuditor)
-  for the unified web interface
+### Web Interface
+- Flask API
+- Three.js viewer
+- Static HTML / CSS / JS frontend
+
+### Outputs
+- JSON
+- CSV
+- SQLite
+- Interactive HTML QA reports
 
 ---
 
@@ -134,48 +139,21 @@ as a build artifact.
 
 ```
 ifcqa-tool/
-├─ src/
-│   ├─ IfcQa.Core/
-│   │   ├─ Rules/           Rule engine + validation logic
-│   │   ├─ Models/          Issue models + trace metadata
-│   │   ├─ Analysis/        IFC analysis orchestration
-│   │   └─ IFC utilities/   xBIM-based helpers
-│   │
-│   └─ IfcQa.Cli/
-│       ├─ Program.cs
-│       ├─ HtmlReportWriter.cs
-│       ├─ SqliteWriter.cs  Shared SQLite output (--sqlite flag)
-│       └─ Report/
-│           └─ Templates/
-│               ├─ report.template.html
-│               ├─ report.css
-│               ├─ report.js
-│               └─ viewer/
-│                   ├─ viewer.bundle.js
-│                   ├─ app.js
-│                   └─ modules/
-│
-├─ auditor/                     ← Python auditor
+├─ auditor/                     ← Primary Python engine
 │   ├─ app/
-│   │   ├─ main.py              CLI (audit + query subcommands)
-│   │   └─ server.py            Flask API
 │   ├─ core/
-│   │   ├─ model.py             ElementInfo, IssueRecord, AuditReport
-│   │   └─ auditor.py           Validation logic (MISSING_NAME rule)
+│   │   ├─ rules/
+│   │   ├─ model.py
+│   │   └─ auditor.py
 │   ├─ infrastructure/
-│   │   ├─ ifc_reader.py        IFC parsing via IfcOpenShell
-│   │   ├─ sqlite_writer.py     SQLite write + query layer
-│   │   ├─ json_writer.py
-│   │   ├─ csv_writer.py
-│   │   └─ console_writer.py
 │   └─ web/
-│       ├─ index.html
-│       ├─ style.css
-│       └─ app.js
 │
-├─ output/                      Shared output dir (audit.db lives here)
-├─ samples/                     Shared IFC sample files
-└─ rulesets/                    IfcQA JSON rulesets
+├─ rulesets/
+├─ samples/
+├─ output/
+│
+└─ legacy/
+    └─ csharp-engine/           ← Archived xBIM-based engine
 ```
 
 ---
@@ -190,3 +168,5 @@ Active development.
 
 Scoped to demonstrate **AEC software engineering**, **BIM reasoning**,
 and **production-quality tooling** without vendor lock-in.
+
+Legacy C# / xBIM validation components are retained in the repository for historical reference during the migration to the Python-based engine.
