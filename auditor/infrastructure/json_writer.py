@@ -14,10 +14,14 @@ def write_json_report(report: AuditReport, output_dir: str) -> None:
         "issues": [
             {
             "issue_code": issue.issue_code,
+            "severity": issue.severity,
             "message": issue.message,
             "global_id": issue.global_id,
             "ifc_class": issue.ifc_class,
             "element_name": issue.element_name,
+            "path": issue.path,
+            "expected": issue.expected,
+            "actual": issue.actual,
             } 
             for issue in report.issues
         ],

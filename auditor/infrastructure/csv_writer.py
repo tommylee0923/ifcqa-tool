@@ -10,6 +10,7 @@ def write_csv_report(report: AuditReport, output_dir: str) -> None:
     output_folder.parent.mkdir(parents=True, exist_ok=True)
 
     write_element_counts_csv(report, output_folder / "element_counts.csv")
+    write_issues_csv(report, output_folder / "issue.csv")
 
 def write_element_counts_csv(report: AuditReport, output_dir: Path) -> None:
     # Write element counts by IFC class to a CSV file
@@ -34,6 +35,9 @@ def write_issues_csv(report: AuditReport, output_dir: Path) -> None:
             "global_id",
             "ifc_class",
             "element_name",
+            "path",
+            "expected",
+            "actual",
         ])
 
         for issue in report.issues:
@@ -42,5 +46,8 @@ def write_issues_csv(report: AuditReport, output_dir: Path) -> None:
                 issue.message,
                 issue.global_id,
                 issue.ifc_class,
-                issue.element_name
+                issue.element_name,
+                issue.path,
+                issue.expected,
+                issue.actual,
             ])

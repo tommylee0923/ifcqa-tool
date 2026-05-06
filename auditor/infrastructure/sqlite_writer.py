@@ -320,9 +320,9 @@ def _insert_issues(
             issue.global_id,
             issue.ifc_class,
             issue.element_name,
-            None,       # path
-            None,       # expected
-            None,       # actual
+            issue.path,       # path
+            issue.expected,       # expected
+            issue.actual,       # actual
             "python"   # source
         )
         for issue in report.issues
