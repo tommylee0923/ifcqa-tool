@@ -34,7 +34,7 @@ def _parse_ruleset(data: dict, source: str) -> RulesetSpec:
         return RulesetSpec(
             name=data.get("name", ""),
             version=data.get("version", ""),
-            rule=rules,
+            rules=rules,
             description=data.get("description", ""),
         )
     except (KeyError, TypeError) as e:
@@ -95,10 +95,10 @@ def _validate_ruleset(spec: RulesetSpec, source: str) -> None:
     if not spec.version.strip():
         raise RulesetValidationError(f"Ruleset '{source}': 'version' is required.")
  
-    if not spec.rule:
+    if not spec.rules:
         raise RulesetValidationError(f"Ruleset '{source}': must contain at least one rule.")
  
-    for rule in spec.rule:
+    for rule in spec.rules:
         if not rule.id.strip():
             raise RulesetValidationError(
                 f"Ruleset '{source}': a rule of type '{rule.type}' is missing 'id'."
@@ -111,7 +111,7 @@ def _validate_ruleset(spec: RulesetSpec, source: str) -> None:
     # Duplicate ID check
     seen: set[str] = set()
     dupes: list[str] = []
-    for rule in spec.rule:
+    for rule in spec.rules:
         if rule.id in seen:
             dupes.append(rule.id)
         seen.add(rule.id)

@@ -60,5 +60,5 @@ class RulesetSpec:
 
     name: str
     version: str
-    rule: list[RuleSpec]
+    rules: list[RuleSpec]
     description: str = ""
