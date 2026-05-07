@@ -1,6 +1,7 @@
 from __future__ import annotations
 import re
 import ifcopenshell
+from core.context import AuditContext
 from core.model import IssueRecord
 from core.rules.base import BaseRule
 from core.rules.pset_utils import (
@@ -16,13 +17,9 @@ from core.rules.pset_utils import (
 )
 
 
-def _elements_of_class(model: ifcopenshell.file, ifc_class: str):
+def _elements_of_class(context: AuditContext, ifc_class: str):
     """Return all IfcProduct instances matching the given IFC class name."""
-    return [
-        e for e in model.by_type("IfcProduct")
-        if e.is_a().lower() == ifc_class.lower()
-    ]
-
+    return context.get_elements(ifc_class)
 
 # ============================================================
 # RequireNonEmpty
@@ -37,9 +34,9 @@ class RuleRequireNonEmpty(BaseRule):
         self.key = key
         self.skip_if_missing = skip_if_missing
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             psets = get_psets(e)
             ps = psets.get(self.pset)
 
@@ -85,9 +82,9 @@ class RuleRequireNonEmptyAny(BaseRule):
         self.pset = pset
         self.key = key
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             attr_val = get_attribute(e, self.attribute) if self.attribute else None
             if attr_val:
                 continue
@@ -124,9 +121,9 @@ class RuleRequireNonEmptyEither(BaseRule):
         self.key_b = key_b
         self.skip_if_missing = skip_if_missing
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             a = get_pset_value(e, self.pset_a, self.key_a)
             b = get_pset_value(e, self.pset_b, self.key_b)
 
@@ -168,9 +165,9 @@ class RuleAllowedValues(BaseRule):
         self.allowed_display = allowed_values
         self.skip_if_missing = skip_if_missing
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             psets = get_psets(e)
             ps = psets.get(self.pset)
 
@@ -231,9 +228,9 @@ class RuleRequireEqualStrings(BaseRule):
         self.key_b = key_b
         self.skip_if_missing = skip_if_missing
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             a = get_pset_value(e, self.pset_a, self.key_a)
             b = get_pset_value(e, self.pset_b, self.key_b)
 
@@ -282,9 +279,9 @@ class RuleRegexMatch(BaseRule):
             return get_pset_value(element, self.pset, self.key)
         return None
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             val = self._get_value(e)
 
             if not val:
@@ -323,9 +320,9 @@ class RuleRequirePset(BaseRule):
         self.ifc_class = ifc_class
         self.pset = pset
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             if not has_pset(e, self.pset):
                 issues.append(self._issue(
                     e.GlobalId, e.is_a(),
@@ -349,9 +346,9 @@ class RuleRequireAnyPset(BaseRule):
         self.ifc_class = ifc_class
         self.psets = psets
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             element_psets = get_psets(e)
             if not any(p in element_psets for p in self.psets):
                 issues.append(self._issue(
@@ -377,9 +374,9 @@ class RuleRequirePsetPropertyKey(BaseRule):
         self.pset = pset
         self.key = key
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             psets = get_psets(e)
             ps = psets.get(self.pset)
             if ps is None:
@@ -408,9 +405,9 @@ class RuleRequirePsetBool(BaseRule):
         self.pset = pset
         self.key = key
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             psets = get_psets(e)
             ps = psets.get(self.pset)
             if ps is None:
@@ -442,9 +439,9 @@ class RuleRequirePsetNumber(BaseRule):
         self.key = key
         self.min_exclusive = min_exclusive
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             psets = get_psets(e)
             ps = psets.get(self.pset)
             if ps is None:
@@ -490,9 +487,9 @@ class RuleComparePsetNumbers(BaseRule):
         self.key_a = key_a
         self.key_b = key_b
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             psets = get_psets(e)
             ps = psets.get(self.pset)
             if ps is None:
@@ -528,9 +525,9 @@ class RuleSurveyValue(BaseRule):
         self.pset = pset
         self.key = key
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             val = get_pset_value(e, self.pset, self.key)
             if val is None:
                 continue
@@ -557,9 +554,9 @@ class RuleRequireInstanceEqualsType(BaseRule):
         self.key = key
         self.skip_if_missing = skip_if_missing
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             inst_psets = get_instance_psets(e)
             type_psets = get_type_psets(e)
 
@@ -596,9 +593,9 @@ class RuleRequireQto(BaseRule):
         self.ifc_class = ifc_class
         self.qto = qto
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             if not has_qto(e, self.qto):
                 issues.append(self._issue(
                     e.GlobalId, e.is_a(),
@@ -619,9 +616,9 @@ class RuleRequireQtoQuantityNames(BaseRule):
         self.qto = qto
         self.qty_names = qty_names
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             qtos = get_qtos(e)
             qto = qtos.get(self.qto)
             if qto is None:
@@ -649,9 +646,9 @@ class RuleRequireQtoQuantityValueNumber(BaseRule):
         self.qty = qty
         self.min_exclusive = min_exclusive
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues = []
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             val = get_qto_value(e, self.qto, self.qty)
             if val is None:
                 continue

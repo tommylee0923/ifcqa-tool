@@ -4,6 +4,7 @@ from collections import Counter
 import ifcopenshell
 
 from core.model import IssueRecord
+from core.context import AuditContext
 from core.rules.base import BaseRule
 from core.rules.pset_utils import get_psets, get_qto_value
 
@@ -11,11 +12,8 @@ from core.rules.pset_utils import get_psets, get_qto_value
 SKIP_NAME_CLASSES = {"IfcAnnotation", "IfcOpeningElement"}
 
 
-def _elements_of_class(model: ifcopenshell.file, ifc_class: str):
-    return [
-        e for e in model.by_type("IfcProduct")
-        if e.is_a().lower() == ifc_class.lower()
-    ]
+def _elements_of_class(context: AuditContext, ifc_class: str):
+    return context.get_elements(ifc_class)
 
 
 class RuleMissingName(BaseRule):
@@ -23,10 +21,10 @@ class RuleMissingName(BaseRule):
         super().__init__(rule_id, severity)
         self.ifc_class = ifc_class
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues: list[IssueRecord] = []
 
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             if e.is_a() in SKIP_NAME_CLASSES:
                 continue
 
@@ -49,16 +47,22 @@ class RuleDuplicateGlobalId(BaseRule):
     def __init__(self, rule_id: str, severity: str):
         super().__init__(rule_id, severity)
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues: list[IssueRecord] = []
 
-        roots = model.by_type("IfcRoot")
+        roots = context.all_roots
         ids = [getattr(e, "GlobalId", None) for e in roots if getattr(e, "GlobalId", None)]
         counts = Counter(ids)
         duplicate_ids = {gid for gid, count in counts.items() if count > 1}
 
         for e in roots:
-            gid = getattr(e, "GlobalId", None)
+            raw_gid = getattr(e, "GlobalId", None)
+
+            if not isinstance(raw_gid, str) or raw_gid.strip() == "":
+                continue
+
+            gid = raw_gid
+
             if gid in duplicate_ids:
                 issues.append(self._issue(
                     gid,
@@ -78,10 +82,10 @@ class RuleMissingContainment(BaseRule):
         super().__init__(rule_id, severity)
         self.ifc_class = ifc_class
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues: list[IssueRecord] = []
 
-        for e in _elements_of_class(model, self.ifc_class):
+        for e in _elements_of_class(context, self.ifc_class):
             contained = getattr(e, "ContainedInStructure", None)
 
             if not contained:
@@ -102,10 +106,10 @@ class RuleSpaceExternalHasExternalBoundary(BaseRule):
     def __init__(self, rule_id: str, severity: str):
         super().__init__(rule_id, severity)
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues: list[IssueRecord] = []
 
-        for space in model.by_type("IfcSpace"):
+        for space in context.get_elements("IfcSpace"):
             is_external = _is_external_space(space)
             if not is_external:
                 continue
@@ -129,10 +133,10 @@ class RuleWallVolumeImpliesLength(BaseRule):
     def __init__(self, rule_id: str, severity: str):
         super().__init__(rule_id, severity)
 
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         issues: list[IssueRecord] = []
 
-        for wall in model.by_type("IfcWall"):
+        for wall in context.get_elements("IfcWall"):
             volume = get_qto_value(wall, "Qto_WallBaseQuantities", "NetVolume")
             length = get_qto_value(wall, "Qto_WallBaseQuantities", "Length")
 

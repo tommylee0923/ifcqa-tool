@@ -2,6 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import ifcopenshell
 from core.model import IssueRecord
+from core.context import AuditContext
 
 class BaseRule(ABC):
     """
@@ -13,7 +14,7 @@ class BaseRule(ABC):
         self.severity = severity
     
     @abstractmethod
-    def evaluate(self, model: ifcopenshell.file) -> list[IssueRecord]:
+    def evaluate(self, context: AuditContext) -> list[IssueRecord]:
         ...
     
     # ========================================================================

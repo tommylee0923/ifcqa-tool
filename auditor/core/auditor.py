@@ -5,6 +5,7 @@ import ifcopenshell
 
 from core.model import ElementInfo, AuditReport
 from core.rules.factory import build_rules
+from core.context import AuditContext
 from infrastructure.ruleset_loader import load_ruleset
 
 
@@ -32,8 +33,10 @@ def run_audit(
         ruleset = load_ruleset(ruleset_path)
         rules = build_rules(ruleset.rules)
 
+        
+        context = AuditContext.from_model(model)
         for rule in rules:
-            issues.extend(rule.evaluate(model))
+            issues.extend(rule.evaluate(context))
 
     return AuditReport(
         source_file=source_file,
