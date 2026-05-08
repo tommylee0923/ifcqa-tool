@@ -1,4 +1,4 @@
-[![IFC QA](https://github.com/tommylee0923/ifc-quality-gate/actions/workflows/ifcqa.yml/badge.svg)](https://github.com/tommylee0923/ifc-quality-gate/actions/workflows/ifcqa.yml)
+[![Python CI](https://github.com/tommylee0923/ifcqa-tool/actions/workflows/ifcqa.yml/badge.svg)](https://github.com/tommylee0923/ifcqa-tool/actions/workflows/ifcqa.yml)
 
 # IfcQA — IFC Quality Gate for BIM Pipelines
 
