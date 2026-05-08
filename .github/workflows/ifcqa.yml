@@ -1,36 +1,34 @@
-name: IFC QA
+name: Python CI
 
 on:
   push:
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
-  ifcqa:
+  test-python-auditor:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          dotnet-version: 8.0.x
-      
-      - name: Build
-        run: dotnet build src/IfcQa.Cli -c Release
+          python-version: "3.11"
 
-      - name: Run IfcQa
+      - name: Install dependencies
         run: |
-          dotnet run --project src/IfcQa.Cli -- \
-            check samples/sample.ifc \
-            --rules rulesets/tool-agnostic-common.json \
-            --out artifacts \
-            --fail-on error
+          python -m pip install --upgrade pip
+          pip install -r auditor/requirements.txt
 
-      - name: Upload HTML report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ifcqa-report
-          path: artifacts/report.html
+      - name: Run audit test
+        run: |
+          python auditor/app/main.py audit samples/sample.ifc --ruleset rulesets/revit-export.json --output output
+
+      - name: Verify output files
+        run: |
+          test -f output/audit_report.json
+          test -f output/issue.csv

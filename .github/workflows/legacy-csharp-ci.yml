@@ -1,0 +1,35 @@
+name: IFC QA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ifcqa:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      
+      - name: Build
+        run: dotnet build src/IfcQa.Cli -c Release
+
+      - name: Run IfcQa
+        run: |
+          dotnet run --project src/IfcQa.Cli -- \
+            check samples/sample.ifc \
+            --rules rulesets/tool-agnostic-common.json \
+            --out artifacts \
+            --fail-on error
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ifcqa-report
+          path: artifacts/report.html
