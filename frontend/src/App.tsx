@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { AuditReport } from "./types/audit";
+import IssueList from "./components/IssueList";
 
 function App() {
   const [report, setReport] = useState<AuditReport | null>(null);
@@ -22,6 +23,8 @@ function App() {
     <main>
       <h1>IfcQA React Frontend</h1>
       <p>Total issues: {report.issues.length}</p>
+
+      <IssueList issues={report.issues} />
     </main>
   );
 }
