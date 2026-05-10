@@ -48,18 +48,26 @@ function App() {
       <p>Total issues: {report.issues.length}</p>
       <label>
         Severity:
-        <FilterBar
-          severityFilter={severityFilter}
-          onSeverityChange={setSeverityFilter} 
-          ifcClassFilter={ifcClassFilter}
-          onIfcClassChange={setIfcClassFilter}
-          ifcClasses={ifcClasses}/>
       </label>
-      <IssueList
-        issues={filteredIssues}
-        onSelectedIssue={setSelectedIssue} />
+      {selectedIssue ? (
+        <IssueDetail
+          issue={selectedIssue}
+          onBack={() => setSelectedIssue(null)}
+        />
+      ) : (
+        <>
+          <FilterBar
+            severityFilter={severityFilter}
+            onSeverityChange={setSeverityFilter}
+            ifcClassFilter={ifcClassFilter}
+            onIfcClassChange={setIfcClassFilter}
+            ifcClasses={ifcClasses} />
 
-      <IssueDetail issue={selectedIssue} />
+          <IssueList
+            issues={filteredIssues}
+            onSelectedIssue={setSelectedIssue} />
+        </>
+      )}
     </main>
   );
 }

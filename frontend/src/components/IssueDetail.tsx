@@ -1,16 +1,18 @@
 import type { AuditIssue } from "../types/audit";
 
 interface IssueDetailProps {
-    issue: AuditIssue | null;
+    issue: AuditIssue;
+    onBack: () => void;
 }
 
-function IssueDetail({ issue }: IssueDetailProps) {
+function IssueDetail({ issue, onBack }: IssueDetailProps) {
     if (!issue) {
         return <p>Select an issue to view details.</p>
     }
 
     return (
         <section>
+            <button onClick={onBack}>Back to Issue</button>
             <h2>Issue Detail</h2>
 
             <p><strong>Code:</strong> {issue.issue_code}</p>
