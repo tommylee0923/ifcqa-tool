@@ -15,11 +15,9 @@
 <body>
 
     <div class="wrap">
-
         <!-- HEADER -->
         <div class="h1">IfcQA</div>
         <div class="meta">IFC Model QA Dashboard</div>
-
         <section id="runs-view">
             <div class="grid">
                 <div class="card">
@@ -46,33 +44,26 @@
         </section>
 
         <section id="detail-view" class="hidden">
-
             <button id="back-btn" class="btn btnSmall" style="margin-bottom: 14px;">← Back to Runs</button>
-
             <div id="run-header"></div>
-
             <!-- TWO-PANE LAYOUT: viewer left, issues right -->
             <div class="detail-panes">
-
                 <!-- LEFT: filters + issues table -->
                 <div class="issues-pane">
-
-                    <div class="chips" id="source-chips">
-                        <!-- Source chips injected by app.js -->
+                    <div id="issues-list-view">
+                        <div class="chips" id="source-chips"></div>
+                        <div class="chips" id="class-chips"></div>
+                        <div class="controls">
+                            <span id="shown" class="pill">0 shown</span>
+                        </div>
+                        <div id="issues-list"></div>
                     </div>
-
-                    <div class="chips" id="class-chips">
-                        <!-- Class chips injected by app.js -->
+                    <div id="issue-detail-view" class="hidden">
+                        <button id="issue-detail-back" class="btn btnSmall" style="margin-bottom: 14px;">
+                            ← Back to Issues
+                        </button>
+                        <div id="issue-detail"></div>
                     </div>
-
-                    <div class="controls">
-                        <span id="shown" class="pill">0 shown</span>
-                    </div>
-
-                    <div id="issues-list">
-                        <!-- Issues table injected by app.js -->
-                    </div>
-
                 </div>
 
                 <div id="splitter" class="splitter" role="separator" aria-orientation="vertical"
@@ -82,7 +73,7 @@
                 <!-- RIGHT: 3D viewer -->
                 <div class="viewer-pane">
                     <canvas id="viewerCanvas"></canvas>
-                    <pre id="viewerInfo"></pre>
+                    <!-- <pre id="viewerInfo"></pre> -->
                 </div>
 
             </div>

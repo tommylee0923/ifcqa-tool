@@ -242,6 +242,66 @@ function renderIssues(issues) {
         const gid = row.dataset.gid ?? null;
         window.dispatchEvent(new CustomEvent("ifcqa:select", { detail: { gid } }));
     });
+
+    issuesListView.classList.remove("hidden");
+    issueDetailView.classList.add("hidden");
+}
+
+function showIssueDetail(issue) {
+    issueDetail.innerHTML = `
+        <div class="issue-detail-card">
+
+            <div class="issue-detail-top">
+                <div>
+                    <div class="k">Issue Detail</div>
+                    <h2>${escapeHtml(issue.issue_code ?? "Unknown Issue")}</h2>
+                </div>
+                <span class="sev ${escapeHtml(issue.severity ?? "")}">
+                    ${escapeHtml(issue.severity ?? "Unknown")}
+                </span>
+            </div>
+
+            <div class="issue-message">
+                ${escapeHtml(issue.message ?? "No message provided.")}
+            </div>
+
+            <div class="issue-detail-grid">
+                <div>
+                    <div class="detail-label">IFC Class</div>
+                    <div class="detail-value">${escapeHtml(issue.ifc_class ?? "—")}</div>
+                </div>
+
+                <div>
+                    <div class="detail-label">Element Name</div>
+                    <div class="detail-value">${escapeHtml(issue.element_name ?? "—")}</div>
+                </div>
+
+                <div>
+                    <div class="detail-label">GlobalId</div>
+                    <div class="detail-value mono">${escapeHtml(issue.global_id ?? "—")}</div>
+                </div>
+
+                <div>
+                    <div class="detail-label">Path</div>
+                    <div class="detail-value mono">${escapeHtml(issue.path ?? "—")}</div>
+                </div>
+
+                <div>
+                    <div class="detail-label">Expected</div>
+                    <div class="detail-value">${escapeHtml(issue.expected ?? "—")}</div>
+                </div>
+
+                <div>
+                    <div class="detail-label">Actual</div>
+                    <div class="detail-value">${escapeHtml(issue.actual ?? "—")}</div>
+                </div>
+            </div>
+
+        </div>
+    `;
+
+    issuesListView.classList.add("hidden");
+    issueDetailView.classList.remove("hidden");
 }
 
 
@@ -302,7 +362,7 @@ let dragging = false;
 
 splitter.addEventListener("pointerdown", (e) => {
     e.preventDefault();
-    
+
     dragging = true;
     splitter.setPointerCapture(e.pointerId);
     document.body.classList.add("resizing");
@@ -433,7 +493,34 @@ document.addEventListener("DOMContentLoaded", () => {
     window.classChips = document.getElementById("class-chips");
     window.backBtn = document.getElementById("back-btn");
 
+    // NEW: left-pane subviews
+    window.issuesListView = document.getElementById("issues-list-view");
+    window.issueDetailView = document.getElementById("issue-detail-view");
+    window.issueDetail = document.getElementById("issue-detail");
+    window.issueDetailBack = document.getElementById("issue-detail-back");
+
     backBtn.addEventListener("click", goBack);
+
+    issueDetailBack.addEventListener("click", () => {
+        issueDetailView.classList.add("hidden");
+        issuesListView.classList.remove("hidden");
+    });
+
+    issuesList.addEventListener("click", (e) => {
+        const row = e.target.closest("tr[data-gid]");
+        if (!row) return;
+
+        const gid = row.dataset.gid;
+        const issue = state.issues.find(i => i.global_id === gid);
+
+        if (!issue) return;
+
+        showIssueDetail(issue);
+
+        window.dispatchEvent(new CustomEvent("ifcqa:select", {
+            detail: { gid }
+        }));
+    });
 
     (async () => {
         const runs = await fetchRuns();

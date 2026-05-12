@@ -310,10 +310,6 @@ tbody tr.selected td {
     min-width: 0;
 }
 
-/* ============================================================
-   LEFT PANEL
-   ============================================================ */
-
 .issues-pane {
     flex: 0 0 var(--leftW);
     min-width: 320px;
@@ -323,6 +319,63 @@ tbody tr.selected td {
     flex-direction: column;
     gap: 8px;
     min-height: 0;
+}
+
+.issue-detail-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.issue-detail-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+}
+
+.issue-detail-top h2 {
+    margin: 4px 0 0;
+    font-size: 20px;
+    line-height: 1.25;
+}
+
+.issue-message {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 14px 0 18px;
+    line-height: 1.45;
+}
+
+.issue-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+
+.detail-value {
+    font-size: 14px;
+    color: #111827;
+    word-break: break-word;
+}
+
+.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 13px;
 }
 
 /* ============================================================
