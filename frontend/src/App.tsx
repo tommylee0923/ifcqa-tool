@@ -43,7 +43,8 @@ function App() {
   });
 
   return (
-    <main>
+    <main className="app">
+      <header className="header"></header>
       <h1>IfcQA React Frontend</h1>
       <p>Total issues: {report.issues.length}</p>
       <label>

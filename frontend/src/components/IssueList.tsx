@@ -10,10 +10,10 @@ function IssueList({ issues, onSelectedIssue }: IssueListProps) {
         <section>
             <h2>Issues</h2>
 
-            <ul>
+            <ul className="issue-list">
                 {issues.map((issue, index) => (
-                    <li key={index}>
-                        <button onClick={() => onSelectedIssue(issue)}>
+                    <li className="issue-item" key={index}>
+                        <button className="issue-button" onClick={() => onSelectedIssue(issue)}>
                             <strong>{issue.issue_code}</strong> - {issue.severity}
                         </button>
 

@@ -182,3 +182,35 @@
     border-right-color: var(--border);
   }
 }
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.issue-list {
+  list-style: none;
+  padding: 0;
+}
+
+.issue-item {
+  margin-bottom: 12px;
+}
+
+.issue-button {
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  cursor: pointer;
+}

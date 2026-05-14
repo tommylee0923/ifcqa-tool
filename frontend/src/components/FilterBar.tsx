@@ -14,7 +14,7 @@ function FilterBar({
     ifcClasses,
 }: FilterBarProps) {
     return (
-        <section>
+        <section className="filter-bar">
             <label>
                 Severity:
                 <select value={severityFilter}
