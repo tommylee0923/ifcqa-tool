@@ -4,6 +4,7 @@ import { fetchIssues, fetchRuns } from "./api/auditApi";
 import FilterBar from "./components/FilterBar";
 import IssueList from "./components/IssueList";
 import IssueDetail from "./components/IssueDetail";
+import RunList from "./components/RunList";
 import "./App.css";
 
 function App() {
@@ -25,11 +26,9 @@ function App() {
           return;
         }
 
-        const latestRun = runsData[0];
-        setSelectedRun(latestRun);
+        setSelectedIssue(null);
+        setIssues([]);
 
-        const issuesData = await fetchIssues(latestRun.id);
-        setIssues(issuesData);
       } catch (err) {
         setErrorMessage(
           err instanceof Error ? err.message : "Unknown error"
@@ -39,6 +38,20 @@ function App() {
 
     loadInitialData();
   }, []);
+
+  async function handleSelectRun(run: AuditRun) {
+    try {
+      setSelectedRun(run);
+      setSelectedIssue(null);
+
+      const issueData = await fetchIssues(run.id);
+      setIssues(issueData);
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : "Unknown error"
+      );
+    }
+  }
 
   const ifcClasses = Array.from(
     new Set(
@@ -66,21 +79,20 @@ function App() {
     <main className="app">
       <header className="header">
         <h1>IfcQA React Frontend</h1>
-        {selectedRun && (
-          <p>
-            Current run: {selectedRun.source_file} -{" "}
-            {selectedRun.total_issues} issues
-          </p>
-        )}
       </header>
-      
-      {selectedIssue ? (
+      {!selectedRun ? (
+        <RunList runs={runs} onSelectRun={handleSelectRun} />
+      ) : selectedIssue ? (
         <IssueDetail
           issue={selectedIssue}
           onBack={() => setSelectedIssue(null)}
         />
       ) : (
         <>
+          <button onClick={() => setSelectedRun(null)}>
+            Back to Runs
+          </button>
+
           <FilterBar
             severityFilter={severityFilter}
             onSeverityChange={setSeverityFilter}
