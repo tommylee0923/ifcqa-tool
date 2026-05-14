@@ -83,118 +83,116 @@ function App() {
     return <p>{errorMessage}</p>;
   }
 
+  const dashboardView = (
+    <section>
+      <div className="grid">
+        <div className="card">
+          <div className="k">Total Runs</div>
+          <div className="v">{runs.length}</div>
+        </div>
+
+        <div className="card">
+          <div className="k">Total Elements</div>
+          <div className="v">
+            {runs.reduce((sum, run) => sum + run.total_elements, 0)}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="k">Total Issues</div>
+          <div className="v">
+            {runs.reduce((sum, run) => sum + run.total_issues, 0)}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="k">Latest Run</div>
+          <div className="v small">
+            {runs[0]?.run_timestamp ?? "—"}
+          </div>
+        </div>
+      </div>
+
+      <RunList runs={runs} onSelectRun={handleSelectRun} />
+    </section>
+  )
+  function renderIssueDetailView(issue: AuditIssue) {
+    return (
+      <section>
+        <button
+          className="btn btnSmall"
+          onClick={() => setSelectedIssue(null)}
+        >
+          ← Back to Issues
+        </button>
+
+        <IssueDetail
+          issue={issue}
+          onBack={() => setSelectedIssue(null)}
+        />
+      </section>
+    );
+  }
+  function renderRunDetailView(run: AuditRun) {
+    return (
+      <section>
+        <button
+          className="btn btnSmall"
+          onClick={() => setSelectedRun(null)}
+        >
+          ← Back to Runs
+        </button>
+
+        <div className="run-detail-card">
+          <div>
+            <div className="run-detail-title">{run.source_file}</div>
+            <div className="run-detail-meta">{run.run_timestamp}</div>
+          </div>
+
+          <div className="run-detail-stats">
+            <span className="pill">{run.total_elements} elements</span>
+            <span className="pill pill-issue">{run.total_issues} issues</span>
+          </div>
+        </div>
+
+        <div className="detail-panes">
+          <div className="issues-pane">
+            <FilterBar
+              severityFilter={severityFilter}
+              onSeverityChange={setSeverityFilter}
+              ifcClassFilter={ifcClassFilter}
+              onIfcClassChange={setIfcClassFilter}
+              ifcClasses={ifcClasses}
+            />
+
+            <div className="controls">
+              <span className="pill">{filteredIssues.length} shown</span>
+            </div>
+
+            <IssueList
+              issues={filteredIssues}
+              onSelectedIssue={setSelectedIssue}
+            />
+          </div>
+
+          <div className="splitter" />
+
+          <div className="viewer-pane">
+            <canvas id="viewerCanvas"></canvas>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <main className="wrap">
       <div className="h1">IfcQA</div>
       <div className="meta">IFC Model QA Dashboard</div>
 
-      {!selectedRun ? (
-        <section>
-          <div className="grid">
-            <div className="card">
-              <div className="k">Total Runs</div>
-              <div className="v">{runs.length}</div>
-            </div>
-
-            <div className="card">
-              <div className="k">Total Elements</div>
-              <div className="v">
-                {runs.reduce((sum, run) => sum + run.total_elements, 0)}
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="k">Total Issues</div>
-              <div className="v">
-                {runs.reduce((sum, run) => sum + run.total_issues, 0)}
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="k">Latest Run</div>
-              <div className="v small">
-                {runs[0]?.run_timestamp ?? "—"}
-              </div>
-            </div>
-          </div>
-
-          <RunList runs={runs} onSelectRun={handleSelectRun} />
-        </section>
-      ) : selectedIssue ? (
-        <section>
-          <button
-            className="btn btnSmall"
-            onClick={() => setSelectedIssue(null)}
-            style={{ marginBottom: "14px" }}
-          >
-            ← Back to Issues
-          </button>
-
-          <IssueDetail
-            issue={selectedIssue}
-            onBack={() => setSelectedIssue(null)}
-          />
-        </section>
-      ) : (
-        <section>
-          <button
-            className="btn btnSmall"
-            onClick={() => setSelectedRun(null)}
-            style={{ marginBottom: "14px" }}
-          >
-            ← Back to Runs
-          </button>
-
-          <div className="run-detail-card">
-            <div>
-              <div className="run-detail-title">
-                {selectedRun.source_file}
-              </div>
-              <div className="run-detail-meta">
-                {selectedRun.run_timestamp}
-              </div>
-            </div>
-
-            <div className="run-detail-stats">
-              <span className="pill">
-                {selectedRun.total_elements} elements
-              </span>
-              <span className="pill pill-issue">
-                {selectedRun.total_issues} issues
-              </span>
-            </div>
-          </div>
-
-          <div className="detail-panes">
-            <div className="issues-pane">
-              <FilterBar
-                severityFilter={severityFilter}
-                onSeverityChange={setSeverityFilter}
-                ifcClassFilter={ifcClassFilter}
-                onIfcClassChange={setIfcClassFilter}
-                ifcClasses={ifcClasses}
-              />
-
-              <div className="controls">
-                <span className="pill">
-                  {filteredIssues.length} shown
-                </span>
-              </div>
-
-              <IssueList
-                issues={filteredIssues}
-                onSelectedIssue={setSelectedIssue}
-              />
-            </div>
-
-            <div className="splitter" />
-
-            <div className="viewer-pane">
-              <canvas id="viewerCanvas"></canvas>
-            </div>
-          </div>
-        </section>
-      )}
+      {!selectedRun && dashboardView}
+      {selectedRun && selectedIssue && renderIssueDetailView(selectedIssue)}
+      {selectedRun && !selectedIssue && renderRunDetailView(selectedRun)}
     </main>
   );
 }
