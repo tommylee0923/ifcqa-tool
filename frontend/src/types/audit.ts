@@ -10,3 +10,11 @@ export interface AuditIssue {
 export interface AuditReport {
     issues: AuditIssue[];
 }
+
+export interface AuditRun {
+    id: number;
+    source_file: string;
+    run_timestamp: string;
+    total_elements: number;
+    total_issues: number;
+}
