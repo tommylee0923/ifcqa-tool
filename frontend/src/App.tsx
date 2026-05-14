@@ -8,6 +8,7 @@ import RunList from "./components/RunList";
 import "./App.css";
 
 function App() {
+  const [isLoading, setIsLoading] = useState(false);
   const [runs, setRuns] = useState<AuditRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<AuditRun | null>(null);
   const [issues, setIssues] = useState<AuditIssue[]>([]);
@@ -19,6 +20,8 @@ function App() {
   useEffect(() => {
     async function loadInitialData() {
       try {
+        setIsLoading(true);
+
         const runsData = await fetchRuns();
         setRuns(runsData);
 
@@ -33,6 +36,8 @@ function App() {
         setErrorMessage(
           err instanceof Error ? err.message : "Unknown error"
         );
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -53,6 +58,9 @@ function App() {
     }
   }
 
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
   const ifcClasses = Array.from(
     new Set(
       issues
@@ -76,36 +84,116 @@ function App() {
   }
 
   return (
-    <main className="app">
-      <header className="header">
-        <h1>IfcQA React Frontend</h1>
-      </header>
+    <main className="wrap">
+      <div className="h1">IfcQA</div>
+      <div className="meta">IFC Model QA Dashboard</div>
+
       {!selectedRun ? (
-        <RunList runs={runs} onSelectRun={handleSelectRun} />
+        <section>
+          <div className="grid">
+            <div className="card">
+              <div className="k">Total Runs</div>
+              <div className="v">{runs.length}</div>
+            </div>
+
+            <div className="card">
+              <div className="k">Total Elements</div>
+              <div className="v">
+                {runs.reduce((sum, run) => sum + run.total_elements, 0)}
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="k">Total Issues</div>
+              <div className="v">
+                {runs.reduce((sum, run) => sum + run.total_issues, 0)}
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="k">Latest Run</div>
+              <div className="v small">
+                {runs[0]?.run_timestamp ?? "—"}
+              </div>
+            </div>
+          </div>
+
+          <RunList runs={runs} onSelectRun={handleSelectRun} />
+        </section>
       ) : selectedIssue ? (
-        <IssueDetail
-          issue={selectedIssue}
-          onBack={() => setSelectedIssue(null)}
-        />
-      ) : (
-        <>
-          <button onClick={() => setSelectedRun(null)}>
-            Back to Runs
+        <section>
+          <button
+            className="btn btnSmall"
+            onClick={() => setSelectedIssue(null)}
+            style={{ marginBottom: "14px" }}
+          >
+            ← Back to Issues
           </button>
 
-          <FilterBar
-            severityFilter={severityFilter}
-            onSeverityChange={setSeverityFilter}
-            ifcClassFilter={ifcClassFilter}
-            onIfcClassChange={setIfcClassFilter}
-            ifcClasses={ifcClasses}
+          <IssueDetail
+            issue={selectedIssue}
+            onBack={() => setSelectedIssue(null)}
           />
+        </section>
+      ) : (
+        <section>
+          <button
+            className="btn btnSmall"
+            onClick={() => setSelectedRun(null)}
+            style={{ marginBottom: "14px" }}
+          >
+            ← Back to Runs
+          </button>
 
-          <IssueList
-            issues={filteredIssues}
-            onSelectedIssue={setSelectedIssue}
-          />
-        </>
+          <div className="run-detail-card">
+            <div>
+              <div className="run-detail-title">
+                {selectedRun.source_file}
+              </div>
+              <div className="run-detail-meta">
+                {selectedRun.run_timestamp}
+              </div>
+            </div>
+
+            <div className="run-detail-stats">
+              <span className="pill">
+                {selectedRun.total_elements} elements
+              </span>
+              <span className="pill pill-issue">
+                {selectedRun.total_issues} issues
+              </span>
+            </div>
+          </div>
+
+          <div className="detail-panes">
+            <div className="issues-pane">
+              <FilterBar
+                severityFilter={severityFilter}
+                onSeverityChange={setSeverityFilter}
+                ifcClassFilter={ifcClassFilter}
+                onIfcClassChange={setIfcClassFilter}
+                ifcClasses={ifcClasses}
+              />
+
+              <div className="controls">
+                <span className="pill">
+                  {filteredIssues.length} shown
+                </span>
+              </div>
+
+              <IssueList
+                issues={filteredIssues}
+                onSelectedIssue={setSelectedIssue}
+              />
+            </div>
+
+            <div className="splitter" />
+
+            <div className="viewer-pane">
+              <canvas id="viewerCanvas"></canvas>
+            </div>
+          </div>
+        </section>
       )}
     </main>
   );

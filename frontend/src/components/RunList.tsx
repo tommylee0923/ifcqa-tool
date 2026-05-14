@@ -8,21 +8,33 @@ interface RunListProps {
 function RunList({ runs, onSelectRun }: RunListProps) {
     return (
         <section>
-            <h2>Audit Runs</h2>
+            <div className="tableWrap">
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>Source File</th>
+                            <th>Timestamp</th>
+                            <th>Elements</th>
+                            <th>Issues</th>
+                        </tr>
+                    </thead>
 
-            <ul>
-                {runs.map((run) => (
-                    <li key="{run.id">
-                        <button onClick={() => onSelectRun(run)}>
-                            <strong>{run.source_file}</strong>
-                            <br />
-                            {run.run_timestamp}
-                            <br />
-                            {run.total_elements} elements - {run.total_issues} issues
-                        </button>
-                    </li>
-                ))}
-            </ul>
+                    <tbody>
+                        {runs.map((run) => (
+                            <tr key={run.id} onClick={() => onSelectRun(run)}>
+                                <td>{run.source_file}</td>
+                                <td>{run.run_timestamp}</td>
+                                <td>{run.total_elements}</td>
+                                <td>
+                                    <span className="pill pill-issue">
+                                        {run.total_issues}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </section>
     );
 }
