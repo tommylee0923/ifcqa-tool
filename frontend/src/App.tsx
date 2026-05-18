@@ -118,23 +118,7 @@ function App() {
       <RunList runs={runs} onSelectRun={handleSelectRun} />
     </section>
   )
-  function renderIssueDetailView(issue: AuditIssue) {
-    return (
-      <section>
-        <button
-          className="btn btnSmall"
-          onClick={() => setSelectedIssue(null)}
-        >
-          ← Back to Issues
-        </button>
 
-        <IssueDetail
-          issue={issue}
-          onBack={() => setSelectedIssue(null)}
-        />
-      </section>
-    );
-  }
   function renderRunDetailView(run: AuditRun) {
     return (
       <section>
@@ -159,22 +143,42 @@ function App() {
 
         <div className="detail-panes">
           <div className="issues-pane">
-            <FilterBar
-              severityFilter={severityFilter}
-              onSeverityChange={setSeverityFilter}
-              ifcClassFilter={ifcClassFilter}
-              onIfcClassChange={setIfcClassFilter}
-              ifcClasses={ifcClasses}
-            />
+            {/* LIST MODE: show when no issue is selected */}
+            {!selectedIssue && (
+              <div>
+                <FilterBar
+                  severityFilter={severityFilter}
+                  onSeverityChange={setSeverityFilter}
+                  ifcClassFilter={ifcClassFilter}
+                  onIfcClassChange={setIfcClassFilter}
+                  ifcClasses={ifcClasses}
+                />
 
-            <div className="controls">
-              <span className="pill">{filteredIssues.length} shown</span>
-            </div>
+                <div className="controls">
+                  <span className="pill">{filteredIssues.length} shown</span>
+                </div>
 
-            <IssueList
-              issues={filteredIssues}
-              onSelectedIssue={setSelectedIssue}
-            />
+                <IssueList
+                  issues={filteredIssues}
+                  onSelectedIssue={setSelectedIssue}
+                />
+              </div>
+            )}
+
+            {/* DETAIL MODE: show when an issue is selected */}
+            {selectedIssue && (
+              <div>
+                <button
+                  type="button"
+                  className="btn btnSmall"
+                  style={{ marginBottom: 14 }}
+                  onClick={() => setSelectedIssue(null)}>
+                  ← Back to Issues
+                </button>
+
+                <IssueDetail issue={selectedIssue}/>
+              </div>
+            )}
           </div>
 
           <div className="splitter" />
@@ -193,8 +197,7 @@ function App() {
       <div className="meta">IFC Model QA Dashboard</div>
 
       {!selectedRun && dashboardView}
-      {selectedRun && selectedIssue && renderIssueDetailView(selectedIssue)}
-      {selectedRun && !selectedIssue && renderRunDetailView(selectedRun)}
+      {selectedRun && renderRunDetailView(selectedRun)}
     </main>
   );
 }

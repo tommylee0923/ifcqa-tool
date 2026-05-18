@@ -13,12 +13,6 @@ interface ChipGroupProps {
     onChange: (value: string) => void;
 }
 
-function formatSourceLabel(source: string): string {
-    if (source === "ifcqa") return "IfcQA";
-    if (source === "python") return "Python";
-    return source;
-}
-
 function ChipGroup({ label, value, options, onChange }: ChipGroupProps) {
     return (
         <div className="chips">

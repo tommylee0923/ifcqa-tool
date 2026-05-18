@@ -6,6 +6,10 @@ export interface AuditIssue {
     ifc_class?: string | null;
     element_name?: string | null;
     source?: string | null;
+    path?: string | null;
+    expected?: string | null;
+    actual?: string | null;
+
 }
 
 export interface AuditReport {
