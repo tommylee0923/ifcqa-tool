@@ -48,6 +48,8 @@ function App() {
     try {
       setSelectedRun(run);
       setSelectedIssue(null);
+      setSeverityFilter("All");
+      setIfcClassFilter("All");
 
       const issueData = await fetchIssues(run.id);
       setIssues(issueData);
@@ -76,7 +78,7 @@ function App() {
     const matchesIfcClass =
       ifcClassFilter === "All" || issue.ifc_class === ifcClassFilter;
 
-    return matchesSeverity && matchesIfcClass
+    return matchesSeverity && matchesIfcClass;
   });
 
   if (errorMessage) {
