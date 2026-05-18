@@ -5,6 +5,7 @@ export interface AuditIssue {
     global_id?: string | null;
     ifc_class?: string | null;
     element_name?: string | null;
+    source?: string | null;
 }
 
 export interface AuditReport {
