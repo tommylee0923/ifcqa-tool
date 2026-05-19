@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { AuditIssue, AuditRun } from "./types/audit";
 import { fetchIssues, fetchRuns } from "./api/auditApi";
+import DetailPanes from "./components/DetailPanes";
 import FilterBar from "./components/FilterBar";
 import IssueList from "./components/IssueList";
 import IssueDetail from "./components/IssueDetail";
@@ -141,52 +142,54 @@ function App() {
           </div>
         </div>
 
-        <div className="detail-panes">
-          <div className="issues-pane">
-            {/* LIST MODE: show when no issue is selected */}
-            {!selectedIssue && (
-              <div>
-                <FilterBar
-                  severityFilter={severityFilter}
-                  onSeverityChange={setSeverityFilter}
-                  ifcClassFilter={ifcClassFilter}
-                  onIfcClassChange={setIfcClassFilter}
-                  ifcClasses={ifcClasses}
-                />
-
-                <div className="controls">
-                  <span className="pill">{filteredIssues.length} shown</span>
+        <DetailPanes
+          left={
+            <>
+              {!selectedIssue && (
+                <div className="issues-pane-layout">
+                  <div className="issues-pane-header">
+                    <FilterBar
+                      severityFilter={severityFilter}
+                      onSeverityChange={setSeverityFilter}
+                      ifcClassFilter={ifcClassFilter}
+                      onIfcClassChange={setIfcClassFilter}
+                      ifcClasses={ifcClasses}
+                    />
+                    <div className="controls">
+                      <span className="pill">{filteredIssues.length} shown</span>
+                    </div>
+                  </div>
+                  <div className="issues-pane-scroll">
+                    <IssueList
+                      issues={filteredIssues}
+                      onSelectedIssue={setSelectedIssue}
+                    />
+                  </div>
                 </div>
+              )}
 
-                <IssueList
-                  issues={filteredIssues}
-                  onSelectedIssue={setSelectedIssue}
-                />
-              </div>
-            )}
+              {selectedIssue && (
+                <div className="issues-pane-layout">
+                  <div className="issues-pane-header">
 
-            {/* DETAIL MODE: show when an issue is selected */}
-            {selectedIssue && (
-              <div>
-                <button
-                  type="button"
-                  className="btn btnSmall"
-                  style={{ marginBottom: 14 }}
-                  onClick={() => setSelectedIssue(null)}>
-                  ← Back to Issues
-                </button>
-
-                <IssueDetail issue={selectedIssue}/>
-              </div>
-            )}
-          </div>
-
-          <div className="splitter" />
-
-          <div className="viewer-pane">
-            <canvas id="viewerCanvas"></canvas>
-          </div>
-        </div>
+                    <button
+                      type="button"
+                      className="btn btnSmall"
+                      style={{ marginBottom: 14 }}
+                      onClick={() => setSelectedIssue(null)}
+                    >
+                      ← Back to Issues
+                    </button>
+                  </div>
+                  <div className="issues-pane-scroll">
+                    <IssueDetail issue={selectedIssue} />
+                  </div>
+                </div>
+              )}
+            </>
+          }
+          right={<canvas id="viewerCanvas"></canvas>}
+        />
       </section>
     );
   }

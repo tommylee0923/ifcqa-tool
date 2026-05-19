@@ -76,13 +76,14 @@ a {
 }
 
 /* ============================================================
-   HEADER — matches IfcQA .h1 and .meta
+   HEADER
    ============================================================ */
 .h1 {
     font-size: 18px;
     font-weight: 750;
     margin: 0 0 6px;
     letter-spacing: 0.2px;
+    text-align: left;
 }
 
 .meta {
@@ -90,6 +91,7 @@ a {
     font-size: 12px;
     margin: 0 0 10px;
     word-break: break-all;
+    text-align: left;
 }
 
 .meta::after {
@@ -101,7 +103,7 @@ a {
 }
 
 /* ============================================================
-   STAT CARDS GRID — matches IfcQA .grid / .card / .k / .v
+   STAT CARDS GRID
    ============================================================ */
 .grid {
     display: grid;
@@ -122,7 +124,7 @@ a {
     color: var(--muted);
     font-size: 12px;
     margin: 0 0 6px;
-    text-align: center;
+    text-align: left;
 }
 
 .v {
@@ -135,9 +137,10 @@ a {
    RUNS TABLE — styled as a card table like IfcQA
    ============================================================ */
 .tableWrap {
-    overflow: auto;
+    overflow: visible;
     border-radius: 12px;
     margin-bottom: 16px;
+    min-width: min-content;
 }
 
 .table {
@@ -207,9 +210,12 @@ tbody tr.selected td {
 }
 
 /* ============================================================
-   BUTTONS — matches IfcQA .btn / .btnSmall
+   BUTTONS
    ============================================================ */
 .btn {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
     background: var(--pill);
     border: 1px solid var(--line);
     color: var(--text);
@@ -275,6 +281,7 @@ tbody tr.selected td {
     border: 1px solid var(--line);
     border-radius: 12px;
     padding: 12px 14px;
+    margin-top: 10px;
     margin-bottom: 4px;
     display: flex;
     justify-content: space-between;
@@ -312,13 +319,32 @@ tbody tr.selected td {
 
 .issues-pane {
     flex: 0 0 var(--leftW);
-    min-width: 320px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0;
+}
+.issues-pane-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     min-height: 0;
+    min-width: 0;
+    height: 100%;
+}
+
+.issues-pane-header {
+    flex-shrink: 0;
+    padding-bottom: 8px;
+}
+
+.issues-pane-scroll {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: auto;
 }
 
 .issue-detail-card {
@@ -327,6 +353,7 @@ tbody tr.selected td {
     border-radius: 16px;
     padding: 18px;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    text-align: left;
 }
 
 .issue-detail-top {
