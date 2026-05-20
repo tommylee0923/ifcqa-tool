@@ -9,19 +9,21 @@ import RunList from "./components/RunList";
 import "./App.css";
 
 function App() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingRuns, setIsLoadingRuns] = useState(false);
   const [runs, setRuns] = useState<AuditRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<AuditRun | null>(null);
   const [issues, setIssues] = useState<AuditIssue[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<AuditIssue | null>(null);
   const [severityFilter, setSeverityFilter] = useState("All");
   const [ifcClassFilter, setIfcClassFilter] = useState("All");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [runsError, setRunsError] = useState<string | null>(null);
+  const [issuesError, setIssuesError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadInitialData() {
       try {
-        setIsLoading(true);
+        setIsLoadingRuns(true);
+        setRunsError(null);
 
         const runsData = await fetchRuns();
         setRuns(runsData);
@@ -34,11 +36,9 @@ function App() {
         setIssues([]);
 
       } catch (err) {
-        setErrorMessage(
-          err instanceof Error ? err.message : "Unknown error"
-        );
+        setRunsError(getErrorMessage(err));
       } finally {
-        setIsLoading(false);
+        setIsLoadingRuns(false);
       }
     }
 
@@ -51,19 +51,16 @@ function App() {
       setSelectedIssue(null);
       setSeverityFilter("All");
       setIfcClassFilter("All");
+      setIssuesError(null);
 
       const issueData = await fetchIssues(run.id);
       setIssues(issueData);
     } catch (err) {
-      setErrorMessage(
-        err instanceof Error ? err.message : "Unknown error"
-      );
+      setIssues([]);
+      setIssuesError(getErrorMessage(err));
     }
   }
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
   const ifcClasses = Array.from(
     new Set(
       issues
@@ -81,10 +78,6 @@ function App() {
 
     return matchesSeverity && matchesIfcClass;
   });
-
-  if (errorMessage) {
-    return <p>{errorMessage}</p>;
-  }
 
   const dashboardView = (
     <section>
@@ -116,7 +109,29 @@ function App() {
         </div>
       </div>
 
-      <RunList runs={runs} onSelectRun={handleSelectRun} />
+      {isLoadingRuns && (
+        <div className="state-message">Loading audit runs...</div>
+      )}
+
+      {!isLoadingRuns && runsError && (
+        <div className="state-message error" role="alert">
+          <p>Could not load runs.</p>
+          <p className="small">{runsError}</p>
+          <p className="small">
+            Make sure Flask is running at http://127.0.0.1:5000 and output/audit.db exists.
+          </p>
+        </div>
+      )}
+
+      {!isLoadingRuns && !runsError && runs.length === 0 && (
+        <div className="state-message">
+          No audit runs found. Run an audit first.
+        </div>
+      )}
+
+      {!isLoadingRuns && !runsError && runs.length > 0 && (
+        <RunList runs={runs} onSelectRun={handleSelectRun} />
+      )}
     </section>
   )
 
@@ -125,7 +140,11 @@ function App() {
       <section>
         <button
           className="btn btnSmall"
-          onClick={() => setSelectedRun(null)}
+          onClick={() => {
+            setSelectedRun(null);
+            setSelectedIssue(null);
+            setIssuesError(null);
+          }}
         >
           ← Back to Runs
         </button>
@@ -160,10 +179,17 @@ function App() {
                     </div>
                   </div>
                   <div className="issues-pane-scroll">
-                    <IssueList
-                      issues={filteredIssues}
-                      onSelectedIssue={setSelectedIssue}
-                    />
+                    {issuesError ? (
+                      <div className="state-message error" role="alert">
+                        <p>Could not load issues for this run.</p>
+                        <p className="small">{issuesError}</p>
+                      </div>
+                    ) : (
+                      <IssueList
+                        issues={filteredIssues}
+                        onSelectedIssue={setSelectedIssue}
+                      />
+                    )}
                   </div>
                 </div>
               )}
@@ -203,6 +229,13 @@ function App() {
       {selectedRun && renderRunDetailView(selectedRun)}
     </main>
   );
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "Unknown Error";
 }
 
 export default App;
