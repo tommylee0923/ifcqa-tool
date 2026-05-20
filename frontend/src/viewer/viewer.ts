@@ -1,13 +1,48 @@
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import type { AuditRun } from "../types/audit";
+import type { AuditIssue, AuditRun } from "../types/audit";
 import type { IfcqaHoverEvent, IfcqaSelectEvent } from "../types/ifcqaEvent";
 
 // ============================================================
 // #region STATE
 // ============================================================
-const viewerState = {
+type HighlightableMaterial = THREE.Material & {
+    color?: THREE.Color;
+    emissive?: THREE.Color;
+    emissiveIntensity?: number;
+};
+
+interface OriginalMaterialState {
+    hasColor: boolean;
+    color: THREE.Color | null;
+    hasEmissive: boolean;
+    emissive: THREE.Color | null;
+    emissiveIntensity: number;
+}
+
+interface ViewerState {
+    renderer: THREE.WebGLRenderer | null;
+    scene: THREE.Scene | null;
+    camera: THREE.PerspectiveCamera | null;
+    controls: OrbitControls | null;
+
+    modelRoot: THREE.Group | null;
+    objectsByGlobalId: Map<string, THREE.Mesh[]>;
+    issuesByGid: Map<string, AuditIssue[]>;
+
+    hoveredGid: string | null;
+    selectedGid: string | null;
+
+    viewerInfo: HTMLElement | null;
+
+    originalMatState: WeakMap<HighlightableMaterial, OriginalMaterialState>;
+    outlineMap: WeakMap<THREE.Mesh, THREE.Mesh>;
+
+    currentRunId: number | null;
+}
+
+const viewerState: ViewerState = {
     renderer: null,
     scene: null,
     camera: null,
@@ -22,11 +57,12 @@ const viewerState = {
 
     viewerInfo: null,
 
-    originalMatState: new WeakMap(),// material -> saved values
-    outlineMap: new WeakMap(),      // mesh -> LineSegments
+    originalMatState: new WeakMap<HighlightableMaterial, OriginalMaterialState>(),// material -> saved values
+    outlineMap: new WeakMap<THREE.Mesh, THREE.Mesh>(),      // mesh -> LineSegments
 
     currentRunId: null,
 };
+
 // #endregion
 
 // ============================================================
@@ -39,17 +75,17 @@ const tmpCenter = new THREE.Vector3();
 // ============================================================
 // #region DATA
 // ============================================================
-async function fetchIssues(runId) {
+async function fetchIssues(runId: number) {
     const res = await fetch(`/runs/${runId}/issues`);
     if (!res.ok) throw new Error(`Failed to fetch issues for run ${runId}`);
     const data = await res.json();
     return data;
 }
 
-function buildIssuesByGlobalId(issues) {
+function buildIssuesByGlobalId(issues: AuditIssue[]) {
     const map = new Map();
     for (const i of issues) {
-        const gid = i.global_id ?? i.GlobalId ?? i.globalId;
+        const gid = i.global_id;
         if (!gid) continue;
         if (!map.has(gid)) map.set(gid, []);
         map.get(gid).push(i);
@@ -61,7 +97,9 @@ function buildIssuesByGlobalId(issues) {
 // ============================================================
 // #region MODEL UTILS
 // ============================================================
-function findNamedAncestor(obj) {
+function findNamedAncestor(
+    obj: THREE.Object3D | null
+): THREE.Object3D | null {
     let cur = obj;
     while (cur) {
         if (cur.name) return cur;
@@ -70,7 +108,7 @@ function findNamedAncestor(obj) {
     return null;
 }
 
-function looksLikeIfcGuid(name) {
+function looksLikeIfcGuid(name: string): boolean {
     return typeof name === "string" &&
         name.length >= 20 &&
         name.length <= 30 &&
@@ -86,9 +124,9 @@ function indexMeshesByGuidNode() {
         if (!looksLikeIfcGuid(node.name)) return;
 
         const gid = node.name;
-        const meshes = [];
-        node.traverse((child) => {
-            if (child.isMesh) meshes.push(child);
+        const meshes: THREE.Mesh[] = [];
+        node.traverse((child: THREE.Object3D) => {
+            if ((child as THREE.Mesh).isMesh) meshes.push(child as THREE.Mesh);
         });
 
         if (meshes.length > 0) {
@@ -103,7 +141,10 @@ function indexMeshesByGuidNode() {
 // ============================================================
 // #region CAMERA
 // ============================================================
-function simpleFit(sceneRoot, camera, controls) {
+function simpleFit(
+    sceneRoot: THREE.Object3D,
+    camera: THREE.PerspectiveCamera,
+    controls: OrbitControls): void {
     const box = new THREE.Box3().setFromObject(sceneRoot);
 
     if (box.isEmpty()) {
@@ -139,9 +180,9 @@ function simpleFit(sceneRoot, camera, controls) {
 // ============================================================
 // #region GROUND PLANE
 // ============================================================
-let ground = null;
+let ground: THREE.Mesh | null = null;
 
-function ensureGround(scene) {
+function ensureGround(scene: THREE.Scene) {
     if (ground) return ground;
 
     const geo = new THREE.PlaneGeometry(5000, 5000);
@@ -164,10 +205,12 @@ function ensureGround(scene) {
 // ============================================================
 // #region HIGHLIGHT — FILL
 // ============================================================
-function setFillHighlight(mesh, on) {
+function setFillHighlight(mesh: THREE.Mesh, on: boolean) {
     if (!mesh?.isMesh) return;
 
-    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    const materials = (
+        Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+    ) as HighlightableMaterial[];
 
     for (const m of materials) {
         if (!m) continue;
@@ -207,8 +250,12 @@ function setFillHighlight(mesh, on) {
 // ============================================================
 // #region HIGHLIGHT — OUTLINE
 // ============================================================
-function ensureOutline(mesh) {
-    if (viewerState.outlineMap.has(mesh)) return viewerState.outlineMap.get(mesh);
+function ensureOutline(mesh: THREE.Mesh): THREE.Mesh {
+    const existing = viewerState.outlineMap.get(mesh);
+
+    if (existing) {
+        return existing;
+    }
 
     const outlineMat = new THREE.MeshBasicMaterial({
         color: 0xff6666,
@@ -229,7 +276,7 @@ function ensureOutline(mesh) {
     return outline;
 }
 
-function setOutlineHighlight(mesh, on) {
+function setOutlineHighlight(mesh: THREE.Mesh, on: boolean) {
     if (!mesh?.isMesh) return;
     const outline = ensureOutline(mesh);
     outline.visible = !!on;
@@ -239,7 +286,11 @@ function setOutlineHighlight(mesh, on) {
 // ============================================================
 // #region VISIBILITY TEST
 // ============================================================
-function isMeshVisible(mesh, camera, sceneRoot) {
+function isMeshVisible(
+    mesh: THREE.Mesh,
+    camera: THREE.PerspectiveCamera,
+    sceneRoot: THREE.Object3D
+): boolean {
     const box = new THREE.Box3().setFromObject(mesh);
     box.getCenter(tmpCenter);
 
@@ -272,8 +323,8 @@ function clearHover() {
     viewerState.hoveredGid = null;
 }
 
-function hoverGlobalId(gid) {
-    if (!viewerState.modelRoot || viewerState.objectsByGlobalId.size === 0) return;
+function hoverGlobalId(gid: string | null): void {
+    if (!viewerState.modelRoot || viewerState.objectsByGlobalId.size === 0 || !viewerState.camera) return;
     if (gid === viewerState.hoveredGid) return;
 
     clearHover();
@@ -301,7 +352,7 @@ function hoverGlobalId(gid) {
 // ============================================================
 // #region SELECTION
 // ============================================================
-function clearSelection() {
+function clearSelection(): void {
     if (!viewerState.selectedGid) return;
 
     const prev = viewerState.objectsByGlobalId.get(viewerState.selectedGid) ?? [];
@@ -314,7 +365,7 @@ function clearSelection() {
     showIssuesForGlobalId(null);
 }
 
-function showIssuesForGlobalId(gid) {
+function showIssuesForGlobalId(gid: string | null): void {
     if (!viewerState.viewerInfo) return;
 
     if (!gid) {
@@ -325,12 +376,12 @@ function showIssuesForGlobalId(gid) {
     const list = viewerState.issuesByGid.get(gid) ?? [];
     const header = `${gid} — ${list.length} issue(s)`;
     const lines = list.slice(0, 8).map(
-        (it) => `- [${it.severity ?? it.Severity}] ${it.message ?? it.Message}`
+        (it) => `- [${it.severity}] ${it.message}`
     );
     viewerState.viewerInfo.textContent = [header, ...lines].join("\n");
 }
 
-function selectGlobalId(gid) {
+function selectGlobalId(gid: string | null): void {
     if (!viewerState.modelRoot || viewerState.objectsByGlobalId.size === 0) return;
 
     if (viewerState.selectedGid) {
@@ -360,8 +411,8 @@ function selectGlobalId(gid) {
 // ============================================================
 // #region CANVAS PICKING
 // ============================================================
-function onCanvasPick(ev) {
-    if (!viewerState.modelRoot) return;
+function onCanvasPick(ev: MouseEvent) {
+    if (!viewerState.modelRoot || !viewerState.renderer || !viewerState.camera) return;
 
     const rect = viewerState.renderer.domElement.getBoundingClientRect();
     const mouse = new THREE.Vector2(
@@ -418,7 +469,8 @@ export function initViewer(canvas: HTMLCanvasElement): () => void {
     dir.position.set(50, 120, 80);
     viewerState.scene.add(dir);
 
-    function resize() {
+    function resize(): void {
+        if (!viewerState.renderer || !viewerState.camera) return;
         const host = canvas.parentElement;
         const w = Math.max(1, host?.clientWidth ?? canvas.clientWidth);
         const h = Math.max(1, host?.clientHeight ?? canvas.clientHeight);
@@ -468,6 +520,7 @@ export function initViewer(canvas: HTMLCanvasElement): () => void {
 
     // Render loop
     function animate() {
+        if (!viewerState.scene || !viewerState.renderer || !viewerState.camera) return;
         requestAnimationFrame(animate);
         viewerState.renderer.render(viewerState.scene, viewerState.camera);
     }
@@ -481,6 +534,7 @@ export function initViewer(canvas: HTMLCanvasElement): () => void {
 }
 
 function resizeViewer() {
+    if (!viewerState.scene || !viewerState.renderer || !viewerState.camera) return;
     const canvas = document.getElementById("viewerCanvas");
     if (!canvas) return;
 
@@ -520,11 +574,12 @@ type LoadRunCallbacks = {
 }
 
 async function loadRun(run: AuditRun, callbacks?: LoadRunCallbacks) {
+    if (!viewerState.scene || !viewerState.camera) return;
+
     const filename = getGlbFilename(run);
     const url = `/model/${filename}`;
 
     if (viewerState.currentRunId === run.id) return;
-    viewerState.currentRunId = run.id;
 
     // Fetch issues for this run and index by global_id
     try {
@@ -536,9 +591,10 @@ async function loadRun(run: AuditRun, callbacks?: LoadRunCallbacks) {
 
     if (viewerState.modelRoot) {
         viewerState.scene.remove(viewerState.modelRoot);
-        viewerState.modelRoot.traverse((obj) => {
-            if (obj.geometry) obj.geometry.dispose();
-            if (obj.material) {
+        viewerState.modelRoot.traverse((obj: THREE.Object3D) => {
+            if (obj instanceof THREE.Mesh) {
+                obj.geometry.dispose();
+
                 if (Array.isArray(obj.material)) {
                     obj.material.forEach(m => m.dispose());
                 } else {
@@ -553,6 +609,7 @@ async function loadRun(run: AuditRun, callbacks?: LoadRunCallbacks) {
     loader.load(
         url,
         (gltf) => {
+            if (!viewerState.scene || !viewerState.camera || !viewerState.controls) return;
             viewerState.modelRoot = gltf.scene;
             viewerState.scene.add(viewerState.modelRoot);
 
@@ -565,6 +622,7 @@ async function loadRun(run: AuditRun, callbacks?: LoadRunCallbacks) {
             const g = ensureGround(viewerState.scene);
             g.position.y = minY - 0.5;
             callbacks?.onSuccess?.();
+            viewerState.currentRunId = run.id;
         },
         undefined,
         () => {

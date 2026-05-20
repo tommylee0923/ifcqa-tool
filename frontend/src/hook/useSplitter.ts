@@ -34,6 +34,8 @@ export function useSplitter(
         let dragging = false;
 
         function setLeftWidthFromPoitner(clientX: number): void {
+            if (!container) return;
+
             const rect = container.getBoundingClientRect();
             const min = MIN_PANE_WIDTH;
             const max = Math.max(min + 50, rect.width - MIN_PANE_WIDTH);
@@ -46,6 +48,8 @@ export function useSplitter(
         }
 
         function onPointerDown(event: PointerEvent): void {
+            if (!splitter) return;
+
             event.preventDefault();
             dragging = true;
             splitter.setPointerCapture(event.pointerId);
@@ -62,6 +66,8 @@ export function useSplitter(
         }
 
         function endDrag(event: PointerEvent): void {
+            if (!splitter) return;
+
             if (!dragging) {
                 return;
             }
@@ -82,6 +88,8 @@ export function useSplitter(
         }
 
         function onWindowResize(): void {
+            if (!container) return;
+
             const rect = container.getBoundingClientRect();
             const current = parseFloat(getComputedStyle(root).getPropertyValue("--leftW")) || 520;
 
