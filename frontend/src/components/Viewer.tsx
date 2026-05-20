@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { AuditRun } from "../types/audit";
-import { initViewer, loadRun, resizeViewer } from "../viewer/viewer";
+import { initViewer, loadRun, resizeViewer, disposeViewer } from "../viewer/viewer";
 
 interface ViewerProps {
     run: AuditRun | null;
@@ -15,13 +15,15 @@ function Viewer({ run }: ViewerProps) {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        const cleanup = initViewer(canvas);
+        initViewer(canvas);
 
         requestAnimationFrame(() => {
             resizeViewer();
         })
 
-        return cleanup;
+        return () => {
+            disposeViewer();
+        };
     }, []);
 
     useEffect(() => {

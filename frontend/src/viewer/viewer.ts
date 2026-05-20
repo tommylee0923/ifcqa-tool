@@ -40,6 +40,9 @@ interface ViewerState {
     outlineMap: WeakMap<THREE.Mesh, THREE.Mesh>;
 
     currentRunId: number | null;
+    animationFrameId: number | null;
+
+    groundPlane: THREE.Mesh | null;
 }
 
 const viewerState: ViewerState = {
@@ -61,6 +64,8 @@ const viewerState: ViewerState = {
     outlineMap: new WeakMap<THREE.Mesh, THREE.Mesh>(),      // mesh -> LineSegments
 
     currentRunId: null,
+    animationFrameId: null,
+    groundPlane: null
 };
 
 // #endregion
@@ -183,7 +188,12 @@ function simpleFit(
 let ground: THREE.Mesh | null = null;
 
 function ensureGround(scene: THREE.Scene) {
-    if (ground) return ground;
+    if (
+        viewerState.groundPlane &&
+        viewerState.groundPlane.parent === scene
+    ) {
+        return viewerState.groundPlane;
+    }
 
     const geo = new THREE.PlaneGeometry(5000, 5000);
     const mat = new THREE.MeshStandardMaterial({
@@ -441,7 +451,9 @@ function onCanvasPick(ev: MouseEvent) {
 // ============================================================
 // #region INIT
 // ============================================================
+
 export function initViewer(canvas: HTMLCanvasElement): () => void {
+    disposeViewer();
     if (!canvas) return () => { };
 
     viewerState.viewerInfo = document.getElementById("viewerInfo") ?? null;
@@ -451,7 +463,7 @@ export function initViewer(canvas: HTMLCanvasElement): () => void {
     viewerState.renderer.setClearColor(0xb9d9ff, 1);
 
     viewerState.scene = new THREE.Scene();
-    viewerState.scene.fog = new THREE.Fog(0xb9d9ff, 200, 2000);
+    viewerState.scene.fog = new THREE.Fog(0xb9d9ff, 200, 1000);
 
     viewerState.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000);
     viewerState.camera.position.set(10, 10, 10);
@@ -520,8 +532,13 @@ export function initViewer(canvas: HTMLCanvasElement): () => void {
 
     // Render loop
     function animate() {
-        if (!viewerState.scene || !viewerState.renderer || !viewerState.camera) return;
-        requestAnimationFrame(animate);
+        viewerState.animationFrameId = requestAnimationFrame(animate);
+
+        if (!viewerState.renderer || !viewerState.scene || !viewerState.camera) {
+            return;
+        }
+
+        viewerState.controls?.update();
         viewerState.renderer.render(viewerState.scene, viewerState.camera);
     }
     animate();
@@ -579,7 +596,13 @@ async function loadRun(run: AuditRun, callbacks?: LoadRunCallbacks) {
     const filename = getGlbFilename(run);
     const url = `/model/${filename}`;
 
-    if (viewerState.currentRunId === run.id) return;
+    if (
+        viewerState.currentRunId === run.id &&
+        viewerState.modelRoot &&
+        viewerState.scene
+    ) {
+        return;
+    }
 
     // Fetch issues for this run and index by global_id
     try {
@@ -632,6 +655,50 @@ async function loadRun(run: AuditRun, callbacks?: LoadRunCallbacks) {
         }
     );
 }
+// #endregion
+
+// ============================================================
+// #region DISPOSE VIEWER
+// ============================================================
+
+export function disposeViewer() {
+    if (viewerState.animationFrameId !== null) {
+        cancelAnimationFrame(viewerState.animationFrameId);
+        viewerState.animationFrameId = null;
+    }
+
+    viewerState.controls?.dispose();
+
+    if (viewerState.modelRoot) {
+        viewerState.modelRoot.traverse((obj) => {
+            if (obj instanceof THREE.Mesh) {
+                obj.geometry.dispose();
+
+                const materials = Array.isArray(obj.material)
+                    ? obj.material
+                    : [obj.material];
+
+                materials.forEach((m) => m.dispose());
+            }
+        });
+    }
+
+    viewerState.renderer?.dispose();
+
+    viewerState.scene?.clear();
+
+    viewerState.renderer = null;
+    viewerState.scene = null;
+    viewerState.camera = null;
+    viewerState.controls = null;
+    viewerState.modelRoot = null;
+    viewerState.currentRunId = null;
+    viewerState.groundPlane = null;
+
+    viewerState.objectsByGlobalId.clear();
+    viewerState.issuesByGid.clear();
+}
+
 // #endregion
 
 // ============================================================

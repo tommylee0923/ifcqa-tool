@@ -8,6 +8,7 @@ import IssueDetail from "./components/IssueDetail";
 import RunList from "./components/RunList";
 import Viewer from "./components/Viewer";
 import "./App.css";
+import { disposeViewer } from "./viewer/viewer";
 
 function App() {
   const [isLoadingRuns, setIsLoadingRuns] = useState(false);
@@ -151,6 +152,7 @@ function App() {
         <button
           className="btn btnSmall"
           onClick={() => {
+            disposeViewer();
             setSelectedRun(null);
             setSelectedIssue(null);
             setIssuesError(null);
