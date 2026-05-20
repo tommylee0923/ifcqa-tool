@@ -1,0 +1,30 @@
+[
+  {
+    "id": 52,
+    "audit_run_id": 2,
+    "issue_code": "RV-SPACE-NUMBER-001",
+    "severity": "Warning",
+    "message": "Missing property set 'PSet_Revit_Identity Data' (required for 'Number').",
+    "global_id": "0xY$LvXaDEswJDk_VU74C_",
+    "ifc_class": "IfcSpace",
+    "element_name": "living room",
+    "path": "Pset: PSet_Revit_Identity Data",
+    "expected": "Present",
+    "actual": "Missing",
+    "source": "python"
+  },
+  {
+    "id": 53,
+    "audit_run_id": 2,
+    "issue_code": "RV-SPACE-NUMBER-001",
+    "severity": "Warning",
+    "message": "Missing property set 'PSet_Revit_Identity Data' (required for 'Number').",
+    "global_id": "18QhMtUIXBvQktPHXXxs7H",
+    "ifc_class": "IfcSpace",
+    "element_name": "entry hall",
+    "path": "Pset: PSet_Revit_Identity Data",
+    "expected": "Present",
+    "actual": "Missing",
+    "source": "python"
+  }
+]

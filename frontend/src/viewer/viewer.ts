@@ -594,7 +594,7 @@ async function loadRun(run: AuditRun, callbacks?: LoadRunCallbacks) {
     if (!viewerState.scene || !viewerState.camera) return;
 
     const filename = getGlbFilename(run);
-    const url = `/model/${filename}`;
+    const url = `${import.meta.env.BASE_URL}model/${filename}`;
 
     if (
         viewerState.currentRunId === run.id &&

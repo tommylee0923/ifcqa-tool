@@ -1,21 +1,34 @@
 import type { AuditIssue, AuditRun } from "../types/audit";
 
-export async function fetchRuns(): Promise<AuditRun[]> {
-    const response = await fetch("/runs");
+const IS_DEV = import.meta.env.DEV;
 
-    if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
+export async function fetchRuns(): Promise<AuditRun[]> {
+    const url = IS_DEV
+        ? "/runs"
+        : `${import.meta.env.BASE_URL}demo-data/runs.json`;
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch runs`);
     }
 
-    return await response.json();
+    return await res.json();
 }
 
-export async function fetchIssues(runId: number): Promise<AuditIssue[]> {
-    const response = await fetch(`/runs/${runId}/issues`);
+export async function fetchIssues(
+    runId: number
+): Promise<AuditIssue[]> {
 
-    if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
+    const url = IS_DEV
+        ? `/runs/${runId}/issues`
+        : `${import.meta.env.BASE_URL}demo-data/run-${runId}-issues.json`;
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch issues`);
     }
 
-    return await response.json();
+    return await res.json();
 }

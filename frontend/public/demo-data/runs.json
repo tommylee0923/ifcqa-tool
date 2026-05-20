@@ -1,0 +1,16 @@
+[
+  {
+    "id": 2,
+    "source_file": "samples\\sample.ifc",
+    "run_timestamp": "2026-05-20 15:59:32",
+    "total_elements": 22,
+    "total_issues": 2
+  },
+  {
+    "id": 1,
+    "source_file": "samples\\revit2012_janesville_restaurant_demo.ifc",
+    "run_timestamp": "2026-05-06 19:47:33",
+    "total_elements": 3628,
+    "total_issues": 51
+  }
+]
