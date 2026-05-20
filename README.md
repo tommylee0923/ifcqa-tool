@@ -19,7 +19,7 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 - Extensible rule architecture (property, quantity, regex, comparison, and model traversal rules)
 - Structured issue trace metadata (severity, path, expected, actual)
 
-### Interactive, Zero-Backend HTML QA Report
+### Interactive, client-side QA dashboard
 - Fully static HTML report (no server required)
 - Embedded Three.js GLB viewer with preserved GlobalId mapping
 - Issue ↔ Element synchronization
@@ -54,9 +54,9 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 - SQLite
 
 ### Web Interface
-- Flask API
-- Three.js viewer
-- Static HTML / CSS / JS frontend
+- UI: React + TypeScript
+- Viewer: Three.js
+- Local API: Flask
 
 ### Outputs
 - JSON
@@ -96,13 +96,7 @@ Activate it:
 source .venv/bin/activate
 ```
 
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run an IFC audit
+### 3. Run an IFC audit
 
 ```powershell
 python auditor/app/main.py audit samples/model.ifc ^
@@ -110,7 +104,7 @@ python auditor/app/main.py audit samples/model.ifc ^
     --output output
 ```
 
-### 5. Generate GLB viewer assets (optional)
+### 4. Generate GLB viewer assets (optional)
 
 ```powershell
 python auditor/app/main.py audit samples/model.ifc ^
@@ -119,11 +113,15 @@ python auditor/app/main.py audit samples/model.ifc ^
     --viewer
 ```
 
-### 6. Launch the local web interface
+### 5. Launch the local web interface
 
 ```powershell
 python auditor/app/server.py
+cd frontend
+npm install
+npm run dev
 ```
+Note: for live SQLite/API, still ```python auditor/app/server.py``` in another terminal.
 
 Then open:
 
@@ -136,10 +134,9 @@ http://127.0.0.1:5000
 The audit pipeline generates:
 
 - `audit_report.json` — structured audit summary
-- `issues.csv` — issue list export
+- `issue.csv` — issue list export
 - `audit.db` — SQLite database
 - `model.glb` — viewer model asset (optional)
-- `viewer/` — Three.js viewer assets
 
 ---
 
@@ -196,8 +193,7 @@ The web interface reads directly from `audit.db` and displays:
 ## CI Quality Gate (GitHub Actions)
 
 This repo includes a GitHub Actions workflow that runs IfcQA against
-a sample IFC on every push/PR and uploads the generated `report.html`
-as a build artifact.
+a sample IFC on every push/PR.
 
 ---
 
@@ -211,9 +207,9 @@ ifcqa-tool/
 │   │   ├─ rules/
 │   │   ├─ model.py
 │   │   └─ auditor.py
-│   ├─ infrastructure/
-│   └─ web/
+│   └─ infrastructure/
 │
+├─ frontend/
 ├─ rulesets/
 ├─ samples/
 ├─ output/
@@ -231,6 +227,7 @@ Active development.
 - v0.4.0 — Static HTML QA report
 - v0.5.0 — Interactive GLB viewer + UX improvement
 - v0.6.0 — SQLite integration for shared multi-engine data layer
+- v0.7.0 - React + TypeSCript
 
 Scoped to demonstrate **AEC software engineering**, **BIM reasoning**,
 and **production-quality tooling** without vendor lock-in.
