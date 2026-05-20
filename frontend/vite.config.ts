@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/runs": "http://127.0.0.1:5000",
+      "/model": "http://127.0.0.1:5000",
     },
   },
 });
