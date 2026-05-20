@@ -22,4 +22,5 @@ export interface AuditRun {
     run_timestamp: string;
     total_elements: number;
     total_issues: number;
+    glb_filename?: string;
 }

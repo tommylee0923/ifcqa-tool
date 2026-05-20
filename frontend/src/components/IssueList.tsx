@@ -1,4 +1,5 @@
 import type { AuditIssue } from "../types/audit";
+import type { IfcqaGidDetail } from "../types/ifcqaEvent";
 
 interface IssueListProps {
     issues: AuditIssue[];
@@ -47,7 +48,7 @@ function IssueList({ issues, onSelectedIssue }: IssueListProps) {
                 <tbody
                     onMouseLeave={() => {
                         window.dispatchEvent(
-                            new CustomEvent("ifcqa:hover", { detail: { gid: null } })
+                            new CustomEvent<IfcqaGidDetail>("ifcqa:hover", { detail: { gid: null } })
                         );
                     }}
                 >
@@ -58,7 +59,7 @@ function IssueList({ issues, onSelectedIssue }: IssueListProps) {
                             onClick={() => onSelectedIssue(issue)}
                             onMouseEnter={() => {
                                 window.dispatchEvent(
-                                    new CustomEvent("ifcqa:hover", {
+                                    new CustomEvent<IfcqaGidDetail>("ifcqa:hover", {
                                         detail: { gid: issue.global_id ?? null },
                                     })
                                 );

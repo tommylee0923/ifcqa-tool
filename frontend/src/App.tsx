@@ -6,6 +6,7 @@ import FilterBar from "./components/FilterBar";
 import IssueList from "./components/IssueList";
 import IssueDetail from "./components/IssueDetail";
 import RunList from "./components/RunList";
+import Viewer from "./components/Viewer";
 import "./App.css";
 
 function App() {
@@ -135,6 +136,15 @@ function App() {
     </section>
   )
 
+  function handleSelectIssue(issue: AuditIssue) {
+    setSelectedIssue(issue);
+    window.dispatchEvent(
+      new CustomEvent("ifcqa:select", {
+        detail: { gid: issue.global_id ?? null },
+      })
+    );
+  }
+
   function renderRunDetailView(run: AuditRun) {
     return (
       <section>
@@ -187,7 +197,7 @@ function App() {
                     ) : (
                       <IssueList
                         issues={filteredIssues}
-                        onSelectedIssue={setSelectedIssue}
+                        onSelectedIssue={handleSelectIssue}
                       />
                     )}
                   </div>
@@ -214,7 +224,7 @@ function App() {
               )}
             </>
           }
-          right={<canvas id="viewerCanvas"></canvas>}
+          right={<Viewer run={selectedRun} />}
         />
       </section>
     );
