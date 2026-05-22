@@ -14,3 +14,4 @@ auditor/__pycache__/
 auditor/**/__pycache__/
 auditor/output/audit.db
 dist/
+.env
