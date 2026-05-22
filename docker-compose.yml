@@ -8,6 +8,22 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  auditor:
+    build:
+      context: ./auditor
+      dockerfile: Dockerfile
+    container_name: ifcqa-auditor
+    platform: linux/amd64
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./samples:/app/samples
+      - ./output:/app/output
+      - ./rulesets:/app/rulesets
+    depends_on:
+      - db
     
 volumes:
   postgres_data:

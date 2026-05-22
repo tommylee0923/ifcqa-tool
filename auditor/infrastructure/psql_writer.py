@@ -1,20 +1,21 @@
 from __future__ import annotations
 
+import os
 import psycopg2
 import psycopg2.extras
 from datetime import datetime, timezone
 from typing import Any
 from core.model import AuditReport
 
-# This will eventually move to .env file after AWS
+# region Docker Database Config
 DB_CONFIG = {
-    "host": "localhost",
-    "port": 5432,
-    "dbname": "ifcqa",
-    "user": "ifcqa",
-    "password": "ifcqa123",
+    "host": os.environ.get("POSTGRES_HOST", "localhost"),
+    "port": int(os.environ.get("POSTGRES_PORT", 5432)),
+    "dbname": os.environ.get("POSTGRES_DB", "ifcqa"),
+    "user": os.environ.get("POSTGRES_USER", "ifcqa"),
+    "password": os.environ.get("POSTGRES_PASSWORD", "ifcqa123"),
 }
-
+# endregion
 # region WRITE
 
 def write_postgres_report(report: AuditReport) -> None:
