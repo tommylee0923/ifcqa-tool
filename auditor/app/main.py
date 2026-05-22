@@ -8,15 +8,13 @@ from infrastructure.console_writer import write_console_report
 from infrastructure.json_writer import write_json_report
 from infrastructure.csv_writer import write_csv_report
 from infrastructure.glb_converter import convert_ifc_to_glb
-from infrastructure.psql_writer import write_postgres_report
-from infrastructure.sqlite_writer import (
-write_sqlite_report,
-query_runs,
-query_issues_by_run,
-query_issue_summary_latest,
-query_issues_by_class_latest,
-)
-
+from infrastructure.psql_writer import (
+    write_postgres_report,
+    query_runs,
+    query_issues_by_run,
+    query_issue_summary_latest,
+    query_issues_by_class_latest,
+    )
 from core.auditor import run_audit as run_core_audit
 
 # ========================================================================
@@ -222,7 +220,6 @@ def run_audit(args) -> None:
         write_csv_report(report, str(output_dir))
     
     if not args.no_sqlite:
-        write_sqlite_report(report, output_dir)
         write_postgres_report(report)
         
     if args.viewer:
@@ -235,22 +232,21 @@ def run_query(args) -> None:
     output_dir = Path(args.output)
 
     if args.runs:
-        rows = query_runs(output_dir)
+        rows = query_runs()
         print_runs(rows)
         return
     
     if args.issues_by_run is not None:
-        rows = query_issues_by_run(output_dir, args.issues_by_run)
-        print_issues_by_run(rows, args.issues_by_run)
+        rows = query_issues_by_run(args.issues_by_run)
         return
     
     if args.issue_summary:
-        rows = query_issue_summary_latest(output_dir)
+        rows = query_issue_summary_latest()
         print_issue_summary(rows)
         return
 
     if args.issues_by_class:
-        rows = query_issues_by_class_latest(output_dir)
+        rows = query_issues_by_class_latest()
         print_issue_by_class(rows)
         return
 
