@@ -499,18 +499,18 @@ export function initViewer(canvas: HTMLCanvasElement): () => void {
     let downPos = { x: 0, y: 0 };
     const DRAG_PX = 6;
 
-    viewerState.renderer.domElement.addEventListener("pointerdown", (e) => {
+    viewerState.renderer.domElement.addEventListener("pointerdown", (e: MouseEvent) => {
         isDragging = false;
         downPos = { x: e.clientX, y: e.clientY };
     });
 
-    viewerState.renderer.domElement.addEventListener("pointermove", (e) => {
+    viewerState.renderer.domElement.addEventListener("pointermove", (e: MouseEvent) => {
         const dx = e.clientX - downPos.x;
         const dy = e.clientY - downPos.y;
         if (dx * dx + dy * dy > DRAG_PX * DRAG_PX) isDragging = true;
     });
 
-    viewerState.renderer.domElement.addEventListener("pointerup", (e) => {
+    viewerState.renderer.domElement.addEventListener("pointerup", (e: MouseEvent) => {
         if (isDragging) return;
         if (e.button !== 0) return;
         onCanvasPick(e);
