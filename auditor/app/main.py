@@ -8,6 +8,7 @@ from infrastructure.console_writer import write_console_report
 from infrastructure.json_writer import write_json_report
 from infrastructure.csv_writer import write_csv_report
 from infrastructure.glb_converter import convert_ifc_to_glb
+from infrastructure.psql_writer import write_postgres_report
 from infrastructure.sqlite_writer import (
 write_sqlite_report,
 query_runs,
@@ -222,6 +223,7 @@ def run_audit(args) -> None:
     
     if not args.no_sqlite:
         write_sqlite_report(report, output_dir)
+        write_postgres_report(report)
         
     if args.viewer:
         convert_ifc_to_glb(str(ifc_path), str(output_dir))
