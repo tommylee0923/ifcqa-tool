@@ -10,8 +10,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
   auditor:
     build:
-      context: ./auditor
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: auditor/Dockerfile
     image: ifcqa-auditor
     container_name: ifcqa-auditor
     platform: linux/amd64

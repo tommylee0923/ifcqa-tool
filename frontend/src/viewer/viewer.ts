@@ -3,6 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { AuditIssue, AuditRun } from "../types/audit";
 import type { IfcqaHoverEvent, IfcqaSelectEvent } from "../types/ifcqaEvent";
+import { IS_FLASK, IS_DEV } from "../api/auditApi";
 
 // ============================================================
 // #region STATE
@@ -594,7 +595,9 @@ async function loadRun(run: AuditRun, callbacks?: LoadRunCallbacks) {
     if (!viewerState.scene || !viewerState.camera) return;
 
     const filename = getGlbFilename(run);
-    const url = `${import.meta.env.BASE_URL}model/${filename}`;
+    const url = (IS_FLASK || IS_DEV) ? 
+        `/model/${filename}` : 
+        `${import.meta.env.BASE_URL}model/${filename}`;
 
     if (
         viewerState.currentRunId === run.id &&

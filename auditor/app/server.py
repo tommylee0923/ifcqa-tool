@@ -15,9 +15,9 @@ from infrastructure.psql_writer import (
 # APP SETUP
 # ========================================================================
 
-BASE_DIR = Path(__file__).parent.parent
-app = Flask(__name__, static_folder=str(BASE_DIR / "web"), static_url_path="")
-OUTPUT_DIR = Path(__file__).parent.parent.parent / "output"
+BASE_DIR = Path(__file__).parent.parent.parent
+app = Flask(__name__, static_folder=str(BASE_DIR / "frontend" / "dist"), static_url_path="")
+OUTPUT_DIR = Path("/app/output") if Path("/app/output").exists() else Path(__file__).parent.parent.parent / "output"
 
 # ========================================================================
 # ROOT ROUTES
@@ -28,6 +28,10 @@ def index():
     """Serve the web app entry point."""
     if app.static_folder is None:
         abort(500, description="Static folder is not configured.")
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route("/<path:path>")
+def catch_all(path):
     return send_from_directory(app.static_folder, "index.html")
 
 # ========================================================================

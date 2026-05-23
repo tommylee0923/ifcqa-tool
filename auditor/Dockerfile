@@ -6,6 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install IfcConvert binary
@@ -16,11 +17,22 @@ RUN wget https://github.com/IfcOpenShell/IfcOpenShell/releases/download/ifcconve
     && rm ifcconvert-0.8.4-linux64.zip
 
 # Install Python dependencies
-COPY requirements.txt .
+COPY auditor/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY auditor/ .
+
+# Install Node.js and build React frontend
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY frontend/ /frontend
+WORKDIR /frontend
+RUN VITE_API_MODE=flask npm install && npm run build -- --base=/
+
+WORKDIR /app
 
 EXPOSE 5000
 
