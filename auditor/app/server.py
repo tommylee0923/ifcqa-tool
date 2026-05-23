@@ -4,7 +4,7 @@ from flask import Flask, jsonify, abort, send_from_directory, request
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from infrastructure.sqlite_writer import (
+from infrastructure.psql_writer import (
     query_runs,
     query_issues_by_run,
     query_issue_summary_latest,
@@ -40,7 +40,7 @@ def serve_glb(filename):
     
     if not filename.endswith(".glb"):
         abort(400, description="Only .glb files are served here")
-    glb_path = OUTPUT_DIR / filename
+    glb_path =  OUTPUT_DIR / filename
     if not glb_path.exists():
         abort(404, description="{filename} not found in the output directory. Run audit with --viewer flag first.")
     return send_from_directory(str(OUTPUT_DIR), filename)
@@ -54,7 +54,7 @@ def get_runs():
     """Return all audit runs, most recent first."""
     
     try:
-        rows = query_runs(OUTPUT_DIR)
+        rows = query_runs()
         for run in rows:
             stem = Path(run["source_file"]).stem
             run["glb_filename"] = f"{stem}.glb"
@@ -72,7 +72,7 @@ def get_issues_by_run(run_id: int):
     """
     
     try:
-        rows = query_issues_by_run(OUTPUT_DIR, run_id)
+        rows = query_issues_by_run(run_id)
         source = request.args.get("source")
         if source:
             rows = [r for r in rows if r.get("source") == source]
@@ -85,7 +85,7 @@ def get_issue_summary(run_id: int):
     """Return issue counts grouped by issue code for the latest run."""
     
     try:
-        rows = query_issue_summary_latest(OUTPUT_DIR)
+        rows = query_issue_summary_latest()
         return jsonify(rows)
     except FileNotFoundError as e:
         abort(404, description=str(e))
@@ -95,7 +95,7 @@ def get_issues_by_class(run_id:int):
     """Return issue counts grouped by IFC clas for the latest run."""
     
     try:
-        rows = query_issues_by_class_latest(OUTPUT_DIR)
+        rows = query_issues_by_class_latest()
         return jsonify(rows)
     except FileNotFoundError as e:
         abort(404, description=str(e))
@@ -105,4 +105,4 @@ def get_issues_by_class(run_id:int):
 # ========================================================================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)

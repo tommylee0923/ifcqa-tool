@@ -5,7 +5,7 @@ const IS_DEV = import.meta.env.DEV;
 export async function fetchRuns(): Promise<AuditRun[]> {
     const url = IS_DEV
         ? "/runs"
-        : `${import.meta.env.BASE_URL}demo-data/runs.json`;
+        : `${import.meta.env.BASE_URL}/docs/demo-data/runs.json`;
 
     const res = await fetch(url);
 

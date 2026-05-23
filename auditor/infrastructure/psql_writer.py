@@ -41,7 +41,7 @@ def query_runs() -> list[dict[str, Any]]:
             """
                 SELECT id, source_file, run_timestamp, total_elements, total_issues
                 FROM audit_runs
-                ODER BY run_timestamp DESC
+                ORDER BY run_timestamp DESC
             """
         )
         return [dict(row) for row in cursor.fetchall()]
@@ -59,7 +59,7 @@ def query_issues_by_run(run_id: int) -> list[dict[str, Any]]:
                     id, issue_code, severity, message, global_id,
                     ifc_class, element_name, path, expected, actual, source
                 FROM issues
-                WHERE audit_run = %s
+                WHERE issues.audit_run_id = %s
                 ORDER BY ifc_class ASC, issue_code ASC
             """,
             (run_id,),

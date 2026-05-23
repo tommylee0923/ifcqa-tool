@@ -51,7 +51,8 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 - IfcConvert (GLB export)
 
 ### Persistence Layer
-- SQLite
+- PostgreSQL
+- Docker / Docker Compose
 
 ### Web Interface
 - UI: React + TypeScript
@@ -65,8 +66,31 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 - Interactive HTML QA reports
 
 ---
+## Quickstart — Running with Docker
 
-## Quickstart
+### 1. Set up environment variables
+Copy `.env.example` to `.env` and fill in your credentials.
+
+### 2. Start the stack
+```bash
+docker compose up -d
+```
+
+### 3. Run an audit
+```bash
+docker exec -it ifcqa-auditor python app/main.py audit \
+    samples/model.ifc \
+    --ruleset rulesets/revit-export.json \
+    --output output \
+    --viewer
+```
+
+### 4. Query results
+```bash
+docker exec -it ifcqa-postgres psql -U ifcqa -d ifcqa -c "SELECT * FROM audit_runs;"
+```
+
+## Quickstart - Running Locally
 
 ### 1. Clone the repository
 
@@ -135,14 +159,14 @@ The audit pipeline generates:
 
 - `audit_report.json` — structured audit summary
 - `issue.csv` — issue list export
-- `audit.db` — SQLite database
 - `model.glb` — viewer model asset (optional)
+- Audit results are persisted to PostgreSQL
 
 ---
 
-## SQLite Integration
+## PostgreSQL Integration
 
-IfcQA writes structured audit results into a local SQLite database (`audit.db`).
+IfcQA writes structured audit results into PostgreSQL running in Docker.
 
 The database stores:
 
@@ -158,31 +182,7 @@ This enables:
 - downstream analytics workflows
 - local web-based model review
 
----
-
-### Example
-
-Run an audit and write results into SQLite:
-
-```powershell
-python auditor/app/main.py audit samples/model.ifc ^
-    --ruleset rulesets/revit-export.json ^
-    --output output
-```
-
-Launch the local web interface:
-
-```powershell
-python auditor/app/server.py
-```
-
-Then open:
-
-```text
-http://127.0.0.1:5000
-```
-
-The web interface reads directly from `audit.db` and displays:
+The web interface reads directly from PostgreSQL and displays:
 
 - issue summaries
 - issue tables
@@ -228,6 +228,7 @@ Active development.
 - v0.5.0 — Interactive GLB viewer + UX improvement
 - v0.6.0 — SQLite integration for shared multi-engine data layer
 - v0.7.0 - React + TypeSCript
+- v0.8.0 - PostgreSQL migration + Docker containerization
 
 Scoped to demonstrate **AEC software engineering**, **BIM reasoning**,
 and **production-quality tooling** without vendor lock-in.
