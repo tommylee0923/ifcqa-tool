@@ -12,6 +12,7 @@ services:
     build:
       context: ./auditor
       dockerfile: Dockerfile
+    image: ifcqa-auditor
     container_name: ifcqa-auditor
     platform: linux/amd64
     env_file:
