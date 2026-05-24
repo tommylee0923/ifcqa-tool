@@ -30,7 +30,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 COPY frontend/ /frontend
 WORKDIR /frontend
-RUN VITE_API_MODE=flask npm install && npm run build -- --base=/
+RUN npm install
+RUN VITE_API_MODE=flask npm run build -- --base=/
 
 WORKDIR /app
 
