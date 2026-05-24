@@ -5,7 +5,7 @@
 ![IfcQA HTML Report](docs/images/report-overview.png)
 
 **IfcQA** is a lightweight IFC quality-gate and validation framework built primarily with Python and IfcOpenShell.
-It validates BIM models against configurable JSON rulesets and generates structured QA outputs including JSON, CSV, SQLite, and interactive 3D web reports.
+It validates BIM models against configurable JSON rulesets and generates structured QA outputs including JSON, CSV, and interactive 3D web reports served via a Flask API backed by PostgreSQL.
 
 Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 
@@ -20,7 +20,7 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 - Structured issue trace metadata (severity, path, expected, actual)
 
 ### Interactive, client-side QA dashboard
-- Fully static HTML report (no server required)
+- React + TypeScript dashboard served by Flask
 - Embedded Three.js GLB viewer with preserved GlobalId mapping
 - Issue ↔ Element synchronization
 - Hover highlight, click selection, and detail drawer interaction
@@ -31,10 +31,10 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 - `--fail-on` threshold support for CI gating
 - Designed for local QA, model audits, and pipeline integration
 
-### SQLite Integration
-- Structured audit results written to SQLite
+### PostgreSQL Integration
+- Structured audit results written to PostgreSQL running in Docker
 - Queryable issue history and audit runs
-- Shared persistence layer for CLI and web interfaces
+- Shared persistence layer for CLI and web interface
 - Supports downstream analytics and QA workflows
 
 ---
@@ -62,11 +62,17 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 ### Outputs
 - JSON
 - CSV
-- SQLite
 - Interactive HTML QA reports
 
 ---
 ## Quickstart — Running with Docker
+
+**Note:** Before building the Docker image, ensure `frontend/.env.production.local` exists with the following content:
+
+```
+VITE_API_MODE=flask
+```
+This is required for the React production build to connect to the Flask API.
 
 ### 1. Set up environment variables
 Copy `.env.example` to `.env` and fill in your credentials.
@@ -89,6 +95,12 @@ docker exec -it ifcqa-auditor python app/main.py audit \
 ```bash
 docker exec -it ifcqa-postgres psql -U ifcqa -d ifcqa -c "SELECT * FROM audit_runs;"
 ```
+
+### 5. Open the app
+```text
+http://127.0.0.1:5000
+```
+
 
 ## Quickstart - Running Locally
 
@@ -145,7 +157,7 @@ cd frontend
 npm install
 npm run dev
 ```
-Note: for live SQLite/API, still ```python auditor/app/server.py``` in another terminal.
+Note: run `python auditor/app/server.py` in a separate terminal for the Flask API.
 
 Then open:
 
@@ -229,8 +241,9 @@ Active development.
 - v0.6.0 — SQLite integration for shared multi-engine data layer
 - v0.7.0 - React + TypeSCript
 - v0.8.0 - PostgreSQL migration + Docker containerization
+- v0.9.0 - AWS EC2 deployment
 
 Scoped to demonstrate **AEC software engineering**, **BIM reasoning**,
 and **production-quality tooling** without vendor lock-in.
 
-Legacy C# / xBIM validation components are retained in the repository for historical reference during the migration to the Python-based engine.
+Legacy C# / xBIM validation components are retained for historical reference.
