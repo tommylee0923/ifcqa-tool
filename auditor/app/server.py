@@ -10,6 +10,7 @@ from infrastructure.psql_writer import (
     query_issue_summary_latest,
     query_issues_by_class_latest,
 )
+from core.pipeline import run_audit_pipeline
 
 # ========================================================================
 # APP SETUP
@@ -18,6 +19,8 @@ from infrastructure.psql_writer import (
 BASE_DIR = Path(__file__).parent.parent.parent
 app = Flask(__name__, static_folder=str(BASE_DIR / "frontend" / "dist"), static_url_path="")
 OUTPUT_DIR = Path("/app/output") if Path("/app/output").exists() else Path(__file__).parent.parent.parent / "output"
+RULESET_DIR = BASE_DIR / "rulesets"
+DEFAULT_RULESET = RULESET_DIR / "revit-export.json"
 
 # ========================================================================
 # ROOT ROUTES

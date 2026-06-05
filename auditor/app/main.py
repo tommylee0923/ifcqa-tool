@@ -16,6 +16,7 @@ from infrastructure.psql_writer import (
     query_issues_by_class_latest,
     )
 from core.auditor import run_audit as run_core_audit
+from core.pipeline import run_audit_pipeline
 
 # ========================================================================
 # ARGUMENT PARSING
@@ -193,21 +194,7 @@ def run_audit(args) -> None:
     
     print (f"Reading IFC file: {ifc_path}")
     
-    elements = load_ifc_elements(str(ifc_path))
-    print(f"Loaded {len(elements)} elements")
-    
-    model = None
-    if ruleset_path:
-        print(f"Loading ruleset: {ruleset_path}")
-        model = ifcopenshell.open(str(ifc_path))
-    
-    report = run_core_audit(
-        elements,
-        source_file=str(ifc_path),
-        model=model,
-        ruleset_path=str(ruleset_path) if ruleset_path else None,
-        )
-    
+    report = run_audit_pipeline(ifc_path, ruleset_path)    
     print(f"Audit complete: {report.total_elements} elements, {report.total_issues} issues")
     
     if not args.no_console:
