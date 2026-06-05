@@ -134,6 +134,67 @@ a {
 }
 
 /* ============================================================
+   UPLOAD FORM
+   ============================================================ */
+.upload-form {
+    margin: 12px 0 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.upload-form-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.upload-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.upload-row-inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.upload-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.required {
+    color: #b91c1c;
+}
+
+.optional {
+    font-weight: 400;
+    color: var(--muted);
+}
+
+.upload-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.state-message.success {
+    color: #15803d;
+    border-color: rgba(21, 128, 61, 0.25);
+}
+
+/* ============================================================
    RUNS TABLE — styled as a card table like IfcQA
    ============================================================ */
 .tableWrap {

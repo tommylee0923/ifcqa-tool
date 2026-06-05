@@ -6,6 +6,8 @@ import FilterBar from "./components/FilterBar";
 import IssueList from "./components/IssueList";
 import IssueDetail from "./components/IssueDetail";
 import RunList from "./components/RunList";
+import UploadForm from "./components/UploadForm";
+import { uploadIfc } from "./api/auditApi";
 import Viewer from "./components/Viewer";
 import "./App.css";
 import { disposeViewer } from "./viewer/viewer";
@@ -63,6 +65,22 @@ function App() {
     }
   }
 
+  async function handleUploadComplete() {
+    try {
+      setIsLoadingRuns(true);
+      setRunsError(null);
+      const runsData = await fetchRuns();
+      setRuns(runsData);
+      if (runsData.length > 0) {
+        await handleSelectRun(runsData[0]);
+      }
+    } catch (err) {
+      setRunsError(getErrorMessage(err));
+    } finally {
+      setIsLoadingRuns(false);
+    }
+  }
+
   const ifcClasses = Array.from(
     new Set(
       issues
@@ -83,6 +101,8 @@ function App() {
 
   const dashboardView = (
     <section>
+      <UploadForm onUploadComplete={handleUploadComplete} />
+      
       <div className="grid">
         <div className="card">
           <div className="k">Total Runs</div>
