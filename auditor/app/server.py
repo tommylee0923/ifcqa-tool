@@ -1,16 +1,21 @@
 import sys
+import tempfile
+import shutil
 from pathlib import Path
 from flask import Flask, jsonify, abort, send_from_directory, request
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from infrastructure.glb_converter import convert_ifc_to_glb
 from infrastructure.psql_writer import (
     query_runs,
     query_issues_by_run,
     query_issue_summary_latest,
     query_issues_by_class_latest,
+    write_postgres_report
 )
 from core.pipeline import run_audit_pipeline
+from core.model import AuditReport
 
 # ========================================================================
 # APP SETUP
@@ -51,6 +56,68 @@ def serve_glb(filename):
     if not glb_path.exists():
         abort(404, description="{filename} not found in the output directory. Run audit with --viewer flag first.")
     return send_from_directory(str(OUTPUT_DIR), filename)
+
+# ========================================================================
+# UPLOAD ROUTES
+# ========================================================================
+
+# TODO: update write_postgres_report() to return run_id directly instead of 
+# re-querying query_runs() to fetch the latest.
+
+@app.route("/upload", methods=["POST"])
+def upload():
+    """Accept an IFC file, run the audit pipeline, persist results."""
+    
+    # Validate file presence
+    if "ifc_file" not in request.files:
+        abort(404, description="No IFC file provided.")
+    
+    ifc_file = request.files["ifc_file"]
+    if not ifc_file.filename.endswith(".ifc"):
+        abort(404, description="Uploaded file must be a .ifc file.")
+    
+    # Ruleset: use upload or fall back to default
+    ruleset_file = request.files.get("ruleset_file")
+    convert_glb = request.form.get("convert_glb", "true").lower() != "false"
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp = Path(tmpdir)
+        
+        ifc_path = tmp / ifc_file.filename
+        ifc_file.save(str(ifc_path))
+        
+        # save ruleset if uploaded, else use default
+        if ruleset_file and ruleset_file.filename.endswith(".json"):
+            ruleset_path = tmp / ruleset_file.filename
+            ruleset_file.save(str(ruleset_path))
+        else:
+            ruleset_path = DEFAULT_RULESET
+        
+        try:
+            report = run_audit_pipeline(ifc_path, ruleset_path)
+        except Exception as e:
+            abort(500, description=f"Audit failed: {str(e)}")
+            
+        try:
+            write_postgres_report(report)
+        except Exception as e:
+            abort(500, description=f"Failed to write report {str(e)}")
+        
+        if convert_glb:
+            try:
+                convert_ifc_to_glb(str(ifc_path), str(OUTPUT_DIR))
+            except Exception as e:
+                print(f"GLB conversion failed: {e}")
+    
+    runs = query_runs()
+    latest = runs[0] if runs else None
+    
+    return jsonify({
+        "run_id": latest["id"] if latest else None,
+        "total_elements": report.total_elements,
+        "total_issues": report.total_issues,
+    }), 201
+                
 
 # ========================================================================
 # API ROUTES
