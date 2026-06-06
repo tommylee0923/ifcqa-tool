@@ -7,7 +7,6 @@ import IssueList from "./components/IssueList";
 import IssueDetail from "./components/IssueDetail";
 import RunList from "./components/RunList";
 import UploadForm from "./components/UploadForm";
-import { uploadIfc } from "./api/auditApi";
 import Viewer from "./components/Viewer";
 import "./App.css";
 import { disposeViewer } from "./viewer/viewer";

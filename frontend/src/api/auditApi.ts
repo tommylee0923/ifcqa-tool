@@ -44,7 +44,7 @@ export async function uploadIfc(
     form.append("convert_glb", options?.convertGlb === false ? "false" : "true");
 
     const res = await fetch("/upload", { method: "POST", body: form });
-    if (~res.ok) {
+    if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.description ?? "Uploaded failed");
     }

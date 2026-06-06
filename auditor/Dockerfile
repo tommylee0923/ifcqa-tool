@@ -22,6 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY auditor/ .
+COPY rulesets/ /rulesets
 
 # Install Node.js and build React frontend
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
