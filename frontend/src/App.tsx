@@ -6,7 +6,7 @@ import FilterBar from "./components/FilterBar";
 import IssueList from "./components/IssueList";
 import IssueDetail from "./components/IssueDetail";
 import RunList from "./components/RunList";
-import UploadForm from "./components/UploadForm";
+import UploadDrawer from "./components/UploadDrawer";
 import Viewer from "./components/Viewer";
 import "./App.css";
 import { disposeViewer } from "./viewer/viewer";
@@ -21,6 +21,7 @@ function App() {
   const [ifcClassFilter, setIfcClassFilter] = useState("All");
   const [runsError, setRunsError] = useState<string | null>(null);
   const [issuesError, setIssuesError] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
     async function loadInitialData() {
@@ -100,7 +101,6 @@ function App() {
 
   const dashboardView = (
     <section>
-      <UploadForm onUploadComplete={handleUploadComplete} />
       
       <div className="grid">
         <div className="card">
@@ -253,12 +253,26 @@ function App() {
 
   return (
     <main className="wrap">
-      <div className="h1">IfcQA</div>
-      <div className="meta">IFC Model QA Dashboard</div>
+    <div className="app-header">
+        <div>
+            <div className="h1">IfcQA</div>
+            <div className="meta">IFC Model QA Dashboard</div>
+        </div>
+        <button className="new-audit-btn" onClick={() => setIsDrawerOpen(true)}>
+            + New Audit
+        </button>
+    </div>
+    <div className="meta-line" />
 
-      {!selectedRun && dashboardView}
-      {selectedRun && renderRunDetailView(selectedRun)}
-    </main>
+    {!selectedRun && dashboardView}
+    {selectedRun && renderRunDetailView(selectedRun)}
+
+    <UploadDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onUploadComplete={handleUploadComplete}
+    />
+</main>
   );
 }
 

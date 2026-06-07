@@ -134,64 +134,241 @@ a {
 }
 
 /* ============================================================
-   UPLOAD FORM
+   APP HEADER
    ============================================================ */
-.upload-form {
-    margin: 12px 0 18px;
+.app-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.app-header .meta::after {
+    display: none;
+}
+
+.meta-line {
+    content: "";
+    display: block;
+    height: 1px;
+    background: var(--line);
+    margin-top: 12px;
+    margin-bottom: 0;
+}
+
+.new-audit-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-dark);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.new-audit-btn:hover {
+    background: #003a7a;
+}
+
+/* ============================================================
+   DRAWER
+   ============================================================ */
+.drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.32);
+    z-index: 100;
+}
+
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 360px;
+    background: var(--card);
+    border-left: 1px solid var(--line);
+    z-index: 101;
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
 
-.upload-form-title {
-    font-size: 13px;
+.drawer-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.drawer-title {
+    font-size: 14px;
     font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
 }
 
-.upload-row {
+.drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+}
+
+.drawer-body {
+    padding: 16px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.drawer-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+    flex-shrink: 0;
+}
+
+.drawer-run-btn {
+    width: 100%;
+    background: var(--accent-dark);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.drawer-run-btn:hover {
+    background: #003a7a;
+}
+
+.drawer-run-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* ============================================================
+   DROP ZONE
+   ============================================================ */
+.drop-zone {
+    border: 1.5px dashed var(--line);
+    border-radius: 12px;
+    padding: 28px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: center;
+}
+
+.drop-zone:hover {
+    border-color: var(--accent);
+    background: rgba(122, 183, 255, 0.04);
+}
+
+.drop-zone-active {
+    border-color: var(--accent);
+    background: rgba(122, 183, 255, 0.08);
+}
+
+.drop-zone-filled {
+    border-color: var(--accent-dark);
+    background: rgba(122, 183, 255, 0.06);
+}
+
+.drop-icon {
+    color: var(--accent-dark);
+    margin-bottom: 4px;
+}
+
+.drop-label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.drop-sub {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+/* ============================================================
+   DRAWER FIELDS
+   ============================================================ */
+.drawer-field {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.upload-row-inline {
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-}
-
-.upload-label {
-    font-size: 12px;
-    font-weight: 600;
+.drawer-field-label {
+    font-size: 11px;
+    font-weight: 700;
     color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.required {
-    color: #b91c1c;
-}
-
-.optional {
-    font-weight: 400;
+.drawer-field-sub {
+    font-size: 11px;
     color: var(--muted);
+    margin-bottom: 2px;
 }
 
-.upload-actions {
+/* ============================================================
+   TOGGLE
+   ============================================================ */
+.drawer-toggle-row {
     display: flex;
-    gap: 10px;
     align-items: center;
+    gap: 10px;
 }
 
-.btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
+.toggle-track {
+    width: 34px;
+    height: 18px;
+    background: var(--line);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
 }
 
-.state-message.success {
-    color: #15803d;
-    border-color: rgba(21, 128, 61, 0.25);
+.toggle-track.toggle-on {
+    background: var(--accent-dark);
+}
+
+.toggle-thumb {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.15s;
+}
+
+.toggle-track.toggle-on .toggle-thumb {
+    left: 19px;
+}
+
+.drawer-toggle-label {
+    font-size: 13px;
 }
 
 /* ============================================================
