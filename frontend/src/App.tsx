@@ -256,7 +256,7 @@ function App() {
     <div className="app-header">
         <div>
             <div className="h1">IfcQA</div>
-            <div className="meta">IFC Model QA Dashboard</div>
+            <div className="meta">IFC Model QA Dashboard - Created by Tommy Lee</div>
         </div>
         <button className="new-audit-btn" onClick={() => setIsDrawerOpen(true)}>
             + New Audit

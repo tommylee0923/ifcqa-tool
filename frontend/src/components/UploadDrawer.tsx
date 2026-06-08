@@ -93,7 +93,7 @@ function UploadDrawer({ isOpen, onClose, onUploadComplete }: UploadDrawerProps) 
                 <div className="drawer-header">
                     <div className="drawer-title">New Audit</div>
                     <button className="drawer-close btn btnSmall" onClick={handleClose}>
-                        <X size={16} strokeWidth={2} />
+                        <X size={12} strokeWidth={4} />
                     </button>
                 </div>
 
