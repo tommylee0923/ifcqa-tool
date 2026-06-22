@@ -18,6 +18,7 @@ DB_CONFIG = {
 # endregion
 # region WRITE
 
+
 def write_postgres_report(report: AuditReport) -> None:
     """Write the audit report into PostgreSQL."""
     conn = _get_connection()
@@ -29,8 +30,11 @@ def write_postgres_report(report: AuditReport) -> None:
         conn.commit()
     finally:
         conn.close()
+
+
 # endregion
-# region QUERY 
+# region QUERY
+
 
 def query_runs() -> list[dict[str, Any]]:
     """Return all audit runs, most recent first."""
@@ -47,6 +51,7 @@ def query_runs() -> list[dict[str, Any]]:
         return [dict(row) for row in cursor.fetchall()]
     finally:
         conn.close()
+
 
 def query_issues_by_run(run_id: int) -> list[dict[str, Any]]:
     """Return all issues for a specific audit run."""
@@ -68,6 +73,7 @@ def query_issues_by_run(run_id: int) -> list[dict[str, Any]]:
     finally:
         conn.close()
 
+
 def query_issue_summary() -> list[dict[str, Any]]:
     """Return issue counts grouped by issue_code across all audit runs."""
 
@@ -87,6 +93,7 @@ def query_issue_summary() -> list[dict[str, Any]]:
         return [dict(row) for row in cursor.fetchall()]
     finally:
         conn.close()
+
 
 def query_issue_by_class() -> list[dict[str, Any]]:
     """Return issue counts grouped by IFC class across all audit runs"""
@@ -108,9 +115,10 @@ def query_issue_by_class() -> list[dict[str, Any]]:
     finally:
         conn.close()
 
+
 def query_issue_summary_latest() -> list[dict[str, Any]]:
     """Return issue counts by issue_code for the most recent audit run."""
-    
+
     conn = _get_connection()
     try:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -130,10 +138,11 @@ def query_issue_summary_latest() -> list[dict[str, Any]]:
         return [dict(row) for row in cursor.fetchall()]
     finally:
         conn.close()
-        
+
+
 def query_issues_by_class_latest() -> list[dict[str, Any]]:
     """Return issue counts by IFC class for the most recent audit run."""
-    
+
     conn = _get_connection()
     try:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictConnection)
@@ -154,10 +163,12 @@ def query_issues_by_class_latest() -> list[dict[str, Any]]:
     finally:
         conn.close()
 
+
 # region PRIVATE HELPER
 # File path logic
 def _get_connection():
     return psycopg2.connect(**DB_CONFIG)
+
 
 def _create_tables(conn) -> None:
     cursor = conn.cursor()
@@ -205,7 +216,65 @@ def _create_tables(conn) -> None:
         )
         """
     )
-    
+
+    # ruleset tables
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS rule_types (
+            id              SERIAL      PRIMARY KEY,
+            name            TEXT        NOT NULL UNIQUE,
+            description     TEXT,
+            required_fields TEXT[]      NOT NULL DEFAULT '{}',
+            optional_fields TEXT[]      NOT NULL DEFAULT '{}'
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS rulesets (
+            id          SERIAL      PRIMARY KEY,
+            name        TEXT        NOT NULL,
+            version     TEXT,
+            description TEXT,
+            source      TEXT        NOT NULL DEFAULT 'built-in',
+            created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS rules (
+            id              SERIAL      PRIMARY KEY,
+            ruleset_id      INTEGER     NOT NULL REFERENCES rulesets(id) ON DELETE CASCADE,
+            rule_type       TEXT        NOT NULL REFERENCES rule_types(name),
+            rule_id         TEXT        NOT NULL,
+            severity        TEXT        NOT NULL DEFAULT 'Warning',
+            ifc_class       TEXT,
+            pset            TEXT,
+            key             TEXT,
+            psets           TEXT[],
+            pset_a          TEXT,
+            key_a           TEXT,
+            pset_b          TEXT,
+            key_b           TEXT,
+            qto             TEXT,
+            qty             TEXT,
+            qty_names       TEXT[],
+            min_exclusive   FLOAT,
+            allowed_values  TEXT[],
+            regex           TEXT,
+            attribute       TEXT,
+            skip_if_missing BOOLEAN     NOT NULL DEFAULT FALSE,
+            meta_title      TEXT,
+            meta_why        TEXT,
+            meta_how_to_fix TEXT
+        )
+        """
+    )
+
+
 def _insert_audit_run(conn, report: AuditReport) -> int:
     cursor = conn.cursor()
     run_timestamp = datetime.now(timezone.utc)
@@ -223,21 +292,22 @@ def _insert_audit_run(conn, report: AuditReport) -> int:
             report.total_issues,
         ),
     )
-    
+
     row = cursor.fetchone()
     if row is None:
         raise RuntimeError("Failed to retrieve audit_runs row id after insert.")
-    
+
     return row[0]
+
 
 def _insert_element_counts(conn, audit_run_id: int, report: AuditReport) -> None:
     cursor = conn.cursor()
-    
-    rows =[
+
+    rows = [
         (audit_run_id, ifc_class, count)
         for ifc_class, count in report.counts_by_class.items()
     ]
-    
+
     psycopg2.extras.execute_values(
         cursor,
         """
@@ -247,9 +317,10 @@ def _insert_element_counts(conn, audit_run_id: int, report: AuditReport) -> None
         rows,
     )
 
+
 def _insert_issues(conn, audit_run_id: int, report: AuditReport) -> None:
     cursor = conn.cursor()
-    
+
     rows = [
         (
             audit_run_id,
@@ -266,7 +337,7 @@ def _insert_issues(conn, audit_run_id: int, report: AuditReport) -> None:
         )
         for issue in report.issues
     ]
-    
+
     psycopg2.extras.execute_values(
         cursor,
         """
@@ -279,5 +350,6 @@ def _insert_issues(conn, audit_run_id: int, report: AuditReport) -> None:
         """,
         rows,
     )
+
 
 # endregion
