@@ -164,6 +164,142 @@ def query_issues_by_class_latest() -> list[dict[str, Any]]:
         conn.close()
 
 
+def query_rulesets() -> list[dict[str, Any]]:
+    """Return all rulesets with their rule count."""
+    conn = _get_connection()
+    try:
+        cursor = conn.curosr(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute(
+            """
+                SELECT
+                    r.id,
+                    r.name,
+                    .r.version,
+                    r.description,
+                    r.source,
+                    r.created_at,
+                    COUNT(ru.id) AS rule_count
+                FROM rulesets r
+                LEFT JOIN rules ru ON ru.ruleset_id = r.id
+                GROUP BY r.id
+                ORDER BY r.source ASC, r.name ASC
+            """
+        )
+        return [dict(row) for row in cursor.fetchall()]
+    finally:
+        conn.close()
+
+def query_ruleset_by_id(ruleset_id: int) -> dict[str, Any] | None:
+    """Return a ruleset with its full rules array."""
+    conn = _get_connection()
+    try:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
+        cursor.execute(
+            """
+                SELECT id, name, version, description, source, created_at
+                FROM rulesets
+                WHERE id = %s
+            """,
+            (ruleset_id,),
+        )
+        ruleset = cursor.fetchone()
+        if ruleset is None:
+            return None
+        
+        cursor.execut(
+            """
+            SELECT
+                id, rule_type rule_id, severity, ifc_class,
+                pset, key, psets, pset_a, key_a, pset_b, key_b,
+                qto, qty, qty_names, min_exclusive, allowed_values,
+                regex, attribute, sli_if_missing,
+                meta_title, meta_why, meta_how_to_fix
+            FROM rules
+            WHERE ruleset_id = %s
+            ORDER BY ifc_class ASC, rule_id ASC
+            """,
+            (ruleset_id,),
+        )
+        rules = [dict(row) for row in cursor.fetchall()]
+        
+        result = dict(ruleset)
+        result["rules"] = rules
+        return result
+    finally:
+        conn.close()
+
+def insert_ruleset(
+    name: str,
+    version: str | None,
+    description: str | None,
+    source: str,
+    rules: list[dict[str, Any]]
+) -> int:
+    """Insert a new ruleset and its rules. Returns the new ruleset id."""
+    conn = _get_connection()
+    try:
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            """
+            INSERT INTO rulesets (name, version, description, source)
+            VALUES (%s, %s, %s, %s)
+            RETURNING id
+            """,
+            (name, version, description, source),
+        )
+        ruleset_id =cursor.fetchone()[0]
+        
+        from infrastructure.seed_rulesets import _rule_to_row
+        rows = [_rule_to_row(ruleset_id, rule) for rule in rules]
+        
+        psycopg2.extras.execute_values(
+            cursor,
+            """
+            INSERT INTO rules (
+                ruleset_id, rule_type, rule_id, severity, ifc_class,
+                pset, key, psets, pset_a, key_a, pset_b, key_b,
+                qto, qty, qty_names, min_exclusive, allowed_values,
+                regex, attribute, skip_if_missing,
+                meta_title, meta_why, meta_how_to_fix
+            )
+            VALUES %s
+            """,
+            rows,
+        )
+        
+        conn.commit()
+        return ruleset_id
+    finally:
+        conn.close()
+
+def delete_ruleset(ruleset_id: int) -> bool:
+    """Delete a ruleset by id. Returns True if deleted, False if protected.
+    Built-in rulesets cannot be deleted.
+    """
+    conn = _get_connection()
+    try:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
+        cursor.execute(
+            "SELECT source FROM rulesets WHERE id = %s",
+            (ruleset_id,),
+        )
+        row = cursor.fetchone()
+        if row is None:
+            return False
+        if row["source"] == "built-in":
+            return False
+        
+        cursor.execute("DELETE FROM rulesets WHERE id = %s",
+                      (ruleset_id,))
+        conn.commit()
+        return True
+    finally:
+        conn.close()
+    
+        
 # region PRIVATE HELPER
 # File path logic
 def _get_connection():

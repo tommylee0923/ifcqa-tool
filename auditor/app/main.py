@@ -15,9 +15,11 @@ from infrastructure.psql_writer import (
     query_issue_summary_latest,
     query_issues_by_class_latest,
     )
+from infrastructure.seed_rulesets import run_seed
 from core.auditor import run_audit as run_core_audit
 from core.pipeline import run_audit_pipeline
 
+# region Argument parsing
 # ========================================================================
 # ARGUMENT PARSING
 # ========================================================================
@@ -117,9 +119,15 @@ def parse_arguments() -> argparse.ArgumentParser:
         action="store_true",
         help="Show issue counts grouped by IFC class. (latest run)"
     )
+    
+    subparsers.add_parser(
+        "seed",
+        help="Seed the database with rule types and built-in rulesets"
+    )
 
     return parser
 
+# region Print Helpers
 # ========================================================================
 # PRINT HELPERS
 # ========================================================================
@@ -176,6 +184,7 @@ def print_issue_by_class(rows: list[dict]) -> None:
     for row in rows:
         print(f"{row['ifc_class']}: {row['total']}")
 
+# region Command handlers
 # ========================================================================
 # COMMAND HANDLERS
 # ========================================================================
@@ -240,6 +249,12 @@ def run_query(args) -> None:
     print("No query option selected.")
     print("Use --runs, --issues-by-run <id>, --issue-summary, or --issue-by-class.")
 
+def run_seed_command() -> None:
+    print("Seeding database...")
+    run_seed()
+    print("Seed complete.")
+
+# region Entry point
 # ========================================================================
 # ENTRY POINT
 # ========================================================================
@@ -252,6 +267,8 @@ def main() -> None:
         run_audit(args)
     elif args.command == "query":
         run_query(args)
+    elif args.command == "seed":
+        run_seed_command()
     else:
         parser.print_help()
     

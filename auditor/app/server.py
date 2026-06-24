@@ -13,6 +13,10 @@ from infrastructure.psql_writer import (
     query_issues_by_run,
     query_issue_summary_latest,
     query_issues_by_class_latest,
+    query_rulesets,
+    query_ruleset_by_id,
+    insert_ruleset,
+    delete_ruleset,
     write_postgres_report,
 )
 from core.pipeline import run_audit_pipeline
@@ -201,6 +205,68 @@ def get_issues_by_class(run_id: int):
     except FileNotFoundError as e:
         abort(404, description=str(e))
 
+
+# ========================================================================
+# RULESET ROUTES
+# ========================================================================
+@app.route("/rulesets", nethods=["GET"])
+def get_rulesets():
+    """Return all rulesets with rule counts."""
+    try:
+        rows = query_rulesets()
+        return jsonify(rows)
+    except Exception as e:
+        abort(500, description=str(e))
+        
+@app.route("/rulesets<int:ruleset_id>", methods=["GET"])
+def get_ruleset(ruleset_id: int):
+    """Reutnr a single ruleset wih its full ruels array."""
+    try:
+        ruleset = query_ruleset_by_id(ruleset_id)
+        if ruleset is None:
+            abort(404, description=f"Ruleset {ruleset_id} not found.")
+        return jsonify(ruleset)
+    except Exception as e:
+        abort(500, description=str(e))
+        
+@app.route("/rulesets", methods=["POST"])
+def create_ruleset():
+    """Save a new ruleset. Used by the LLM composer."""
+    data = request.get_json()
+    if not data:
+        abort(400, description="Request body must be JSON.")
+
+    name = data.get("name")
+    if not name:
+        abort(400, description="Ruleset must have a name.")
+
+    rules = data.get("rules", [])
+    if not rules:
+        abort(400, description="Ruleset must have at least one rule.")
+
+    try:
+        ruleset_id = insert_ruleset(
+            name=name,
+            version=data.get("version"),
+            description=data.get("description"),
+            source="generated",
+            rules=rules,
+        )
+        return jsonify({"ruleset_id": ruleset_id}), 201
+    except Exception as e:
+        abort(500, description=str(e))
+
+
+@app.route("/rulesets/<int:ruleset_id>", methods=["DELETE"])
+def remove_ruleset(ruleset_id: int):
+    """Delete a ruleset. Built-in rulesets are protected."""
+    try:
+        deleted = delete_ruleset(ruleset_id)
+        if not deleted:
+            abort(403, description="Cannot delete a built-in ruleset or ruleset not found.")
+        return jsonify({"deleted": ruleset_id}), 200
+    except Exception as e:
+        abort(500, description=str(e))
 
 # ========================================================================
 # ENTRY POINT
