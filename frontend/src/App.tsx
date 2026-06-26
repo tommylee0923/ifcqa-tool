@@ -8,6 +8,7 @@ import IssueDetail from "./components/IssueDetail";
 import RunList from "./components/RunList";
 import UploadDrawer from "./components/UploadDrawer";
 import Viewer from "./components/Viewer";
+import RulesetDrawer from "./components/RulesetDrawer";
 import "./App.css";
 import { disposeViewer } from "./viewer/viewer";
 
@@ -22,6 +23,7 @@ function App() {
   const [runsError, setRunsError] = useState<string | null>(null);
   const [issuesError, setIssuesError] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isRulesetDrawerOpen, setIsRulesetDrawerOpen] = useState(false);
 
   useEffect(() => {
     async function loadInitialData() {
@@ -101,7 +103,7 @@ function App() {
 
   const dashboardView = (
     <section>
-      
+
       <div className="grid">
         <div className="card">
           <div className="k">Total Runs</div>
@@ -253,26 +255,34 @@ function App() {
 
   return (
     <main className="wrap">
-    <div className="app-header">
+      <div className="app-header">
         <div>
-            <div className="h1">IfcQA</div>
-            <div className="meta">IFC Model QA Dashboard - Created by Tommy Lee</div>
+          <div className="h1">IfcQA</div>
+          <div className="meta">IFC Model QA Dashboard - Created by Tommy Lee</div>
         </div>
         <button className="new-audit-btn" onClick={() => setIsDrawerOpen(true)}>
-            + New Audit
+          + New Audit
         </button>
-    </div>
-    <div className="meta-line" />
+        <button className="btn btnSmall" onClick={() => setIsRulesetDrawerOpen(true)}>
+          Rulesets
+        </button>
+      </div>
+      <div className="meta-line" />
 
-    {!selectedRun && dashboardView}
-    {selectedRun && renderRunDetailView(selectedRun)}
+      {!selectedRun && dashboardView}
+      {selectedRun && renderRunDetailView(selectedRun)}
 
-    <UploadDrawer
+      <UploadDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onUploadComplete={handleUploadComplete}
-    />
-</main>
+      />
+
+      <RulesetDrawer
+        isOpen={isRulesetDrawerOpen}
+        onClose={() => setIsRulesetDrawerOpen(false)}
+      />
+    </main>
   );
 }
 
