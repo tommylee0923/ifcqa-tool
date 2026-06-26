@@ -8,7 +8,7 @@ from typing import Any
 import psycopg2
 import psycopg2.extras
 
-from infrastructure.psql_writer import _get_connection
+from infrastructure.psql_writer import _get_connection, _create_tables
 
 # region Rule Types Seed Data
 # ========================================================================
@@ -190,7 +190,7 @@ def seed_rulesets(conn) -> None:
       Seed rulesets and rules from JSON files in the rulesets/ directory.
       Skips rulesets that already exist by name.
     """
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     json_files = list(RULESET_DIR.glob("*.json"))
     if not json_files:
@@ -215,7 +215,7 @@ def seed_rulesets(conn) -> None:
         cursor.execute(
             """
                 INSERT INTO rulesets (name, version, description, source)
-                VALUES (%s, %s, %s, 'built-in)
+                VALUES (%s, %s, %s, 'built-in')
                 RETURNING id
             """,
             (
@@ -285,6 +285,8 @@ def _rule_to_row(ruleset_id: int, rule: dict[str, Any]) -> tuple:
 def run_seed() -> None:
     conn = _get_connection()
     try:
+        _create_tables(conn)
+        conn.commit()
         seed_rule_types(conn)
         seed_rulesets(conn)
     finally:

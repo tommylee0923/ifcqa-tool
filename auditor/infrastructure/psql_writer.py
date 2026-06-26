@@ -168,13 +168,13 @@ def query_rulesets() -> list[dict[str, Any]]:
     """Return all rulesets with their rule count."""
     conn = _get_connection()
     try:
-        cursor = conn.curosr(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute(
             """
                 SELECT
                     r.id,
                     r.name,
-                    .r.version,
+                    r.version,
                     r.description,
                     r.source,
                     r.created_at,
@@ -207,13 +207,13 @@ def query_ruleset_by_id(ruleset_id: int) -> dict[str, Any] | None:
         if ruleset is None:
             return None
         
-        cursor.execut(
+        cursor.execute(
             """
             SELECT
                 id, rule_type rule_id, severity, ifc_class,
                 pset, key, psets, pset_a, key_a, pset_b, key_b,
                 qto, qty, qty_names, min_exclusive, allowed_values,
-                regex, attribute, sli_if_missing,
+                regex, attribute, skip_if_missing,
                 meta_title, meta_why, meta_how_to_fix
             FROM rules
             WHERE ruleset_id = %s

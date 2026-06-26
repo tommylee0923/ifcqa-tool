@@ -209,7 +209,7 @@ def get_issues_by_class(run_id: int):
 # ========================================================================
 # RULESET ROUTES
 # ========================================================================
-@app.route("/rulesets", nethods=["GET"])
+@app.route("/rulesets", methods=["GET"])
 def get_rulesets():
     """Return all rulesets with rule counts."""
     try:
@@ -218,7 +218,7 @@ def get_rulesets():
     except Exception as e:
         abort(500, description=str(e))
         
-@app.route("/rulesets<int:ruleset_id>", methods=["GET"])
+@app.route("/rulesets/<int:ruleset_id>", methods=["GET"])
 def get_ruleset(ruleset_id: int):
     """Reutnr a single ruleset wih its full ruels array."""
     try:
