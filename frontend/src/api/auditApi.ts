@@ -1,4 +1,4 @@
-import type { AuditIssue, AuditRun } from "../types/audit";
+import type { AuditIssue, AuditRun, Rule, RuleType, Ruleset } from "../types/audit";
 
 export const IS_DEV = import.meta.env.DEV;
 export const IS_FLASK = import.meta.env.VITE_API_MODE === "flask"
@@ -47,6 +47,22 @@ export async function uploadIfc(
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.description ?? "Uploaded failed");
+    }
+    return res.json();
+}
+
+export async function fetchRulesets(): Promise<Ruleset[]> {
+    const res = await fetch("/rulesets");
+    if (!res.ok) {
+        throw new Error("Failed to fetch rulesets");
+    }
+    return res.json();
+}
+
+export async function fetchRuleset(id: number): Promise<Ruleset> {
+    const res = await fetch(`/rulesets/${id}`);
+    if (!res.ok) {
+        throw new Error(`Failed to fetch ruleset ${id}`);
     }
     return res.json();
 }
