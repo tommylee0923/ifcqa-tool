@@ -260,12 +260,14 @@ function App() {
           <div className="h1">IfcQA</div>
           <div className="meta">IFC Model QA Dashboard - Created by Tommy Lee</div>
         </div>
-        <button className="new-audit-btn" onClick={() => setIsDrawerOpen(true)}>
-          + New Audit
-        </button>
-        <button className="btn btnSmall" onClick={() => setIsRulesetDrawerOpen(true)}>
-          Rulesets
-        </button>
+        <div className="app-header-btn-row">
+          <button className="new-audit-btn" onClick={() => setIsDrawerOpen(true)}>
+            + New Audit
+          </button>
+          <button className="ruleset-btn" onClick={() => setIsRulesetDrawerOpen(true)}>
+            Rulesets
+          </button>
+        </div>
       </div>
       <div className="meta-line" />
 

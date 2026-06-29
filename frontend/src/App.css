@@ -147,6 +147,12 @@ a {
     display: none;
 }
 
+.app-header-btn-row {
+    display: flex;
+    gap: 12px;
+    margin: auto 0;
+}
+
 .meta-line {
     content: "";
     display: block;
@@ -156,7 +162,8 @@ a {
     margin-bottom: 0;
 }
 
-.new-audit-btn {
+.new-audit-btn,
+.ruleset-btn {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -172,7 +179,8 @@ a {
     margin-top: 2px;
 }
 
-.new-audit-btn:hover {
+.new-audit-btn:hover,
+.ruleset-btn:hover {
     background: #003a7a;
 }
 

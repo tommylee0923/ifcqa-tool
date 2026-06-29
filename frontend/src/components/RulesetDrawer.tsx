@@ -95,7 +95,7 @@ function RulesetDrawer({ isOpen, onClose }: RulesetDrawerProps) {
                         onClick={handleClose}
                         aria-label="Close"
                     >
-                        <X size={16} strokeWidth={2} />
+                        <X size={12} strokeWidth={4} />
                     </button>
                 </div>
 
