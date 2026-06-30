@@ -2,6 +2,7 @@ import sys
 import tempfile
 import shutil
 import traceback
+import json
 from pathlib import Path
 from flask import Flask, jsonify, abort, send_from_directory, request
 
@@ -90,7 +91,6 @@ def serve_glb(filename):
 def upload():
     """Accept an IFC file, run the audit pipeline, persist results."""
 
-    # Validate file presence
     if "ifc_file" not in request.files:
         abort(400, description="No IFC file provided.")
 
@@ -98,8 +98,8 @@ def upload():
     if not ifc_file.filename or not ifc_file.filename.endswith(".ifc"):
         abort(400, description="Uploaded file must be a .ifc file.")
 
-    # Ruleset: use upload or fall back to default
     ruleset_file = request.files.get("ruleset_file")
+    ruleset_id = request.form.get("ruleset_id")
     convert_glb = request.form.get("convert_glb", "true").lower() != "false"
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -108,10 +108,21 @@ def upload():
         ifc_path = tmp / ifc_file.filename
         ifc_file.save(str(ifc_path))
 
-        # save ruleset if uploaded, else use default
-        if ruleset_file and ruleset_file.filename and  ruleset_file.filename.endswith(".json"):
+        # Priority: ruleset_id from DB > uploaded ruleset file > default
+        if ruleset_id:
+            ruleset_data = query_ruleset_by_id(int(ruleset_id))
+            if ruleset_data is None:
+                abort(404, description=f"Ruleset {ruleset_id} not found.")
+
+            ruleset_json = _ruleset_row_to_json(ruleset_data)
+            ruleset_path = tmp / "selected_ruleset.json"
+            with open(ruleset_path, "w") as f:
+                json.dump(ruleset_json, f)
+
+        elif ruleset_file and ruleset_file.filename and ruleset_file.filename.endswith(".json"):
             ruleset_path = tmp / ruleset_file.filename
             ruleset_file.save(str(ruleset_path))
+
         else:
             ruleset_path = DEFAULT_RULESET
 
@@ -123,7 +134,7 @@ def upload():
         try:
             write_postgres_report(report)
         except Exception as e:
-            abort(500, description=f"Failed to write report {str(e)}")
+            abort(500, description=f"Failed to write report: {str(e)}")
 
         if convert_glb:
             try:
@@ -134,16 +145,11 @@ def upload():
         runs = query_runs()
         latest = runs[0] if runs else None
 
-        return (
-            jsonify(
-                {
-                    "run_id": latest["id"] if latest else None,
-                    "total_elements": report.total_elements,
-                    "total_issues": report.total_issues,
-                }
-            ),
-            201,
-        )
+        return jsonify({
+            "run_id": latest["id"] if latest else None,
+            "total_elements": report.total_elements,
+            "total_issues": report.total_issues,
+        }), 201
 
 
 # ========================================================================
@@ -267,6 +273,62 @@ def remove_ruleset(ruleset_id: int):
         return jsonify({"deleted": ruleset_id}), 200
     except Exception as e:
         abort(500, description=str(e))
+
+def _ruleset_row_to_json(ruleset_data: dict) -> dict:
+    """Convert a Postgres ruleset row (with nested rules) back into the JSON shape run_audit_pipeline expects."""
+    rules = []
+    for r in ruleset_data["rules"]:
+        rule = {
+            "type": r["rule_type"],
+            "id": r["rule_id"],
+            "severity": r["severity"],
+        }
+        if r["ifc_class"]:
+            rule["ifcClass"] = r["ifc_class"]
+        if r["pset"]:
+            rule["pset"] = r["pset"]
+        if r["key"]:
+            rule["key"] = r["key"]
+        if r["psets"]:
+            rule["psets"] = r["psets"]
+        if r["pset_a"]:
+            rule["psetA"] = r["pset_a"]
+        if r["key_a"]:
+            rule["keyA"] = r["key_a"]
+        if r["pset_b"]:
+            rule["psetB"] = r["pset_b"]
+        if r["key_b"]:
+            rule["keyB"] = r["key_b"]
+        if r["qto"]:
+            rule["qto"] = r["qto"]
+        if r["qty"]:
+            rule["qty"] = r["qty"]
+        if r["qty_names"]:
+            rule["qtyNames"] = r["qty_names"]
+        if r["min_exclusive"] is not None:
+            rule["minExclusive"] = r["min_exclusive"]
+        if r["allowed_values"]:
+            rule["allowedValues"] = r["allowed_values"]
+        if r["regex"]:
+            rule["regex"] = r["regex"]
+        if r["attribute"]:
+            rule["attribute"] = r["attribute"]
+        if r["skip_if_missing"]:
+            rule["skipIfMissing"] = r["skip_if_missing"]
+        if r["meta_title"] or r["meta_why"] or r["meta_how_to_fix"]:
+            rule["meta"] = {
+                "title": r["meta_title"],
+                "why": r["meta_why"],
+                "howToFix": r["meta_how_to_fix"],
+            }
+        rules.append(rule)
+
+    return {
+        "name": ruleset_data["name"],
+        "version": ruleset_data.get("version"),
+        "description": ruleset_data.get("description"),
+        "rules": rules,
+    }
 
 # ========================================================================
 # ENTRY POINT

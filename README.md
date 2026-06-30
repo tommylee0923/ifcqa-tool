@@ -15,12 +15,14 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 
 ### Rule-based IFC QA Engine
 - Modular Python rule engine built on IfcOpenShell
-- JSON-driven validation rulesets
+- JSON-driven validation rulesets, persisted to PostgreSQL
 - Extensible rule architecture (property, quantity, regex, comparison, and model traversal rules)
 - Structured issue trace metadata (severity, path, expected, actual)
 
 ### Interactive, client-side QA dashboard
 - React + TypeScript dashboard served by Flask
+- IFC upload with drag-and-drop, ruleset selection, and GLB conversion
+- Ruleset viewer for browsing rule details without opening JSON files
 - Embedded Three.js GLB viewer with preserved GlobalId mapping
 - Issue ↔ Element synchronization
 - Hover highlight, click selection, and detail drawer interaction
@@ -32,8 +34,8 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 - Designed for local QA, model audits, and pipeline integration
 
 ### PostgreSQL Integration
-- Structured audit results written to PostgreSQL running in Docker
-- Queryable issue history and audit runs
+- Structured audit results, rulesets, and rule metadata written to PostgreSQL running in Docker
+- Queryable issue history, audit runs, and ruleset library
 - Shared persistence layer for CLI and web interface
 - Supports downstream analytics and QA workflows
 
@@ -44,7 +46,7 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 ### Validation Engine
 - Python
 - IfcOpenShell
-- JSON-driven modular rule system
+- JSON-driven modular rule system (22 rule types)
 
 ### IFC Processing
 - IfcOpenShell
@@ -53,6 +55,7 @@ Live Interactive Demo: https://www.leetommy.com/ifcqa-tool/
 ### Persistence Layer
 - PostgreSQL
 - Docker / Docker Compose
+- Stores audit runs, issues, and rulesets
 
 ### Web Interface
 - UI: React + TypeScript
@@ -82,7 +85,12 @@ Copy `.env.example` to `.env` and fill in your credentials.
 docker compose up -d
 ```
 
-### 3. Run an audit
+### 3. Seed the database
+```bash
+docker exec -it ifcqa-auditor python app/main.py seed
+```
+
+### 4. Run an audit
 ```bash
 docker exec -it ifcqa-auditor python app/main.py audit \
     samples/model.ifc \
@@ -91,16 +99,15 @@ docker exec -it ifcqa-auditor python app/main.py audit \
     --viewer
 ```
 
-### 4. Query results
+### 5. Query results
 ```bash
 docker exec -it ifcqa-postgres psql -U ifcqa -d ifcqa -c "SELECT * FROM audit_runs;"
 ```
 
-### 5. Open the app
+### 6. Open the app
 ```text
 http://127.0.0.1:5000
 ```
-
 
 ## Quickstart - Running Locally
 
@@ -132,7 +139,13 @@ Activate it:
 source .venv/bin/activate
 ```
 
-### 3. Run an IFC audit
+### 3. Seed the database
+
+```bash
+python auditor/app/main.py seed
+```
+
+### 4. Run an IFC audit
 
 ```powershell
 python auditor/app/main.py audit samples/model.ifc ^
@@ -140,7 +153,7 @@ python auditor/app/main.py audit samples/model.ifc ^
     --output output
 ```
 
-### 4. Generate GLB viewer assets (optional)
+### 5. Generate GLB viewer assets (optional)
 
 ```powershell
 python auditor/app/main.py audit samples/model.ifc ^
@@ -149,7 +162,7 @@ python auditor/app/main.py audit samples/model.ifc ^
     --viewer
 ```
 
-### 5. Launch the local web interface
+### 6. Launch the local web interface
 
 ```powershell
 python auditor/app/server.py
@@ -165,6 +178,8 @@ Then open:
 http://127.0.0.1:5000
 ```
 
+From here, models can also be uploaded directly through the browser instead of the CLI — see [Browser Upload](#browser-upload).
+
 ### Outputs
 
 The audit pipeline generates:
@@ -178,7 +193,7 @@ The audit pipeline generates:
 
 ## PostgreSQL Integration
 
-IfcQA writes structured audit results into PostgreSQL running in Docker.
+IfcQA writes structured audit results and rulesets into PostgreSQL running in Docker.
 
 The database stores:
 
@@ -186,11 +201,13 @@ The database stores:
 - issue records
 - IFC class statistics
 - validation trace data (`severity`, `path`, `expected`, `actual`)
+- rulesets and individual rule definitions
 
 This enables:
 
 - persistent QA history
 - issue querying and filtering
+- a browsable, structured ruleset library
 - downstream analytics workflows
 - local web-based model review
 
@@ -200,6 +217,8 @@ The web interface reads directly from PostgreSQL and displays:
 - issue tables
 - IFC class statistics
 - interactive model viewer data
+- ruleset and rule detail views
+
 ---
 
 ## CI Quality Gate (GitHub Actions)
@@ -242,6 +261,8 @@ Active development.
 - v0.7.0 - React + TypeSCript
 - v0.8.0 - PostgreSQL migration + Docker containerization
 - v0.9.0 - AWS EC2 deployment
+- v1.0.0 — Browser-based IFC upload workflow with drag-and-drop UI
+- v1.1.0 — PostgreSQL-backed ruleset manager and viewer
 
 Scoped to demonstrate **AEC software engineering**, **BIM reasoning**,
 and **production-quality tooling** without vendor lock-in.
