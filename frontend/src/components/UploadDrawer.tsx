@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
-import { uploadIfc } from "../api/auditApi";
+import { useEffect, useRef, useState } from "react";
+import { uploadIfc, fetchRulesets } from "../api/auditApi";
 import { Upload, X } from "lucide-react";
+import type { Ruleset } from "../types/audit";
 
 type UploadStatus = "idle" | "uploading" | "success" | "error";
 
@@ -17,9 +18,18 @@ function UploadDrawer({ isOpen, onClose, onUploadComplete }: UploadDrawerProps) 
     const [status, setStatus] = useState<UploadStatus>("idle")
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [rulesets, setRulesets] = useState<Ruleset[]>([]);
+    const [selectedRulesetId, setSelectedRulesetId] = useState<string>("");
 
     const ifcInputRef = useRef<HTMLInputElement>(null);
     const rulesetInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        fetchRulesets()
+            .then(setRulesets)
+            .catch(() => setRulesets([]));
+    })
 
     function handleDragOver(e: React.DragEvent) {
         e.preventDefault();
@@ -60,6 +70,7 @@ function UploadDrawer({ isOpen, onClose, onUploadComplete }: UploadDrawerProps) 
         try {
             await uploadIfc(ifcFile, {
                 rulesetFile: rulesetFile ?? undefined,
+                rulesetId: selectedRulesetId ? Number(selectedRulesetId) : undefined,
                 convertGlb,
             });
             setStatus("success");
@@ -78,6 +89,7 @@ function UploadDrawer({ isOpen, onClose, onUploadComplete }: UploadDrawerProps) 
         setStatus("idle");
         setErrorMsg(null);
         setIsDragging(false);
+        setSelectedRulesetId("")
         if (ifcInputRef.current) ifcInputRef.current.value = "";
         if (rulesetInputRef.current) rulesetInputRef.current.value = "";
         onClose();
@@ -138,14 +150,52 @@ function UploadDrawer({ isOpen, onClose, onUploadComplete }: UploadDrawerProps) 
                     {/* Ruleset */}
                     <div className="drawer-field">
                         <div className="drawer-field-label">Ruleset</div>
-                        <div className="drawer-field-sub">Optional — defaults to revit-export</div>
+                        <div className="drawer-field-sub">Select a ruleset or upload a custom JSON file</div>
+
+                        <div className="ruleset-select-row">
+                            <select
+                                className="ruleset-select"
+                                value={selectedRulesetId}
+                                disabled={status === "uploading" || !!rulesetFile}
+                                onChange={(e) => {
+                                    setSelectedRulesetId(e.target.value);
+                                    if (e.target.value && rulesetFile) {
+                                        setRulesetFile(null);
+                                        if (rulesetInputRef.current) rulesetInputRef.current.value = "";
+                                    }
+                                }}
+                            >
+                                <option value="">Use default ruleset</option>
+                                {rulesets.map((rs) => (
+                                    <option key={rs.id} value={rs.id}>
+                                        {rs.name} ({rs.rule_count} rules)
+                                    </option>
+                                ))}
+                            </select>
+
+                            <button
+                                type="button"
+                                className="ruleset-upload-btn btn btnSmall"
+                                onClick={() => rulesetInputRef.current?.click()}
+                                disabled={status === "uploading"}
+                            >
+                                Upload
+                            </button>
+                        </div>
+
                         <input
                             ref={rulesetInputRef}
                             type="file"
                             accept=".json"
+                            style={{ display: "none" }}
                             disabled={status === "uploading"}
-                            onChange={(e) => setRulesetFile(e.target.files?.[0] ?? null)}
+                            onChange={(e) => {
+                                const file = e.target.files?.[0] ?? null;
+                                setRulesetFile(file);
+                                if (file) setSelectedRulesetId("");
+                            }}
                         />
+
                         {rulesetFile && (
                             <div className="drop-sub" style={{ marginTop: 4 }}>{rulesetFile.name}</div>
                         )}

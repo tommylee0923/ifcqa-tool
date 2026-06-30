@@ -185,6 +185,35 @@ a {
 }
 
 /* ============================================================
+   RULESET UPLOAD DROPDOWN
+   ============================================================ */
+
+.ruleset-select-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.ruleset-select {
+    flex: 1;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 7px 8px;
+    font-size: 12px;
+    background: var(--card);
+    color: var(--text);
+}
+
+.ruleset-select:disabled {
+    opacity: 0.5;
+}
+
+.ruleset-upload-btn {
+    flex-shrink: 0;
+    font-weight: 700;
+}
+
+/* ============================================================
    DRAWER
    ============================================================ */
 .drawer-overlay {
@@ -658,7 +687,7 @@ tbody tr.selected td {
 }
 
 .btnSmall {
-    padding: 0;
+    padding: 4px;
     font-size: 12px;
     justify-content: center;
     align-items: center;
