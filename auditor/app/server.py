@@ -5,6 +5,7 @@ import traceback
 import json
 from pathlib import Path
 from flask import Flask, jsonify, abort, send_from_directory, request
+import os
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -26,6 +27,14 @@ from core.model import AuditReport
 # ========================================================================
 # APP SETUP
 # ========================================================================
+
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+if not ANTHROPIC_API_KEY:
+    import warnings
+    warnings.warn(
+        "ANTHROPIC_API_KEY is not set. The LLM composer will not function.",
+        RuntimeWarning
+    )
 
 BASE_DIR = Path(__file__).parent.parent.parent
 app = Flask(
