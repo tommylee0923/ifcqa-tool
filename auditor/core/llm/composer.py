@@ -144,16 +144,73 @@ def _parse_rules(raw: str) -> list[dict[str, Any]]:
     return json.loads(cleaned)
 
 # ========================================================================
+# VALIDATION
+# ========================================================================
+
+def _validate_rules(
+    rules: list[dict[str, Any]],
+    rule_types: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """
+    Validate LLM-generated rules against the known rule type vocabulary.
+
+    Checks:
+    - rule type exists in the vocabulary
+    - all required fields for that type are present and non-null
+
+    Returns:
+        valid_rules: rules that passed all checks
+        errors: human-readable error strings for any rules that failed
+    """
+    vocab: dict[str, list[str]] = {
+        rt["name"]: rt["required_fields"] or []
+        for rt in rule_types
+    }
+
+    valid_rules: list[dict[str, Any]] = []
+    errors: list[str] = []
+
+    for i, rule in enumerate(rules):
+        rule_id = rule.get("id", f"rule[{i}]")
+        rule_type = rule.get("type")
+
+        if rule_type not in vocab:
+            errors.append(
+                f"{rule_id}: unknown rule type '{rule_type}'. "
+                f"Must be one of: {', '.join(sorted(vocab.keys()))}"
+            )
+            continue
+
+        missing = [
+            f for f in vocab[rule_type]
+            if rule.get(f) is None and rule.get(f) != 0
+        ]
+        if missing:
+            errors.append(
+                f"{rule_id} ({rule_type}): missing required fields: {', '.join(missing)}"
+            )
+            continue
+
+        valid_rules.append(rule)
+
+    return valid_rules, errors
+
+# ========================================================================
 # PUBLIC ENTRY POINT
 # ========================================================================
 
-def generate_ruleset(description: str) -> list[dict[str, Any]]:
+def generate_ruleset(description: str) -> tuple[list[dict[str, Any]], list[str]]:
     """
-    Takes a natural language description, calls the LLM, and returns
-    a parsed list of rule dicts ready for validation and preview.
+    Takes a natural language description, calls the LLM, validates the output,
+    and returns (valid_rules, errors).
 
-    Retries once if the response is not valid JSON.
-    Raises ValueError if both attempts fail.
+    - valid_rules: list of rule dicts that passed vocabulary + required-field checks
+    - errors: list of human-readable strings for any rules that failed validation
+
+    Retries once with a corrective nudge if the response is not valid JSON.
+    Raises ValueError if both parse attempts fail.
+    If any rules fail validation, the entire batch is rejected and errors are returned
+    with an empty valid_rules list — no partial saves.
     """
     rule_types = _fetch_rule_types()
     system_prompt = _build_system_prompt(rule_types)
@@ -164,7 +221,7 @@ def generate_ruleset(description: str) -> list[dict[str, Any]]:
         try:
             raw = _call_anthropic(system_prompt, user_description=description)
             rules = _parse_rules(raw)
-            return rules
+            break
         except (json.JSONDecodeError, IndexError) as e:
             last_error = e
             if attempt == 0:
@@ -173,7 +230,15 @@ def generate_ruleset(description: str) -> list[dict[str, Any]]:
                     + "\n\nIMPORTANT: Your previous response could not be parsed. "
                     "Return only a valid JSON array. No explanation, no markdown, no code fences."
                 )
+    else:
+        raise ValueError(
+            f"Failed to generate valid JSON after 2 attempts. Last error: {last_error}"
+        )
 
-    raise ValueError(
-        f"Failed to generate valid JSON after 2 attempts. Last error: {last_error}"
-    )
+    valid_rules, errors = _validate_rules(rules, rule_types)
+
+    # Reject the entire batch if any rule fails validation
+    if errors:
+        return [], errors
+
+    return valid_rules, []
