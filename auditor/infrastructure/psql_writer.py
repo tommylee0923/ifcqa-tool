@@ -210,7 +210,7 @@ def query_ruleset_by_id(ruleset_id: int) -> dict[str, Any] | None:
         cursor.execute(
             """
             SELECT
-                id, rule_type rule_id, severity, ifc_class,
+                id, rule_type, rule_id, severity, ifc_class,
                 pset, key, psets, pset_a, key_a, pset_b, key_b,
                 qto, qty, qty_names, min_exclusive, allowed_values,
                 regex, attribute, skip_if_missing,

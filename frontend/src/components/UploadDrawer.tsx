@@ -25,11 +25,11 @@ function UploadDrawer({ isOpen, onClose, onUploadComplete }: UploadDrawerProps) 
     const rulesetInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen || rulesets.length > 0) return;
         fetchRulesets()
             .then(setRulesets)
             .catch(() => setRulesets([]));
-    })
+    }, [isOpen]);
 
     function handleDragOver(e: React.DragEvent) {
         e.preventDefault();
@@ -179,7 +179,7 @@ function UploadDrawer({ isOpen, onClose, onUploadComplete }: UploadDrawerProps) 
                                 onClick={() => rulesetInputRef.current?.click()}
                                 disabled={status === "uploading"}
                             >
-                                Upload
+                                Upload Ruleset
                             </button>
                         </div>
 

@@ -1,4 +1,4 @@
-import type { AuditIssue, AuditRun, Rule, RuleType, Ruleset } from "../types/audit";
+import type { AuditIssue, AuditRun, Ruleset } from "../types/audit";
 
 export const IS_DEV = import.meta.env.DEV;
 export const IS_FLASK = import.meta.env.VITE_API_MODE === "flask"
@@ -47,7 +47,7 @@ export async function uploadIfc(
     const res = await fetch("/upload", { method: "POST", body: form });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.description ?? "Uploaded failed");
+        throw new Error(err.description ?? "Upload failed");
     }
     return res.json();
 }

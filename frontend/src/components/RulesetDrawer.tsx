@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, ChevronLeft } from "lucide-react";
-import type { Ruleset, Rule } from "../types/audit";
+import type { Ruleset } from "../types/audit";
 import { fetchRulesets, fetchRuleset } from "../api/auditApi";
 
 type DrawerView = "list" | "detail";
