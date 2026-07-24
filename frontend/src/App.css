@@ -1006,6 +1006,81 @@ tbody tr.selected td {
 }
 
 /* ============================================================
+   COMPOSE FORM
+   ============================================================ */
+.compose-trigger-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    background: rgba(122, 183, 255, 0.08);
+    border: 1px solid rgba(122, 183, 255, 0.3);
+    border-radius: 10px;
+    cursor: pointer;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.compose-trigger-btn:hover {
+    background: rgba(122, 183, 255, 0.14);
+    border-color: var(--accent);
+}
+
+.compose-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.compose-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    background: var(--card);
+    color: var(--text);
+    font-family: inherit;
+}
+
+.compose-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(122, 183, 255, 0.15);
+}
+
+.compose-input:disabled {
+    opacity: 0.5;
+}
+
+.compose-textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    background: var(--card);
+    color: var(--text);
+    font-family: inherit;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.compose-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(122, 183, 255, 0.15);
+}
+
+.compose-textarea:disabled {
+    opacity: 0.5;
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 700px) {
