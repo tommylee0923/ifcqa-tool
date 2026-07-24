@@ -23,6 +23,7 @@ from infrastructure.psql_writer import (
 )
 from core.pipeline import run_audit_pipeline
 from core.model import AuditReport
+from core.llm.composer import generate_ruleset
 
 # ========================================================================
 # APP SETUP
@@ -271,6 +272,46 @@ def create_ruleset():
     except Exception as e:
         abort(500, description=str(e))
 
+@app.route("/rulesets/compose", methods=["POST"])
+def compose_ruleset():
+    """Generate a ruleset from a natural language description using the LLM composer."""
+    data = request.get_json()
+    if not data:
+        abort(400, description="Request body must be JSON.")
+    
+    description = data.get("description", "").strip()
+    if not description:
+        abort(400, description="A 'description' field is required.")
+    
+    name = data.get("name", "").strip()
+    if not name:
+        abort(400, description="A 'name' field is required.")
+    
+    try:
+        valid_rules, errors = generate_ruleset(description)
+    except ValueError as e:
+        abort(502, description=str(e))
+    except Exception as e:
+        abort(500, description=f"Composer error: {str(e)}")
+    
+    if errors:
+        return jsonify({
+            "error": "Ruleset rejected: one or more generated rules failed validation.",
+            "validation_errors": errors,
+        }), 422
+    
+    try:
+        ruleset_id = insert_ruleset(
+            name=name,
+            version=None,
+            description=description,
+            source="generated",
+            rules=valid_rules,
+        )
+    except Exception as e:
+        abort(500, description=f"Failed to save ruleset: {str(e)}")
+    
+    return jsonify({"ruleset_id": ruleset_id}), 201
 
 @app.route("/rulesets/<int:ruleset_id>", methods=["DELETE"])
 def remove_ruleset(ruleset_id: int):
