@@ -124,6 +124,7 @@ def upload():
             if ruleset_data is None:
                 abort(404, description=f"Ruleset {ruleset_id} not found.")
 
+            print(f"DEBUG first rule keys: {list(ruleset_data['rules'][0].keys()) if ruleset_data['rules'] else 'no rules'}")
             ruleset_json = _ruleset_row_to_json(ruleset_data)
             ruleset_path = tmp / "selected_ruleset.json"
             with open(ruleset_path, "w") as f:
