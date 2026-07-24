@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { X, ChevronLeft } from "lucide-react";
+import { X, ChevronLeft, Sparkles } from "lucide-react";
 import type { Ruleset } from "../types/audit";
-import { fetchRulesets, fetchRuleset } from "../api/auditApi";
+import { fetchRulesets, fetchRuleset, composeRuleset } from "../api/auditApi";
 
-type DrawerView = "list" | "detail";
+type DrawerView = "list" | "detail" | "compose";
 
 interface RulesetDrawerProps {
     isOpen: boolean;
@@ -23,6 +23,12 @@ function RulesetDrawer({ isOpen, onClose }: RulesetDrawerProps) {
     const [selectedRuleset, setSelectedRuleset] = useState<Ruleset | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Compose form state
+    const [composeName, setComposeName] = useState("");
+    const [composeDescription, setComposeDescription] = useState("");
+    const [composeStatus, setComposeStatus] = useState<"idle" | "loading" | "error">("idle");
+    const [composeError, setComposeError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -56,16 +62,54 @@ function RulesetDrawer({ isOpen, onClose }: RulesetDrawerProps) {
         }
     }
 
+    async function handleCompose() {
+        if (!composeName.trim() || !composeDescription.trim()) return;
+
+        setComposeStatus("loading");
+        setComposeError(null);
+
+        try {
+            await composeRuleset(composeName.trim(), composeDescription.trim());
+            // Reset form, reload list, return to list view
+            setComposeName("");
+            setComposeDescription("");
+            setComposeStatus("idle");
+            await loadRulesets();
+            setView("list");
+        } catch (err) {
+            setComposeError(err instanceof Error ? err.message : "Generation failed");
+            setComposeStatus("error");
+        }
+    }
+
     function handleBack() {
-        setView("list");
-        setSelectedRuleset(null);
+        if (view === "detail") {
+            setView("list");
+            setSelectedRuleset(null);
+        } else if (view === "compose") {
+            setComposeName("");
+            setComposeDescription("");
+            setComposeStatus("idle");
+            setComposeError(null);
+            setView("list");
+        }
     }
 
     function handleClose() {
         setView("list");
         setSelectedRuleset(null);
         setError(null);
+        setComposeName("");
+        setComposeDescription("");
+        setComposeStatus("idle");
+        setComposeError(null);
         onClose();
+    }
+
+    function drawerTitle() {
+        if (view === "list") return "Rulesets";
+        if (view === "detail") return selectedRuleset?.name ?? "";
+        return "Generate Ruleset";
     }
 
     if (!isOpen) return null;
@@ -77,7 +121,7 @@ function RulesetDrawer({ isOpen, onClose }: RulesetDrawerProps) {
 
                 <div className="drawer-header">
                     <div className="drawer-header-left">
-                        {view === "detail" && (
+                        {view !== "list" && (
                             <button
                                 className="btn btnSmall"
                                 onClick={handleBack}
@@ -86,9 +130,7 @@ function RulesetDrawer({ isOpen, onClose }: RulesetDrawerProps) {
                                 <ChevronLeft size={14} />
                             </button>
                         )}
-                        <div className="drawer-title">
-                            {view === "list" ? "Rulesets" : selectedRuleset?.name}
-                        </div>
+                        <div className="drawer-title">{drawerTitle()}</div>
                     </div>
                     <button
                         className="drawer-close btn btnSmall"
@@ -110,8 +152,17 @@ function RulesetDrawer({ isOpen, onClose }: RulesetDrawerProps) {
                         </div>
                     )}
 
+                    {/* LIST VIEW */}
                     {!isLoading && !error && view === "list" && (
                         <div className="ruleset-list">
+                            <button
+                                className="compose-trigger-btn btn"
+                                onClick={() => setView("compose")}
+                            >
+                                <Sparkles size={14} />
+                                Generate with AI
+                            </button>
+
                             {rulesets.length === 0 && (
                                 <div className="state-message">
                                     No rulesets found. Run the seed command first.
@@ -144,6 +195,7 @@ function RulesetDrawer({ isOpen, onClose }: RulesetDrawerProps) {
                         </div>
                     )}
 
+                    {/* DETAIL VIEW */}
                     {!isLoading && !error && view === "detail" && selectedRuleset && (
                         <div className="ruleset-detail">
                             {selectedRuleset.description && (
@@ -192,7 +244,63 @@ function RulesetDrawer({ isOpen, onClose }: RulesetDrawerProps) {
                             </div>
                         </div>
                     )}
+
+                    {/* COMPOSE VIEW */}
+                    {view === "compose" && (
+                        <div className="compose-form">
+                            <div className="drawer-field">
+                                <div className="drawer-field-label">Ruleset Name</div>
+                                <div className="drawer-field-sub">A short name for this ruleset</div>
+                                <input
+                                    className="compose-input"
+                                    type="text"
+                                    placeholder="e.g. Hospital MEP Handover"
+                                    value={composeName}
+                                    disabled={composeStatus === "loading"}
+                                    onChange={(e) => setComposeName(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="drawer-field">
+                                <div className="drawer-field-label">Description</div>
+                                <div className="drawer-field-sub">
+                                    Describe what you want validated in plain language
+                                </div>
+                                <textarea
+                                    className="compose-textarea"
+                                    placeholder="e.g. Check that all spaces have a room number, all walls have a fire rating, and no elements have duplicate GlobalIds."
+                                    value={composeDescription}
+                                    disabled={composeStatus === "loading"}
+                                    rows={6}
+                                    onChange={(e) => setComposeDescription(e.target.value)}
+                                />
+                            </div>
+
+                            {composeStatus === "error" && composeError && (
+                                <div className="state-message error" role="alert">
+                                    {composeError}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
+
+                {/* Footer — only shown in compose view */}
+                {view === "compose" && (
+                    <div className="drawer-footer">
+                        <button
+                            className="drawer-run-btn"
+                            onClick={handleCompose}
+                            disabled={
+                                !composeName.trim() ||
+                                !composeDescription.trim() ||
+                                composeStatus === "loading"
+                            }
+                        >
+                            {composeStatus === "loading" ? "Generating..." : "Generate Ruleset"}
+                        </button>
+                    </div>
+                )}
             </div>
         </>
     );

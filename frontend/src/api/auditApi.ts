@@ -67,3 +67,21 @@ export async function fetchRuleset(id: number): Promise<Ruleset> {
     }
     return res.json();
 }
+
+export async function composeRuleset(
+    name: string,
+    description: string
+): Promise<{ ruleset_id: number }> {
+    const res = await fetch("/rulesets/compose", {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({ name, description }),
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.description ?? err.error ?? "Compose failed");
+    }
+
+    return res.json();
+}
